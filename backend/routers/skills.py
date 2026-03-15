@@ -281,19 +281,20 @@ async def submit_session_answer(
     current_user: CurrentUser,
     db: AsyncSession = Depends(get_db),
 ) -> GradingOut:
+    # Per-user AI rate limit: 30 answers per hour
+    from middleware.security import check_ai_rate_limit
+    await check_ai_rate_limit(str(current_user.id), "answer", limit=30, window_seconds=3600)
+
+    # Sanitize user answer before processing
+    from middleware.security import sanitize_user_input
+    body.user_answer = sanitize_user_input(body.user_answer, max_length=2000)
+
     session = await get_active_session(session_id, current_user.id, db)
     if not session:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Active session not found")
 
     if session.questions_asked >= _MAX_QUESTIONS:
         raise HTTPException(status.HTTP_409_CONFLICT, "Session already complete")
-
-    # Prevent duplicate submissions — Redis lock per session
-    from redis_client import cache_get, cache_set
-    lock_key = f"submit_lock:{session_id}"
-    if await cache_get(lock_key):
-        raise HTTPException(status.HTTP_429_TOO_MANY_REQUESTS, "Answer already being processed")
-    await cache_set(lock_key, "1", ttl=10)
 
     # Verify the question was actually served (anti-cheat)
     question_cache_key = f"question:{session.id}:current"
