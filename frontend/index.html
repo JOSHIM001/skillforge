@@ -494,7 +494,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
             <div class="card-header"><div class="card-title">Choose a skill</div></div>
             <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:13px">
               <template x-for="s in availableSkills" :key="s">
-                <span class="tag" :class="{active:selectedSkill===s}" @click="selectedSkill===s ? selectedSkill='' : selectedSkill=s" x-text="s"></span>
+                <span class="tag" :class="{active:selectedSkill===s}" @click="selectedSkill=s" x-text="s"></span>
               </template>
             </div>
             <div style="display:flex;gap:8px">
@@ -1133,7 +1133,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
         <div style="display:flex;gap:9px;align-items:center">
           <div style="display:flex;align-items:center;gap:7px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:6px 12px">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7b82a0" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
-            <input x-model="gpsLocation" @keydown.enter="loadGPS()" placeholder="remote, USA, London..." style="background:none;border:none;outline:none;color:var(--text);font-size:12px;width:140px">
+            <input x-model="gpsLocation" @keydown.enter="loadGPS()" placeholder="Bangalore, Mumbai, remote..." style="background:none;border:none;outline:none;color:var(--text);font-size:12px;width:140px">
           </div>
           <button class="btn btn-primary btn-sm" @click="loadGPS()" :disabled="gpsLoading">
             <span x-show="!gpsLoading">🔍 Analyze Market</span>
@@ -1293,10 +1293,6 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
         <div style="font-size:13px;color:#7b82a0;margin-bottom:24px;max-width:400px;margin-left:auto;margin-right:auto">Enter a location and click Analyze Market to see real-time job intelligence based on your skill matrix</div>
         <button @click="loadGPS()" class="btn btn-primary" style="font-size:14px;padding:12px 28px">🔍 Analyze My Market</button>
       </div>
-
-    </div>
-
-    </div>
 
     <!-- GHOST INTERVIEW VIEW -->
     <div x-show="view==='ghost'" style="display:none">
@@ -1546,7 +1542,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
               style="color:#a78bfa"
               x-text="ghostDebrief?.verdict"></div>
             <div style="font-size:13px;color:#7b82a0;margin-bottom:6px">
-              from <span style="color:#a78bfa;font-weight:600" x-text="ghostDebrief?.persona_name"></span> - <span x-text="ghostDebrief?.persona_role"></span>
+              from <span style="color:#a78bfa;font-weight:600" x-text="ghostDebrief?.persona_name"></span> - <span x-text="ghostDebrief?.persona_role
             </div>
             <div style="font-size:14px;color:#e2e6f3;max-width:600px;margin:0 auto;line-height:1.7" x-text="ghostDebrief?.summary"></div>
           </div>
@@ -1917,7 +1913,7 @@ document.addEventListener('alpine:init', () => {
     gpsGaps: null,
     gpsSalary: null,
     gpsLoading: false,
-    gpsLocation: 'remote',
+    gpsLocation: 'Bangalore',
     gpsTab: 'overview',
     gpsBubbleChart: null,
     // Ghost Interview
@@ -2002,7 +1998,6 @@ document.addEventListener('alpine:init', () => {
       await new Promise(r => setTimeout(r, 160));
       this.view = newView;
       await this.$nextTick();
-      window.scrollTo(0, 0);
       if (vc) { vc.style.transition = 'opacity 200ms ease,transform 200ms ease'; vc.style.transform = 'translateY(0)'; vc.style.opacity = '1'; }
 
       if (newView === 'dashboard')  this.loadDashboard();

@@ -55,18 +55,40 @@ _BASELINE_DEMAND: dict[str, int] = {
 }
 
 # Salary ranges by skill + location (USD annual)
+# India salaries in INR (annual)
+_INDIA_SALARY_DATA: dict[str, tuple] = {
+    "Python":           (800000, 2500000),
+    "JavaScript":       (700000, 2200000),
+    "TypeScript":       (900000, 2800000),
+    "Go":               (1200000, 3500000),
+    "Rust":             (1500000, 4000000),
+    "Java":             (800000, 2800000),
+    "React":            (800000, 2500000),
+    "Node.js":          (700000, 2200000),
+    "FastAPI":          (900000, 2600000),
+    "Django":           (800000, 2400000),
+    "PostgreSQL":       (900000, 2500000),
+    "MongoDB":          (800000, 2300000),
+    "Docker":           (1000000, 3000000),
+    "Kubernetes":       (1200000, 3500000),
+    "AWS":              (1100000, 3200000),
+    "Machine Learning": (1200000, 4000000),
+    "DevOps":           (1000000, 3200000),
+}
+_INDIA_DEFAULT_SALARY = (700000, 2000000)
+
 _SALARY_DATA: dict[str, dict] = {
-    "Python":     {"USA": (95000, 175000), "UK": (65000, 120000), "remote": (75000, 150000), "EU": (60000, 110000)},
-    "JavaScript": {"USA": (85000, 160000), "UK": (55000, 110000), "remote": (65000, 140000), "EU": (55000, 100000)},
-    "TypeScript": {"USA": (90000, 170000), "UK": (60000, 115000), "remote": (70000, 145000), "EU": (58000, 105000)},
-    "Go":         {"USA": (110000, 195000), "UK": (70000, 135000), "remote": (85000, 165000), "EU": (70000, 125000)},
-    "Rust":       {"USA": (120000, 210000), "UK": (75000, 145000), "remote": (90000, 175000), "EU": (75000, 135000)},
-    "Kubernetes": {"USA": (115000, 200000), "UK": (72000, 140000), "remote": (88000, 170000), "EU": (72000, 130000)},
-    "AWS":        {"USA": (105000, 190000), "UK": (68000, 130000), "remote": (82000, 160000), "EU": (68000, 120000)},
-    "Machine Learning": {"USA": (125000, 220000), "UK": (80000, 155000), "remote": (95000, 185000), "EU": (80000, 145000)},
+    "Python":     {"USA": (95000, 175000), "UK": (65000, 120000), "remote": (75000, 150000), "EU": (60000, 110000), "India": (800000, 2500000)},
+    "JavaScript": {"USA": (85000, 160000), "UK": (55000, 110000), "remote": (65000, 140000), "EU": (55000, 100000), "India": (700000, 2200000)},
+    "TypeScript": {"USA": (90000, 170000), "UK": (60000, 115000), "remote": (70000, 145000), "EU": (58000, 105000), "India": (900000, 2800000)},
+    "Go":         {"USA": (110000, 195000), "UK": (70000, 135000), "remote": (85000, 165000), "EU": (70000, 125000), "India": (1200000, 3500000)},
+    "Rust":       {"USA": (120000, 210000), "UK": (75000, 145000), "remote": (90000, 175000), "EU": (75000, 135000), "India": (1500000, 4000000)},
+    "Kubernetes": {"USA": (115000, 200000), "UK": (72000, 140000), "remote": (88000, 170000), "EU": (72000, 130000), "India": (1200000, 3500000)},
+    "AWS":        {"USA": (105000, 190000), "UK": (68000, 130000), "remote": (82000, 160000), "EU": (68000, 120000), "India": (1100000, 3200000)},
+    "Machine Learning": {"USA": (125000, 220000), "UK": (80000, 155000), "remote": (95000, 185000), "EU": (80000, 145000), "India": (1200000, 4000000)},
 }
 
-_DEFAULT_SALARY = {"USA": (80000, 140000), "UK": (50000, 95000), "remote": (60000, 120000), "EU": (50000, 90000)}
+_DEFAULT_SALARY = {"USA": (80000, 140000), "UK": (50000, 95000), "remote": (60000, 120000), "EU": (50000, 90000), "India": (700000, 2000000)}
 
 
 # ── GitHub demand fetcher ─────────────────────────────────────────────────────
@@ -169,7 +191,11 @@ async def get_market_analysis(skill_matrix: dict[str, float], location: str) -> 
         "usa": 1.0, "us": 1.0, "united states": 1.0,
         "uk": 0.4, "united kingdom": 0.4, "london": 0.35,
         "eu": 0.55, "europe": 0.55, "germany": 0.28, "berlin": 0.22,
-        "canada": 0.35, "australia": 0.25, "india": 0.8,
+        "canada": 0.35, "australia": 0.25,
+        "india": 1.2, "bangalore": 1.2, "bengaluru": 1.2,
+        "mumbai": 1.0, "delhi": 1.0, "hyderabad": 1.1,
+        "pune": 0.9, "chennai": 0.9, "noida": 0.95,
+        "gurugram": 1.0, "gurgaon": 1.0, "kochi": 0.8,
         "remote": 0.85, "worldwide": 1.0, "global": 1.0,
     }
     loc_key = location.lower().strip()
@@ -196,16 +222,28 @@ async def get_market_analysis(skill_matrix: dict[str, float], location: str) -> 
 
 
 def _location_breakdown(base_jobs: int, location: str) -> list[dict]:
-    """Estimated job distribution across locations."""
-    regions = [
+    """Estimated job distribution across locations — India-first."""
+    loc_lower = location.lower()
+    is_india = any(x in loc_lower for x in ["india", "bangalore", "bengaluru", "mumbai", "delhi", "hyderabad", "pune", "chennai", "noida", "gurugram"])
+
+    if is_india:
+        return [
+            {"region": "🇮🇳 Bangalore", "jobs": int(base_jobs * 1.0), "avg_salary": "₹12L–₹35L", "growth": "+22%"},
+            {"region": "🇮🇳 Hyderabad", "jobs": int(base_jobs * 0.85), "avg_salary": "₹10L–₹30L", "growth": "+18%"},
+            {"region": "🇮🇳 Mumbai", "jobs": int(base_jobs * 0.75), "avg_salary": "₹10L–₹28L", "growth": "+15%"},
+            {"region": "🇮🇳 Delhi NCR", "jobs": int(base_jobs * 0.80), "avg_salary": "₹10L–₹30L", "growth": "+17%"},
+            {"region": "🇮🇳 Pune", "jobs": int(base_jobs * 0.65), "avg_salary": "₹8L–₹25L", "growth": "+14%"},
+            {"region": "🌍 Remote (India)", "jobs": int(base_jobs * 0.70), "avg_salary": "₹15L–₹45L", "growth": "+35%"},
+        ]
+
+    return [
+        {"region": "🇮🇳 India", "jobs": int(base_jobs * 0.9), "avg_salary": "₹8L–₹35L", "growth": "+22%"},
         {"region": "🇺🇸 USA", "jobs": int(base_jobs * 1.0), "avg_salary": "$120k–$180k", "growth": "+12%"},
         {"region": "🌍 Remote", "jobs": int(base_jobs * 0.85), "avg_salary": "$90k–$150k", "growth": "+28%"},
         {"region": "🇬🇧 UK", "jobs": int(base_jobs * 0.4), "avg_salary": "£65k–£110k", "growth": "+8%"},
         {"region": "🇪🇺 Europe", "jobs": int(base_jobs * 0.55), "avg_salary": "€60k–€100k", "growth": "+15%"},
         {"region": "🇨🇦 Canada", "jobs": int(base_jobs * 0.35), "avg_salary": "C$90k–C$140k", "growth": "+10%"},
-        {"region": "🇦🇺 Australia", "jobs": int(base_jobs * 0.25), "avg_salary": "A$95k–A$145k", "growth": "+9%"},
     ]
-    return regions
 
 
 def _empty_market() -> dict:
@@ -366,7 +404,8 @@ async def get_salary_hints(skill_matrix: dict[str, float], location: str) -> dic
     loc_key = location.lower()
     # Normalize location key
     loc_norm = "USA"
-    if any(x in loc_key for x in ["uk", "london", "england"]): loc_norm = "UK"
+    if any(x in loc_key for x in ["india", "bangalore", "bengaluru", "mumbai", "delhi", "hyderabad", "pune", "chennai", "kolkata", "noida", "gurugram", "gurgaon", "kochi", "trivandrum", "thiruvananthapuram"]): loc_norm = "India"
+    elif any(x in loc_key for x in ["uk", "london", "england"]): loc_norm = "UK"
     elif any(x in loc_key for x in ["eu", "europe", "germany", "france"]): loc_norm = "EU"
     elif "remote" in loc_key: loc_norm = "remote"
 
@@ -407,7 +446,7 @@ async def get_salary_hints(skill_matrix: dict[str, float], location: str) -> dic
     final_max = int(base_max * mult_max / 1000) * 1000
 
     # What would increase salary most
-    currency = {"USA": "$", "UK": "£", "EU": "€", "remote": "$"}.get(loc_norm, "$")
+    currency = {"USA": "$", "UK": "£", "EU": "€", "remote": "$", "India": "₹"}.get(loc_norm, "$")
     improvement_tips = []
     for skill, score in sorted(skill_matrix.items(), key=lambda x: x[1]):
         if score < 0.7 and skill in _SALARY_DATA:
