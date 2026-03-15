@@ -48,4 +48,4 @@ pytest-asyncio==0.23.6
 aiosqlite==0.20.0
 passlib[bcrypt]==1.7.4
 
-psycopg2-binary==2.9.9
+
