@@ -93,7 +93,8 @@ async def generate_roadmap(body: GenerateRoadmapRequest, current_user: CurrentUs
         "Return ONLY valid JSON: "
         '{"summary": "2 sentences", "target_level": "Junior|Mid|Senior|Staff", '
         '"estimated_salary_range": "₹12L-₹25L", '
-        '"phases": [{"phase": 1, "title": "Phase 1 — Quick Wins", "goal": "string", "jobs_unlocked": 500, '
+        '"phases": [{"phase": 1, "title": "Phase 1 — Quick Wins", "goal": "string", '
+        '"jobs_unlocked": 500, "total_hours": 35, "estimated_days": 18, '
         '"tasks": [{"id": "t1", "title": "string", "description": "string", "skill": "Python", '
         '"resource_type": "course|book|project|video|practice", "resource_name": "string", '
         '"resource_url": "https://...", "hours_needed": 5, "priority": "high|medium|low", "why": "string"}]}], '
@@ -110,6 +111,8 @@ async def generate_roadmap(body: GenerateRoadmapRequest, current_user: CurrentUs
         "Phase 2: Deepen market strengths\n"
         "Phase 3: Advanced + interview prep\n"
         "Use real resources with real URLs. Salary in Indian Rupees (Lakhs).\n"
+        f"IMPORTANT: For each phase, calculate total_hours (sum of all task hours) and estimated_days (total_hours / {body.hours_per_day} rounded up).\n"
+        "So if Phase 1 has 35 total hours and user does 2h/day, estimated_days=18.\n"
         "Return ONLY valid JSON."
     )
 
@@ -264,19 +267,17 @@ async def delete_roadmap(current_user: CurrentUser, db: AsyncSession = Depends(g
 
 def _fallback_roadmap(skill_matrix: dict, hours_per_day: float) -> dict:
     weak = sorted([(s,v) for s,v in skill_matrix.items() if v<0.6], key=lambda x:x[1])
-    # If no strong skills, use top skills from all
-    all_sorted = sorted(skill_matrix.items(), key=lambda x:x[1], reverse=True)
     strong = sorted([(s,v) for s,v in skill_matrix.items() if v>=0.6], key=lambda x:x[1], reverse=True)
-    if not strong:
-        strong = all_sorted[:3]  # use best skills even if below 0.6
     h = int(hours_per_day * 7)
     return {
         "summary": "Fix weaknesses first, then deepen strengths for maximum market impact.",
         "target_level": "Mid", "estimated_salary_range": "₹12L–₹25L",
         "phases": [
             {"phase":1,"title":"Phase 1 — Fix Weaknesses","goal":"Bring weak skills to 70%+","jobs_unlocked":400,
+             "total_hours": h * min(len(weak[:5]),5), "estimated_days": max(1, round(h * min(len(weak[:5]),5) / hours_per_day)),
              "tasks":[{"id":f"t{i+1}","title":f"Master {s} fundamentals","description":f"Study core {s} concepts and build practice projects","skill":s,"resource_type":"course","resource_name":f"{s} - freeCodeCamp","resource_url":"https://freecodecamp.org","hours_needed":h,"priority":"high","why":f"Your {s} is {round(v*100)}% — reaching 70% unlocks significantly more jobs"} for i,(s,v) in enumerate(weak[:5])]},
             {"phase":2,"title":"Phase 2 — Deepen Strengths","goal":"Become expert in your best skills","jobs_unlocked":600,
+             "total_hours": (h+3) * min(len(strong[:4]),4), "estimated_days": max(1, round((h+3) * min(len(strong[:4]),4) / hours_per_day)),
              "tasks":[{"id":f"t{len(weak[:5])+i+1}","title":f"Advanced {s}","description":f"Advanced {s} patterns, real-world projects, performance optimization","skill":s,"resource_type":"project","resource_name":f"Build 3 real {s} projects","resource_url":"https://github.com","hours_needed":h+3,"priority":"medium","why":f"Going from {round(v*100)}% to 85%+ unlocks senior roles"} for i,(s,v) in enumerate(strong[:4])]},
             {"phase":3,"title":"Phase 3 — Market Ready","goal":"Interview prep + portfolio","jobs_unlocked":800,
              "tasks":[{"id":f"t{len(weak[:5])+len(strong[:4])+1}","title":"Build portfolio project","description":"Full-stack project showcasing all your skills","skill":strong[0][0] if strong else "Python","resource_type":"project","resource_name":"Personal Portfolio","resource_url":"https://github.com","hours_needed":h+5,"priority":"high","why":"A real project is worth more than any certificate"}]},

@@ -1316,10 +1316,13 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
                 <input class="input" x-model="roadmapSetup.target_role" placeholder="e.g. Senior Backend Engineer, Full Stack Dev">
               </div>
               <div>
-                <label class="form-label">Hours per day: <span style="color:#6366f1;font-weight:600" x-text="roadmapSetup.hours_per_day + 'h'"></span></label>
+                <label class="form-label">Hours available per day: <span style="color:#6366f1;font-weight:600" x-text="roadmapSetup.hours_per_day + 'h'"></span></label>
                 <input type="range" min="0.5" max="8" step="0.5" x-model="roadmapSetup.hours_per_day" style="width:100%;accent-color:#6366f1">
                 <div style="display:flex;justify-content:space-between;font-size:10px;color:#7b82a0;margin-top:3px">
                   <span>0.5h (casual)</span><span>2h (serious)</span><span>8h (bootcamp)</span>
+                </div>
+                <div style="margin-top:8px;padding:8px 12px;background:rgba(99,102,241,.08);border-radius:8px;font-size:11px;color:#a78bfa">
+                  💡 Based on your pace, AI will calculate exactly how many days each phase takes for <strong>you</strong> — not a fixed 30/60/90 timeline
                 </div>
               </div>
               <div>
@@ -1430,12 +1433,13 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
               <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-bottom:12px"
                 @click="roadmapExpandedPhase = roadmapExpandedPhase===phase.phase ? 0 : phase.phase">
                 <div style="display:flex;align-items:center;gap:12px">
-                  <div style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0"
+                  <div style="min-width:44px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;padding:0 8px"
                     :style="phase.phase===1?'background:rgba(99,102,241,.15);color:#6366f1':phase.phase===2?'background:rgba(245,158,11,.15);color:#f59e0b':'background:rgba(16,185,129,.15);color:#10b981'"
-                    x-text="phase.phase===1?'30d':phase.phase===2?'60d':'90d'"></div>
+                    x-text="(phase.estimated_days||'?') + 'd'"></div>
                   <div>
                     <div style="font-size:13px;font-weight:600" x-text="'Phase '+phase.phase+': '+phase.title"></div>
                     <div style="font-size:11px;color:#7b82a0" x-text="phase.goal"></div>
+                    <div x-show="phase.estimated_days" style="font-size:10px;color:#6366f1;margin-top:2px" x-text="'~'+phase.estimated_days+' days at '+roadmapData.hours_per_day+'h/day · '+phase.total_hours+'h total'"></div>
                   </div>
                 </div>
                 <div style="display:flex;align-items:center;gap:12px">
