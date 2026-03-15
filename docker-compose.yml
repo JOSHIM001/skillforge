@@ -1,0 +1,141 @@
+version: "3.9"
+
+# ── Shared build context ──────────────────────────────────────
+x-app-base: &app-base
+  build:
+    context: .
+    dockerfile: Dockerfile
+    target: runtime
+  env_file: .env
+  depends_on:
+    postgres:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+  restart: unless-stopped
+  networks:
+    - skillforge
+
+
+services:
+
+  # ── API server ─────────────────────────────────────────────
+  api:
+    <<: *app-base
+    container_name: skillforge-api
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount source for hot-reload in development.
+      # Remove this volume in production — use the baked-in image.
+      - ./frontend:/frontend
+      - ./backend:/app
+      - app-logs:/app/logs
+    command: >
+      uvicorn main:app
+        --host 0.0.0.0
+        --port 8000
+        --reload
+        --reload-dir /app
+        --log-level info
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # ── Celery worker (AI task processing) ────────────────────
+  worker:
+    <<: *app-base
+    container_name: skillforge-worker
+    volumes:
+      - ./backend:/app
+      - app-logs:/app/logs
+    command: >
+      celery -A tasks.celery_app.celery_app worker
+        --loglevel=info
+        --concurrency=2
+        --queues=default
+        -E
+    healthcheck:
+      test: ["CMD", "celery", "-A", "tasks.celery_app.celery_app", "inspect", "ping"]
+      interval: 60s
+      timeout: 20s
+      retries: 3
+      start_period: 30s
+
+  # ── Celery Beat (scheduled tasks) ─────────────────────────
+  beat:
+    <<: *app-base
+    container_name: skillforge-beat
+    volumes:
+      - ./backend:/app
+      - app-logs:/app/logs
+    command: >
+      celery -A tasks.celery_app.celery_app beat
+        --loglevel=info
+        --scheduler celery.beat:PersistentScheduler
+
+  # ── PostgreSQL ────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: skillforge-postgres
+    environment:
+      POSTGRES_DB:       skillapp
+      POSTGRES_USER:     user
+      POSTGRES_PASSWORD: password
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"          # exposed for local DB tools (TablePlus etc.)
+    networks:
+      - skillforge
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d skillapp"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ── Redis ─────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: skillforge-redis
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redisdata:/data
+    ports:
+      - "6379:6379"          # exposed for redis-cli debugging
+    networks:
+      - skillforge
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Flower (Celery monitoring UI) — dev only ───────────────
+  flower:
+    <<: *app-base
+    container_name: skillforge-flower
+    ports:
+      - "5555:5555"
+    command: >
+      celery -A tasks.celery_app.celery_app flower
+        --port=5555
+        --basic_auth=${FLOWER_USER:-admin}:${FLOWER_PASSWORD:-admin}
+    profiles:
+      - monitoring            # only starts with: docker compose --profile monitoring up
+
+
+volumes:
+  pgdata:
+  redisdata:
+  app-logs:
+
+networks:
+  skillforge:
+    driver: bridge

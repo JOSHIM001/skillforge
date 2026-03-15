@@ -1,0 +1,3105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SkillForge — AI Career Assessment</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%236366f1'/><text x='16' y='22' font-family='monospace' font-size='18' font-weight='bold' fill='white' text-anchor='middle'>S</text></svg>">
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:      #0a0c14;
+  --bg2:     #111420;
+  --bg3:     #171c2e;
+  --bg4:     #1e2438;
+  --border:  #252d45;
+  --border2: #2e3850;
+  --text:    #e2e6f3;
+  --muted:   #6a738f;
+  --muted2:  #8891ab;
+  --accent:  #6366f1;
+  --accent2: #8b5cf6;
+  --accent3: #a78bfa;
+  --green:   #10b981;
+  --amber:   #f59e0b;
+  --red:     #ef4444;
+  --teal:    #06b6d4;
+  --t-fast:  120ms ease;
+  --t-base:  200ms ease;
+  --t-slow:  350ms cubic-bezier(0.4,0,0.2,1);
+  --t-spring:400ms cubic-bezier(0.34,1.56,0.64,1);
+  --r-sm:8px; --r-md:12px; --r-lg:16px; --r-xl:24px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:14px;-webkit-font-smoothing:antialiased}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;line-height:1.6;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(99,102,241,.07) 0%,transparent 70%),radial-gradient(ellipse 60% 50% at 80% 110%,rgba(139,92,246,.05) 0%,transparent 60%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M 60 0 L 0 0 0 60' fill='none' stroke='%23252d45' stroke-width='0.5' opacity='0.25'/%3E%3C/svg%3E");pointer-events:none;z-index:0}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg2)}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* ── Layout ── */
+.app-shell{display:grid;grid-template-columns:210px 1fr;min-height:100vh;position:relative;z-index:1}
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow:hidden}
+.main-content{padding:28px 32px;overflow-y:auto;min-height:100vh}
+
+/* ── Sidebar ── */
+.sidebar-logo{padding:20px 18px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px}
+.logo-mark{width:28px;height:28px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:#fff;flex-shrink:0}
+.logo-text{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;letter-spacing:-.3px}
+.logo-text span{color:var(--accent)}
+.nav-section-label{font-size:10px;font-weight:600;letter-spacing:1.2px;color:var(--muted);text-transform:uppercase;padding:8px 18px 3px}
+.nav-item{padding:8px 16px;display:flex;align-items:center;gap:9px;font-size:12.5px;font-weight:500;color:var(--muted2);cursor:pointer;border-left:2px solid transparent;transition:all var(--t-base);user-select:none}
+.nav-item:hover{color:var(--text);background:rgba(255,255,255,.03)}
+.nav-item.active{color:var(--accent3);background:rgba(99,102,241,.07);border-left-color:var(--accent)}
+.nav-item svg{width:14px;height:14px;opacity:.7;flex-shrink:0}
+.nav-item.active svg{opacity:1}
+.nav-badge{margin-left:auto;font-size:10px;font-family:'DM Mono',monospace;background:var(--accent);color:#fff;padding:1px 6px;border-radius:10px}
+.sidebar-footer{padding:12px 14px;border-top:1px solid var(--border);margin-top:auto}
+.user-chip{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:var(--r-md);cursor:pointer;transition:background var(--t-base)}
+.user-chip:hover{background:var(--bg3)}
+.avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff;flex-shrink:0}
+.user-name{font-size:12px;font-weight:500}
+.user-role{font-size:10px;color:var(--muted)}
+
+/* ── Page header ── */
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px}
+.page-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;letter-spacing:-.5px;line-height:1.2}
+.page-subtitle{font-size:12px;color:var(--muted);margin-top:2px}
+
+/* ── Grids ── */
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.grid-main{display:grid;grid-template-columns:1fr 320px;gap:14px}
+
+/* ── Cards ── */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;transition:border-color var(--t-base);position:relative;overflow:hidden}
+.card:hover{border-color:var(--border2)}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.card-title{font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted)}
+
+/* ── Metric cards ── */
+.metric-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px 18px;position:relative;overflow:hidden;transition:border-color var(--t-base),transform var(--t-base)}
+.metric-card::before{content:'';position:absolute;top:0;right:0;width:52px;height:52px;border-radius:0 var(--r-lg) 0 52px;opacity:.07}
+.metric-card.indigo::before{background:var(--accent)}
+.metric-card.green::before{background:var(--green)}
+.metric-card.amber::before{background:var(--amber)}
+.metric-card.teal::before{background:var(--teal)}
+.metric-card:hover{border-color:var(--border2);transform:translateY(-1px)}
+.metric-icon{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+.metric-icon svg{width:14px;height:14px}
+.metric-icon.indigo{background:rgba(99,102,241,.15);color:var(--accent)}
+.metric-icon.green{background:rgba(16,185,129,.15);color:var(--green)}
+.metric-icon.amber{background:rgba(245,158,11,.15);color:var(--amber)}
+.metric-icon.teal{background:rgba(6,182,212,.15);color:var(--teal)}
+.metric-value{font-family:'Syne',sans-serif;font-size:28px;font-weight:700;line-height:1;letter-spacing:-1px}
+.metric-label{font-size:11px;color:var(--muted);margin-top:4px;font-weight:500}
+.metric-delta{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-family:'DM Mono',monospace;color:var(--green);margin-top:3px}
+
+/* ── Skill bars ── */
+.skill-row{display:flex;align-items:center;gap:9px;margin-bottom:9px}
+.skill-name{font-size:12px;width:88px;flex-shrink:0;font-weight:500}
+.skill-track{flex:1;height:4px;background:var(--bg4);border-radius:2px;overflow:hidden}
+.skill-bar{height:100%;border-radius:2px;transition:width 1.2s cubic-bezier(.4,0,.2,1);width:0%}
+.skill-pct{font-size:11px;color:var(--muted);width:30px;text-align:right;font-family:'DM Mono',monospace}
+
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--r-sm);font-size:12.5px;font-weight:500;cursor:pointer;border:none;transition:all var(--t-base);font-family:'Inter',sans-serif;text-decoration:none;white-space:nowrap}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
+.btn svg{width:13px;height:13px}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover:not(:disabled){background:#4f52e0;transform:translateY(-1px);box-shadow:0 5px 14px rgba(99,102,241,.3)}
+.btn-secondary{background:var(--bg3);color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover:not(:disabled){border-color:var(--border2);background:var(--bg4)}
+.btn-ghost{background:transparent;color:var(--muted2);border:1px solid var(--border)}
+.btn-ghost:hover:not(:disabled){color:var(--text);border-color:var(--border2);background:var(--bg3)}
+.btn-danger{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.25)}
+.btn-danger:hover:not(:disabled){background:rgba(239,68,68,.22)}
+.btn-sm{padding:5px 11px;font-size:11.5px}
+
+/* ── Inputs ── */
+.input,.textarea,.select{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-sm);padding:9px 13px;color:var(--text);font-size:12.5px;transition:border-color var(--t-base),box-shadow var(--t-base);font-family:'Inter',sans-serif;outline:none}
+.input::placeholder,.textarea::placeholder{color:var(--muted)}
+.input:focus,.textarea:focus,.select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(99,102,241,.12)}
+.input.error,.textarea.error{border-color:var(--red)}
+.input.error:focus,.textarea.error:focus{box-shadow:0 0 0 3px rgba(239,68,68,.12)}
+.field-error{font-size:11px;color:var(--red);margin-top:4px}
+.textarea{resize:vertical;min-height:90px;line-height:1.6}
+
+/* ── Badges ── */
+.badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 9px;border-radius:20px;letter-spacing:.3px}
+.badge-accent{background:rgba(99,102,241,.15);color:var(--accent3)}
+.badge-green{background:rgba(16,185,129,.15);color:var(--green)}
+.badge-amber{background:rgba(245,158,11,.15);color:var(--amber)}
+.badge-red{background:rgba(239,68,68,.15);color:var(--red)}
+.badge-teal{background:rgba(6,182,212,.15);color:var(--teal)}
+.badge-muted{background:var(--bg4);color:var(--muted2)}
+
+/* ── Tags ── */
+.tag{display:inline-flex;align-items:center;gap:3px;font-size:11px;padding:3px 9px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--muted2);cursor:pointer;transition:all var(--t-fast)}
+.tag:hover{border-color:var(--accent);color:var(--accent3)}
+.tag.active{background:rgba(99,102,241,.12);border-color:var(--accent);color:var(--accent3)}
+
+/* ── Forms ── */
+.form-group{margin-bottom:12px}
+.form-label{display:block;font-size:11.5px;font-weight:500;color:var(--muted2);margin-bottom:5px}
+
+/* ── Loading ── */
+@keyframes shimmer{0%{background-position:-400% 0}100%{background-position:400% 0}}
+.skeleton{background:linear-gradient(90deg,var(--bg3) 25%,var(--bg4) 50%,var(--bg3) 75%);background-size:400% 100%;animation:shimmer 2s infinite;border-radius:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{width:13px;height:13px;border:2px solid rgba(255,255,255,.15);border-top-color:rgba(255,255,255,.8);border-radius:50%;animation:spin .65s linear infinite;display:inline-block}
+.spinner.dark{border-color:rgba(99,102,241,.2);border-top-color:var(--accent)}
+
+/* ── Animations ── */
+@keyframes slideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideInRight{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes scaleIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+@keyframes fadeOut{to{opacity:0;transform:translateY(4px)}}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.75)}}
+.animate-up{animation:slideUp var(--t-spring) both}
+.animate-scale{animation:scaleIn var(--t-slow) both}
+.animate-fade{animation:fadeIn var(--t-slow) both}
+
+/* ── Presence ── */
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.dot.online{background:var(--green);animation:pulse 2s ease infinite}
+.dot.offline{background:var(--muted)}
+
+/* ── Dividers ── */
+.divider{height:1px;background:var(--border);margin:14px 0}
+.divider-text{display:flex;align-items:center;gap:10px;margin:14px 0;font-size:11px;color:var(--muted)}
+.divider-text::before,.divider-text::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ── Table ── */
+.table{width:100%;border-collapse:collapse}
+.table th{font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);padding:7px 10px;text-align:left;border-bottom:1px solid var(--border)}
+.table td{padding:10px;font-size:12px;border-bottom:1px solid rgba(37,45,69,.5);vertical-align:middle}
+.table tr:last-child td{border-bottom:none}
+.table tr:hover td{background:rgba(255,255,255,.01)}
+
+/* ── Modal ── */
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .2s ease both}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-xl);padding:26px;width:100%;max-width:460px;animation:scaleIn .3s cubic-bezier(.34,1.56,.64,1) both}
+.modal-title{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;margin-bottom:5px}
+
+/* ── Toast ── */
+#toast-container{position:fixed;bottom:22px;right:22px;z-index:9999;display:flex;flex-direction:column;gap:7px;pointer-events:none}
+.toast{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-md);padding:11px 16px;font-size:12.5px;color:var(--text);max-width:300px;animation:slideInRight .3s cubic-bezier(.34,1.56,.64,1) both;box-shadow:0 6px 20px rgba(0,0,0,.4);pointer-events:auto}
+
+/* ── Landing ── */
+.landing-content{position:relative;z-index:1;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 20px}
+.landing-grid{display:grid;grid-template-columns:1fr 380px;gap:70px;align-items:center;max-width:1060px;width:100%}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;padding:4px 13px;background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.25);border-radius:20px;color:var(--accent3);margin-bottom:20px;letter-spacing:.4px}
+.hero-title{font-family:'Syne',sans-serif;font-size:clamp(34px,5vw,54px);font-weight:800;line-height:1.06;letter-spacing:-2px;margin-bottom:18px}
+.hero-title .hl{background:linear-gradient(135deg,var(--accent),var(--accent2),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-desc{font-size:14px;color:var(--muted2);max-width:480px;line-height:1.7;margin-bottom:28px}
+.feature-chip{display:flex;align-items:center;gap:7px;padding:6px 0;font-size:12.5px;color:var(--muted2)}
+.feature-chip svg{color:var(--accent3);flex-shrink:0;width:14px;height:14px}
+.stat-row{display:flex;gap:24px;margin-top:28px;padding-top:24px;border-top:1px solid var(--border)}
+.stat-num{font-family:'Syne',sans-serif;font-size:24px;font-weight:700;letter-spacing:-1px;line-height:1}
+.stat-lbl{font-size:10px;color:var(--muted);margin-top:2px}
+.auth-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-xl);padding:28px;width:100%;animation:slideUp .5s cubic-bezier(.34,1.56,.64,1) .15s both}
+.auth-title{font-family:'Syne',sans-serif;font-size:19px;font-weight:700;margin-bottom:4px}
+.auth-sub{font-size:12.5px;color:var(--muted);margin-bottom:20px}
+.github-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:9px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text);font-size:12.5px;font-weight:500;cursor:pointer;transition:all var(--t-base);font-family:'Inter',sans-serif}
+.github-btn:hover{background:var(--bg4);border-color:var(--border2)}
+
+/* ── Assessment ── */
+.question-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px;animation:slideUp var(--t-spring) both}
+.diff-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;margin-bottom:12px;letter-spacing:.5px;text-transform:uppercase}
+.diff-easy{background:rgba(16,185,129,.1);color:var(--green)}
+.diff-medium{background:rgba(245,158,11,.1);color:var(--amber)}
+.diff-hard{background:rgba(239,68,68,.1);color:var(--red)}
+.diff-expert{background:rgba(139,92,246,.1);color:var(--accent2)}
+#feedback-panel{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;margin-top:14px;animation:slideUp var(--t-spring) both}
+
+/* ── Issue cards ── */
+.issue-card{padding:13px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-md);transition:border-color var(--t-base),transform var(--t-base)}
+.issue-card:hover{border-color:var(--accent);transform:translateY(-1px)}
+
+/* ── Member card ── */
+.member-card{display:flex;align-items:center;gap:9px;padding:9px 11px;background:var(--bg3);border-radius:var(--r-md);border:1px solid var(--border);animation:slideUp var(--t-spring) both}
+
+/* ── Empty state ── */
+.empty-state{text-align:center;padding:40px 20px;color:var(--muted);font-size:13px}
+.empty-state svg{width:36px;height:36px;margin:0 auto 12px;opacity:.3;display:block}
+
+/* ── Session status ── */
+.session-live{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--green);font-weight:500}
+.session-live::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s ease infinite}
+
+/* ── Responsive ── */
+@media(max-width:1100px){.grid-4{grid-template-columns:repeat(2,1fr)}.grid-main{grid-template-columns:1fr}.landing-grid{grid-template-columns:1fr;gap:36px}}
+@media(max-width:768px){.app-shell{grid-template-columns:1fr}.sidebar{display:none}.main-content{padding:14px}.grid-2{grid-template-columns:1fr}}
+</style>
+</head>
+<body x-data="app()" x-init="boot()">
+<div id="toast-container"></div>
+
+<!-- ══════════ LANDING ══════════ -->
+<div x-show="view === 'landing'" style="display:none">
+  <div class="landing-content">
+    <div class="landing-grid">
+      <div class="animate-fade">
+        <div class="hero-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          AI-Powered Skill Assessment
+        </div>
+        <h1 class="hero-title">Know exactly<br><span class="hl">where you stand.</span></h1>
+        <p class="hero-desc">No more self-reported ratings. Our AI conducts real technical micro-interviews, builds your proficiency matrix, and connects you to the right opportunities.</p>
+        <div style="display:flex;flex-direction:column;gap:3px">
+          <div class="feature-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Adaptive difficulty — questions calibrate to your level</div>
+          <div class="feature-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Spaced repetition re-assessment scheduling</div>
+          <div class="feature-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Live team collaboration with role gap analysis</div>
+        </div>
+        <div class="stat-row">
+          <div><div class="stat-num" id="s-devs">0</div><div class="stat-lbl">Developers assessed</div></div>
+          <div><div class="stat-num" id="s-skills">0</div><div class="stat-lbl">Skills tracked</div></div>
+          <div><div class="stat-num" id="s-acc">0%</div><div class="stat-lbl">Accuracy rate</div></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="auth-card">
+          <!-- Login -->
+          <div x-show="authMode === 'login'">
+            <div class="auth-title">Welcome back</div>
+            <div class="auth-sub">Sign in to continue your assessment journey</div>
+            <div class="form-group">
+              <label class="form-label">Email address</label>
+              <input type="email" class="input" :class="{error: errors.email}" placeholder="you@company.com" x-model="loginForm.email" @input="errors.email=''">
+              <div class="field-error" x-show="errors.email" x-text="errors.email"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Password</label>
+              <input type="password" class="input" :class="{error: errors.password}" placeholder="••••••••" x-model="loginForm.password" @keydown.enter="doLogin()" @input="errors.password=''">
+              <div class="field-error" x-show="errors.password" x-text="errors.password"></div>
+            </div>
+            <div class="field-error" style="margin-bottom:8px" x-show="errors.auth" x-text="errors.auth"></div>
+            <button class="btn btn-primary" style="width:100%;justify-content:center" @click="doLogin()" :disabled="loginLoading">
+              <span x-show="!loginLoading">Sign in</span>
+              <span x-show="loginLoading" style="display:flex;align-items:center;gap:6px"><span class="spinner"></span>Signing in...</span>
+            </button>
+            <div class="divider-text">or</div>
+            <button class="github-btn" @click="doGithubLogin()">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+              Continue with GitHub
+            </button>
+            <p style="text-align:center;font-size:11.5px;color:var(--muted);margin-top:14px">No account? <span style="color:var(--accent);cursor:pointer" @click="authMode='register'">Create one free →</span></p>
+          </div>
+
+          <!-- Register -->
+          <div x-show="authMode === 'register'" style="display:none">
+            <div class="auth-title">Create account</div>
+            <div class="auth-sub">Start your AI-powered career journey</div>
+            <div class="form-group">
+              <label class="form-label">Username</label>
+              <input type="text" class="input" :class="{error: errors.username}" placeholder="johndoe" x-model="regForm.username" @input="errors.username=''">
+              <div class="field-error" x-show="errors.username" x-text="errors.username"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input type="email" class="input" :class="{error: errors.email}" placeholder="you@company.com" x-model="regForm.email" @input="errors.email=''">
+              <div class="field-error" x-show="errors.email" x-text="errors.email"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Password</label>
+              <input type="password" class="input" :class="{error: errors.password}" placeholder="Min. 8 characters" x-model="regForm.password" @keydown.enter="doRegister()" @input="errors.password=''">
+              <div class="field-error" x-show="errors.password" x-text="errors.password"></div>
+            </div>
+            <div class="field-error" style="margin-bottom:8px" x-show="errors.auth" x-text="errors.auth"></div>
+            <button class="btn btn-primary" style="width:100%;justify-content:center" @click="doRegister()" :disabled="regLoading">
+              <span x-show="!regLoading">Create account</span>
+              <span x-show="regLoading" style="display:flex;align-items:center;gap:6px"><span class="spinner"></span>Creating...</span>
+            </button>
+            <p style="text-align:center;font-size:11.5px;color:var(--muted);margin-top:14px">Already have one? <span style="color:var(--accent);cursor:pointer" @click="authMode='login'">Sign in →</span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ APP SHELL ══════════ -->
+<div x-show="view !== 'landing'" class="app-shell" style="display:none">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">SF</div>
+      <div class="logo-text">Skill<span>Forge</span></div>
+    </div>
+    <nav style="padding:12px 0;flex:1">
+      <div class="nav-section-label">Overview</div>
+      <div class="nav-item" :class="{active:view==='dashboard'}" @click="go('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </div>
+      <div class="nav-item" :class="{active:view==='assessment'}" @click="go('assessment')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        Assessment
+        <span class="nav-badge" x-show="Object.keys(skillMatrix).length" x-text="Object.keys(skillMatrix).length"></span>
+      </div>
+      <div class="nav-section-label" style="margin-top:6px">Career</div>
+      <div class="nav-item" :class="{active:view==='projects'}" @click="go('projects')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        Projects
+      </div>
+      <div class="nav-item" :class="{active:view==='issues'}" @click="go('issues')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        GitHub Issues
+      </div>
+      <div class="nav-section-label" style="margin-top:6px">Identity</div>
+      <div class="nav-item" :class="{active:view==='dna'}" @click="go('dna')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2C6 2 2 7 2 12s4 10 10 10"/><path d="M12 22c6 0 10-5 10-10S18 2 12 2"/><path d="M2 12h4M18 12h4"/><circle cx="12" cy="12" r="3"/></svg>
+        Skill DNA
+        <span style="margin-left:auto;font-size:9px;font-weight:700;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;padding:2px 6px;border-radius:8px">NEW</span>
+      </div>
+      <div class="nav-item" :class="{active:view==='decay'}" @click="go('decay')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/><path d="M5 3v4M3 5h4M19 17v4M17 19h4"/></svg>
+        Skill Decay
+        <span style="margin-left:auto;font-size:9px;font-weight:700;background:linear-gradient(135deg,#ef4444,#f59e0b);color:#fff;padding:2px 6px;border-radius:8px">NEW</span>
+      </div>
+      <div class="nav-item" :class="{active:view==='bounties'}" @click="go('bounties')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+        Skill Bounties
+        <span style="margin-left:auto;font-size:9px;font-weight:700;background:linear-gradient(135deg,#f59e0b,#10b981);color:#fff;padding:2px 6px;border-radius:8px">NEW</span>
+      </div>
+      <div class="nav-item" :class="{active:view==='gps'}" @click="go('gps')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+        Career GPS
+        <span style="margin-left:auto;font-size:9px;font-weight:700;background:linear-gradient(135deg,#06b6d4,#6366f1);color:#fff;padding:2px 6px;border-radius:8px">NEW</span>
+      </div>
+      <div class="nav-item" :class="{active:view==='ghost'}" @click="go('ghost')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2a7 7 0 0 0-7 7v4l-2 2v1h18v-1l-2-2V9a7 7 0 0 0-7-7z"/><path d="M9 21a3 3 0 0 0 6 0"/></svg>
+        Ghost Interview
+        <span style="margin-left:auto;font-size:9px;font-weight:700;background:linear-gradient(135deg,#8b5cf6,#ef4444);color:#fff;padding:2px 6px;border-radius:8px">NEW</span>
+      </div>
+      <div class="nav-section-label" style="margin-top:6px">Team</div>
+      <div class="nav-item" :class="{active:view==='room'}" @click="go('room')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Team Hub
+        <span class="dot online" style="margin-left:auto" x-show="activeRoom"></span>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-chip" @click="doLogout()">
+        <div class="avatar" x-text="(user?.username?.[0]||'U').toUpperCase()"></div>
+        <div>
+          <div class="user-name" x-text="user?.username||'Developer'"></div>
+          <div class="user-role">Sign out</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content" id="vc" style="transition:opacity 180ms ease,transform 180ms ease">
+
+    <!-- ── DASHBOARD ── -->
+    <div x-show="view==='dashboard'" style="display:none">
+      <div class="page-header">
+        <div><div class="page-title">Dashboard</div><div class="page-subtitle">Your skill intelligence at a glance</div></div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div class="session-live" x-show="activeSession">Assessment active</div>
+          <button class="btn btn-primary btn-sm" @click="go('assessment')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>New Assessment
+          </button>
+        </div>
+      </div>
+
+      <div class="grid-4" style="margin-bottom:14px">
+        <div class="metric-card indigo animate-up" style="animation-delay:.00s">
+          <div class="metric-icon indigo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+          <div class="metric-value" id="m-score">–</div>
+          <div class="metric-label">Overall Score</div>
+        </div>
+        <div class="metric-card green animate-up" style="animation-delay:.06s">
+          <div class="metric-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+          <div class="metric-value" id="m-skills">–</div>
+          <div class="metric-label">Skills Assessed</div>
+        </div>
+        <div class="metric-card amber animate-up" style="animation-delay:.12s">
+          <div class="metric-icon amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+          <div class="metric-value" id="m-queue">–</div>
+          <div class="metric-label">Due for Review</div>
+        </div>
+        <div class="metric-card teal animate-up" style="animation-delay:.18s">
+          <div class="metric-icon teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+          <div class="metric-value" id="m-top">–</div>
+          <div class="metric-label">Top Skill Score</div>
+        </div>
+      </div>
+
+      <div class="grid-main">
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="card animate-scale" style="animation-delay:.08s">
+            <div class="card-header">
+              <div class="card-title">Skill Matrix</div>
+              <button class="btn btn-ghost btn-sm" @click="go('assessment')">+ Assess skill</button>
+            </div>
+            <div id="skill-bars"></div>
+            <div class="empty-state" x-show="!Object.keys(skillMatrix).length">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+              No skills yet. <span style="color:var(--accent);cursor:pointer" @click="go('assessment')">Start your first assessment →</span>
+            </div>
+          </div>
+
+          <div class="card animate-scale" style="animation-delay:.14s">
+            <div class="card-header"><div class="card-title">Spaced Repetition Queue</div></div>
+            <div x-show="spacedQueue.length" style="display:flex;flex-direction:column;gap:7px">
+              <template x-for="item in spacedQueue" :key="item.skill_name">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--bg3);border-radius:var(--r-sm)">
+                  <div><div style="font-size:12px;font-weight:500" x-text="item.skill_name"></div><div style="font-size:10px;color:var(--muted)" x-text="item.due_label"></div></div>
+                  <button class="btn btn-ghost btn-sm" @click="startAssessment(item.skill_name)">Review</button>
+                </div>
+              </template>
+            </div>
+            <div class="empty-state" x-show="!spacedQueue.length" style="padding:20px 0">All caught up ✓</div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="card animate-up" style="animation-delay:.1s">
+            <div class="card-header"><div class="card-title">Proficiency Radar</div><span class="badge badge-accent">Live</span></div>
+            <canvas id="radarChart" height="240" style="max-width:260px;margin:0 auto;display:block"></canvas>
+          </div>
+          <div class="card animate-up" style="animation-delay:.18s">
+            <div class="card-header"><div class="card-title">Level Distribution</div></div>
+            <canvas id="donutChart" height="170" style="max-width:180px;margin:0 auto 10px;display:block"></canvas>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">
+              <div style="display:flex;align-items:center;gap:6px;font-size:11px"><span style="width:7px;height:7px;border-radius:2px;background:var(--accent);flex-shrink:0"></span><span style="color:var(--muted)">Expert (≥70%)</span></div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:11px"><span style="width:7px;height:7px;border-radius:2px;background:var(--green);flex-shrink:0"></span><span style="color:var(--muted)">Intermediate</span></div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:11px"><span style="width:7px;height:7px;border-radius:2px;background:var(--amber);flex-shrink:0"></span><span style="color:var(--muted)">Beginner</span></div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:11px"><span style="width:7px;height:7px;border-radius:2px;background:var(--bg4);flex-shrink:0"></span><span style="color:var(--muted)">Unassessed</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ASSESSMENT ── -->
+    <div x-show="view==='assessment'" style="display:none">
+      <div class="page-header">
+        <div><div class="page-title">Assessment</div><div class="page-subtitle">AI-powered adaptive technical interviews</div></div>
+        <button class="btn btn-ghost btn-sm" x-show="activeSession" @click="endSession()">End session</button>
+      </div>
+
+      <!-- Skill picker -->
+      <div x-show="!activeSession">
+        <div class="grid-2" style="margin-bottom:14px">
+          <div class="card animate-up">
+            <div class="card-header"><div class="card-title">Choose a skill</div></div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:13px">
+              <template x-for="s in availableSkills" :key="s">
+                <span class="tag" :class="{active:selectedSkill===s}" @click="selectedSkill=s" x-text="s"></span>
+              </template>
+            </div>
+            <div style="display:flex;gap:8px">
+              <input class="input" placeholder="Or type a custom skill…" x-model="customSkill" @keydown.enter="startAssessment(customSkill)">
+              <button class="btn btn-primary" @click="startAssessment(selectedSkill||customSkill)" :disabled="!selectedSkill&&!customSkill">
+                Start <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="card animate-up" style="animation-delay:.07s">
+            <div class="card-header"><div class="card-title">How it works</div></div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;gap:9px;align-items:flex-start"><div style="width:26px;height:26px;border-radius:6px;background:rgba(99,102,241,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><div><div style="font-size:12px;font-weight:600;margin-bottom:2px">Adaptive difficulty</div><div style="font-size:11px;color:var(--muted)">Questions calibrate to your answers in real time</div></div></div>
+              <div style="display:flex;gap:9px;align-items:flex-start"><div style="width:26px;height:26px;border-radius:6px;background:rgba(16,185,129,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><div><div style="font-size:12px;font-weight:600;margin-bottom:2px">AI grading</div><div style="font-size:11px;color:var(--muted)">llama-3.3-70b via Groq grades your answers instantly</div></div></div>
+              <div style="display:flex;gap:9px;align-items:flex-start"><div style="width:26px;height:26px;border-radius:6px;background:rgba(245,158,11,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div><div style="font-size:12px;font-weight:600;margin-bottom:2px">Unbiased scores</div><div style="font-size:11px;color:var(--muted)">Mathematical proficiency, not self-reported ratings</div></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card animate-scale" style="animation-delay:.1s">
+          <div class="card-header"><div class="card-title">Previously assessed — click to reassess</div></div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px">
+            <template x-for="(score, skill) in skillMatrix" :key="skill">
+              <div style="padding:11px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-md);cursor:pointer;transition:border-color .2s"
+                   @click="startAssessment(skill)"
+                   @mouseenter="$el.style.borderColor='var(--accent)'"
+                   @mouseleave="$el.style.borderColor='var(--border)'">
+                <div style="font-size:12px;font-weight:600;margin-bottom:5px" x-text="skill"></div>
+                <div style="height:3px;background:var(--bg4);border-radius:2px;margin-bottom:5px"><div :style="'width:'+Math.round(score*100)+'%;height:100%;background:'+sColor(score)+';border-radius:2px'"></div></div>
+                <div style="font-size:11px;font-family:monospace" :style="'color:'+sColor(score)" x-text="Math.round(score*100)+'%'"></div>
+              </div>
+            </template>
+          </div>
+          <div class="empty-state" x-show="!Object.keys(skillMatrix).length">No assessments yet — pick a skill above to get started.</div>
+        </div>
+      </div>
+
+      <!-- Active session -->
+      <div x-show="activeSession">
+        <div class="card" style="margin-bottom:13px">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700" x-text="activeSession?.skill_name"></div>
+              <span class="badge badge-accent" x-text="'Difficulty: '+(activeSession?.difficulty||1)+'/5'"></span>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px">
+              <div style="font-size:12px;color:var(--muted)">Q <span style="color:var(--text)" x-text="(activeSession?.questions_asked||0)+1"></span> / 8</div>
+              <div style="width:110px;height:4px;background:var(--bg4);border-radius:2px"><div :style="'width:'+(((activeSession?.questions_asked||0)/8)*100)+'%;height:100%;background:var(--accent);border-radius:2px;transition:width .4s ease'"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-main">
+          <div>
+            <div x-show="qLoading" class="question-card" style="animation:none">
+              <div class="skeleton" style="height:13px;width:55px;margin-bottom:12px"></div>
+              <div class="skeleton" style="height:16px;width:100%;margin-bottom:7px"></div>
+              <div class="skeleton" style="height:16px;width:82%"></div>
+            </div>
+            <div x-show="!qLoading && currentQuestion" class="question-card">
+              <div class="diff-badge" :class="diffClass(activeSession?.difficulty||1)" x-text="diffLabel(activeSession?.difficulty||1)"></div>
+              <div id="q-text" style="font-size:14px;line-height:1.75;font-weight:500;margin-bottom:16px"></div>
+              <label class="form-label">Your answer</label>
+              <textarea class="textarea" :class="{error:errors.answer}" rows="5"
+                placeholder="Explain your understanding clearly. Cover the key concepts, practical usage, and trade-offs…"
+                x-model="userAnswer" @keydown.ctrl.enter="submitAnswer()" @input="errors.answer=''"></textarea>
+              <div class="field-error" x-show="errors.answer" x-text="errors.answer"></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px">
+                <div style="font-size:11px;color:var(--muted)">Ctrl+Enter to submit</div>
+                <button class="btn btn-primary" @click="submitAnswer()" :disabled="!userAnswer.trim()||aLoading">
+                  <span x-show="!aLoading">Submit answer</span>
+                  <span x-show="aLoading" style="display:flex;align-items:center;gap:6px"><span class="spinner"></span>Grading…</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Feedback -->
+            <div id="feedback-panel" x-show="gradeFeedback" style="display:none">
+              <div style="display:flex;align-items:center;gap:14px;margin-bottom:11px">
+                <svg width="52" height="52" viewBox="0 0 52 52">
+                  <circle cx="26" cy="26" r="20" fill="none" stroke="var(--border)" stroke-width="3"/>
+                  <circle id="grade-ring" cx="26" cy="26" r="20" fill="none" stroke-width="3" stroke-linecap="round" transform="rotate(-90 26 26)"/>
+                  <text id="grade-text" x="26" y="30" text-anchor="middle" font-family="Syne,sans-serif" font-size="11" font-weight="700" fill="var(--text)">0%</text>
+                </svg>
+                <div>
+                  <div style="font-size:13px;font-weight:600;margin-bottom:3px" id="grade-label"></div>
+                  <div style="font-size:12px;color:var(--muted);line-height:1.5" id="feedback-txt"></div>
+                </div>
+              </div>
+              <div style="display:flex;gap:7px">
+                <button class="btn btn-primary btn-sm" @click="nextQuestion()" x-show="(activeSession?.questions_asked||0)<7">Next question <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                <button class="btn btn-ghost btn-sm" style="color:var(--green);border-color:rgba(16,185,129,.3)" @click="endSession()" x-show="(activeSession?.questions_asked||0)>=7">Complete ✓</button>
+                <button class="btn btn-ghost btn-sm" @click="endSession()">End early</button>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div class="card">
+              <div class="card-header"><div class="card-title">Session stats</div></div>
+              <div style="display:flex;flex-direction:column;gap:9px">
+                <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--muted)">Running score</span><span style="font-family:monospace;font-weight:600" :style="'color:'+sColor(activeSession?.currentScore||0)" x-text="Math.round((activeSession?.currentScore||0)*100)+'%'"></span></div>
+                <div style="height:3px;background:var(--bg4);border-radius:2px"><div :style="'width:'+Math.round((activeSession?.currentScore||0)*100)+'%;height:100%;background:var(--accent);border-radius:2px;transition:width .8s ease'"></div></div>
+                <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--muted)">Questions done</span><span style="font-family:monospace" x-text="activeSession?.questions_asked||0"></span></div>
+                <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--muted)">Difficulty</span><span x-text="activeSession?.difficulty||1" style="font-family:monospace;color:var(--accent3)"></span></div>
+              </div>
+            </div>
+            <div class="card" x-show="gradeFeedback?.topics_covered?.length">
+              <div class="card-header"><div class="card-title">Topics identified</div></div>
+              <div style="display:flex;flex-wrap:wrap;gap:5px">
+                <template x-for="t in (gradeFeedback?.topics_covered||[])"><span class="badge badge-teal" x-text="t"></span></template>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PROJECTS ── -->
+    <div x-show="view==='projects'" style="display:none">
+      <div class="page-header">
+        <div><div class="page-title">Project Analyzer</div><div class="page-subtitle">Validate your stack · Get an AI-generated blueprint</div></div>
+      </div>
+      <div class="grid-main">
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="card animate-up">
+            <div class="card-header"><div class="card-title">Stack Validator</div></div>
+            <div class="form-group">
+              <label class="form-label">Project idea</label>
+              <textarea class="textarea" :class="{error:errors.idea}" placeholder="e.g. A real-time collaborative code editor with syntax highlighting, user presence, and version history…" x-model="projectIdea" rows="4" @input="errors.idea=''"></textarea>
+              <div class="field-error" x-show="errors.idea" x-text="errors.idea"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Current tech stack</label>
+              <div style="display:flex;gap:7px;margin-bottom:7px">
+                <input class="input" placeholder="Add a technology…" x-model="newTech" @keydown.enter="addTech()">
+                <button class="btn btn-secondary" @click="addTech()">Add</button>
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:5px">
+                <template x-for="t in techStack" :key="t">
+                  <span class="badge badge-accent" style="cursor:pointer" @click="removeTech(t)"><span x-text="t"></span><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span>
+                </template>
+              </div>
+            </div>
+            <button class="btn btn-primary" @click="doValidate()" :disabled="!projectIdea.trim()||projLoading">
+              <span x-show="!projLoading">Analyze stack</span>
+              <span x-show="projLoading" style="display:flex;align-items:center;gap:6px"><span class="spinner"></span>Analyzing…</span>
+            </button>
+          </div>
+
+          <div class="card animate-up" x-show="validationResult" style="display:none">
+            <div class="card-header"><div class="card-title">Analysis results</div><span class="badge badge-green">Complete</span></div>
+            <div x-show="validationResult?.missing_tech?.length" style="margin-bottom:13px">
+              <div style="font-size:12px;font-weight:600;color:var(--amber);margin-bottom:8px">Missing technologies:</div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px">
+                <template x-for="t in (validationResult?.missing_tech||[])"><span class="badge badge-amber"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span x-text="t"></span></span></template>
+              </div>
+            </div>
+            <div style="font-size:12px;color:var(--muted2);line-height:1.7;padding:11px;background:var(--bg3);border-radius:var(--r-sm)" x-text="validationResult?.reasoning"></div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="card animate-up" style="animation-delay:.08s">
+            <div class="card-header"><div class="card-title">AI Blueprint</div>
+              <button class="btn btn-ghost btn-sm" @click="doBlueprint()" :disabled="bpLoading">
+                <span x-show="!bpLoading">Generate</span><span x-show="bpLoading" class="spinner dark"></span>
+              </button>
+            </div>
+            <div x-show="!blueprint&&!bpLoading" style="text-align:center;padding:20px 0;font-size:12px;color:var(--muted)">Click Generate for a personalised project based on your skill matrix</div>
+            <div x-show="bpLoading" style="display:flex;flex-direction:column;gap:7px">
+              <div class="skeleton" style="height:12px;width:90%"></div>
+              <div class="skeleton" style="height:12px;width:70%"></div>
+              <div class="skeleton" style="height:12px;width:82%"></div>
+            </div>
+            <div x-show="blueprint">
+              <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:6px" x-text="blueprint?.title"></div>
+              <div style="font-size:12px;color:var(--muted2);line-height:1.65;margin-bottom:10px" x-text="blueprint?.description"></div>
+              <div style="font-size:11px;color:var(--muted);margin-bottom:5px">Tech stack:</div>
+              <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px">
+                <template x-for="t in (blueprint?.tech_stack||[])"><span class="badge badge-accent" x-text="t"></span></template>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);padding-top:8px;border-top:1px solid var(--border)">
+                <span>~<span x-text="blueprint?.estimated_days"></span> days</span>
+                <span x-text="(blueprint?.skills_practiced||[]).length+' skills practiced'"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card animate-up" style="animation-delay:.14s">
+            <div class="card-header"><div class="card-title">Skill readiness</div></div>
+            <div style="display:flex;flex-direction:column;gap:7px">
+              <template x-for="(score, skill) in skillMatrix" :key="skill">
+                <div style="display:flex;align-items:center;justify-content:space-between;font-size:12px">
+                  <span x-text="skill"></span>
+                  <span class="badge" :class="score>=.7?'badge-green':score>=.4?'badge-amber':'badge-red'" x-text="score>=.7?'Ready':score>=.4?'Partial':'Gap'"></span>
+                </div>
+              </template>
+              <div class="empty-state" x-show="!Object.keys(skillMatrix).length" style="padding:16px 0">Complete assessments to see readiness</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── GITHUB ISSUES ── -->
+    <div x-show="view==='issues'" style="display:none">
+      <div class="page-header">
+        <div><div class="page-title">GitHub Issues</div><div class="page-subtitle">Help-wanted issues matched to your skill matrix</div></div>
+        <button class="btn btn-primary btn-sm" @click="fetchIssues(true)">
+          <span x-show="!issuesLoading">Refresh</span><span x-show="issuesLoading" class="spinner"></span>
+        </button>
+      </div>
+
+      <div style="display:flex;gap:7px;margin-bottom:14px;flex-wrap:wrap">
+        <span class="tag" :class="{active:issueFilter==='all'}" @click="issueFilter='all';filterIssues()">All</span>
+        <span class="tag" :class="{active:issueFilter==='help-wanted'}" @click="issueFilter='help-wanted';filterIssues()">Help wanted</span>
+        <span class="tag" :class="{active:issueFilter==='good-first-issue'}" @click="issueFilter='good-first-issue';filterIssues()">Good first issue</span>
+      </div>
+
+      <div x-show="issuesLoading" style="display:flex;flex-direction:column;gap:9px">
+        <template x-for="i in [1,2,3]"><div class="card" style="animation:none"><div class="skeleton" style="height:12px;width:60%;margin-bottom:8px"></div><div class="skeleton" style="height:14px;width:90%;margin-bottom:6px"></div><div class="skeleton" style="height:12px;width:40%"></div></div></template>
+      </div>
+
+      <div x-show="!issuesLoading" style="display:flex;flex-direction:column;gap:9px">
+        <template x-for="issue in filteredIssues" :key="issue.id">
+          <div class="issue-card animate-up">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+              <div style="flex:1">
+                <div style="display:flex;align-items:center;gap:7px;margin-bottom:5px">
+                  <span class="badge" :class="issue.label==='good-first-issue'?'badge-green':'badge-teal'" x-text="issue.label"></span>
+                  <span class="badge badge-muted" x-text="issue.language"></span>
+                </div>
+                <div style="font-size:13px;font-weight:600;margin-bottom:3px" x-text="issue.title"></div>
+                <div style="font-size:11px;color:var(--muted);margin-bottom:7px;font-family:'DM Mono',monospace" x-text="issue.repo"></div>
+                <div style="display:flex;flex-wrap:wrap;gap:4px">
+                  <template x-for="s in issue.skills"><span class="badge badge-accent" x-text="s"></span></template>
+                </div>
+              </div>
+              <a :href="issue.url" target="_blank" rel="noopener" class="btn btn-ghost btn-sm" style="flex-shrink:0">
+                View <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              </a>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:9px;padding-top:9px;border-top:1px solid var(--border)">
+              <div style="font-size:11px;color:var(--muted)" x-text="issue.comments+' comments'"></div>
+              <div style="font-size:11px;font-family:monospace" :style="'color:'+sColor(issue.match/100)" x-text="'Match: '+issue.match+'%'"></div>
+            </div>
+          </div>
+        </template>
+        <div class="empty-state" x-show="!filteredIssues.length&&!issuesLoading">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          No matching issues found. Complete more assessments to improve matching.
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TEAM HUB ── -->
+    <div x-show="view==='room'" style="display:none">
+      <div class="page-header">
+        <div><div class="page-title">Team Hub</div><div class="page-subtitle">Live collaboration · Team skill matrix · Role gap analysis</div></div>
+        <div style="display:flex;gap:7px">
+          <button class="btn btn-ghost btn-sm" @click="showCreateRoom=true">Create room</button>
+          <button class="btn btn-primary btn-sm" @click="showJoinRoom=true">Join room</button>
+        </div>
+      </div>
+
+      <!-- Empty state -->
+      <div x-show="!activeRoom" class="card" style="text-align:center;padding:44px 20px;animation:slideUp .4s cubic-bezier(.34,1.56,.64,1) both">
+        <div style="width:50px;height:50px;background:rgba(99,102,241,.1);border-radius:var(--r-lg);display:flex;align-items:center;justify-content:center;margin:0 auto 14px">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700;margin-bottom:7px">Join a team room</div>
+        <div style="font-size:12.5px;color:var(--muted);max-width:360px;margin:0 auto 20px">Create or join a room to see your team's combined skill matrix and identify role gaps in real-time via WebSocket</div>
+        <div style="display:flex;gap:9px;justify-content:center">
+          <button class="btn btn-primary" @click="showCreateRoom=true">Create room</button>
+          <button class="btn btn-ghost" @click="showJoinRoom=true">Join with code</button>
+        </div>
+      </div>
+
+      <!-- Active room -->
+      <div x-show="activeRoom">
+        <div style="display:flex;align-items:center;gap:9px;margin-bottom:18px;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-md)">
+          <span class="dot online"></span>
+          <span style="font-size:13px;font-weight:500">Room:</span>
+          <span style="font-family:'DM Mono',monospace;font-size:13px;color:var(--accent3)" x-text="activeRoom?.room_id"></span>
+          <span style="font-size:12px;color:var(--muted)" x-text="'- '+(activeRoom?.online_count||0)+' online'"></span>
+          <button class="btn btn-ghost btn-sm" style="margin-left:auto" @click="leaveRoom()">Leave</button>
+        </div>
+
+        <div class="grid-main">
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div class="card animate-up">
+              <div class="card-header"><div class="card-title">Team skill radar</div><span class="badge badge-green">Live</span></div>
+              <canvas id="teamRadar" height="260" style="max-width:300px;margin:0 auto;display:block"></canvas>
+            </div>
+            <div class="card animate-up" style="animation-delay:.08s">
+              <div class="card-header"><div class="card-title">Role gap analysis</div></div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <template x-for="gap in (activeRoom?.role_gaps||[])" :key="gap.role">
+                  <div style="padding:10px 11px;background:var(--bg3);border-radius:var(--r-sm);border:1px solid var(--border)">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+                      <div style="font-size:12px;font-weight:600" x-text="gap.role"></div>
+                      <span class="badge" :class="gap.covered?'badge-green':'badge-red'" x-text="gap.covered?'Covered':'Gap'"></span>
+                    </div>
+                    <div style="font-size:11px;color:var(--muted)" x-text="gap.required_skills.join(', ')"></div>
+                    <div style="margin-top:6px;height:3px;background:var(--bg4);border-radius:2px">
+                      <div :style="'width:'+(gap.coverage_score*100)+'%;height:100%;background:'+(gap.covered?'var(--green)':'var(--amber)')+';border-radius:2px;transition:width .8s ease'"></div>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div class="card animate-up" style="animation-delay:.05s">
+              <div class="card-header"><div class="card-title">Members</div><span class="badge badge-green" x-text="(activeRoom?.online_count||0)+' online'"></span></div>
+              <div style="display:flex;flex-direction:column;gap:7px">
+                <template x-for="(m,i) in (activeRoom?.members||[])" :key="m.user_id">
+                  <div class="member-card" :style="'animation-delay:'+(i*60)+'ms'">
+                    <div class="avatar" x-text="m.username[0].toUpperCase()"></div>
+                    <div style="flex:1">
+                      <div style="font-size:12px;font-weight:500" x-text="m.username"></div>
+                      <div style="font-size:10px;color:var(--muted)" x-text="m.top_skill||'No skills yet'"></div>
+                    </div>
+                    <div style="text-align:right">
+                      <div style="font-size:11px;font-family:monospace" :style="'color:'+sColor(m.overall_score)" x-text="Math.round(m.overall_score*100)+'%'"></div>
+                      <span class="dot" :class="m.is_online?'online':'offline'" style="margin-top:3px;display:inline-block"></span>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </div>
+
+            <div class="card animate-up" style="animation-delay:.12s">
+              <div class="card-header"><div class="card-title">Team chat</div></div>
+              <div id="chat-msgs" style="height:190px;overflow-y:auto;display:flex;flex-direction:column;gap:5px;margin-bottom:9px;padding-right:2px">
+                <template x-for="msg in roomMessages" :key="msg.id">
+                  <div style="font-size:12px">
+                    <span style="font-weight:600;color:var(--accent3)" x-text="msg.username+': '"></span>
+                    <span style="color:var(--muted2)" x-text="msg.text"></span>
+                  </div>
+                </template>
+                <div x-show="!roomMessages.length" style="font-size:11px;color:var(--muted);text-align:center;padding:20px 0">No messages yet</div>
+              </div>
+              <div style="display:flex;gap:7px">
+                <input class="input" placeholder="Say something…" x-model="chatMsg" @keydown.enter="sendChat()">
+                <button class="btn btn-secondary" @click="sendChat()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DNA VIEW -->
+    <div x-show="view==='dna'" style="display:none">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Skill DNA</div>
+          <div class="page-subtitle">Your unique developer fingerprint — hover nodes, drag to rotate, scroll to zoom</div>
+        </div>
+        <div style="display:flex;gap:9px">
+          <button class="btn btn-ghost btn-sm" onclick="rotateDNA()">Toggle Rotation</button>
+          <button class="btn btn-primary btn-sm" onclick="exportDNA()">Share DNA</button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 260px;gap:16px;align-items:start">
+        <div class="card" style="padding:0;overflow:hidden;position:relative;height:580px;background:#0a0c14">
+          <div id="dna-canvas" style="width:100%;height:100%"></div>
+          <div id="dna-tooltip" style="position:absolute;display:none;background:#161b27;border:1px solid #2a3147;border-radius:10px;padding:10px 14px;pointer-events:none;z-index:10;min-width:160px">
+            <div id="tt-skill" style="font-weight:600;font-size:13px;margin-bottom:5px"></div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
+              <div style="flex:1;height:4px;background:#2a3147;border-radius:2px"><div id="tt-fill" style="height:100%;border-radius:2px;transition:width .3s"></div></div>
+              <span id="tt-score" style="font-family:DM Mono,monospace;font-size:11px;color:#7b82a0"></span>
+            </div>
+            <div id="tt-cat" style="font-size:10px;color:#7b82a0"></div>
+            <div id="tt-health" style="font-size:10px;margin-top:3px"></div>
+          </div>
+          <div id="dna-loading" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px">
+            <div class="spinner" style="width:22px;height:22px;border-width:3px"></div>
+            <div style="font-size:12px;color:#7b82a0">Sequencing your DNA...</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div class="card">
+            <div class="card-header"><div class="card-title">DNA Profile</div></div>
+            <div style="display:flex;flex-direction:column;gap:9px">
+              <div style="display:flex;justify-content:space-between"><span style="font-size:11px;color:#7b82a0">Skills</span><span id="dna-total" style="font-family:DM Mono,monospace;font-size:12px">—</span></div>
+              <div style="display:flex;justify-content:space-between"><span style="font-size:11px;color:#7b82a0">Dominant</span><span id="dna-dominant" style="font-size:12px;font-weight:600">—</span></div>
+              <div style="display:flex;justify-content:space-between"><span style="font-size:11px;color:#7b82a0">Strength</span><span id="dna-strength" style="font-size:12px;color:#10b981">—</span></div>
+              <div style="display:flex;justify-content:space-between"><span style="font-size:11px;color:#7b82a0">DNA Hash</span><span id="dna-hash" style="font-family:DM Mono,monospace;font-size:10px;color:#6366f1">—</span></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Legend</div></div>
+            <div style="display:flex;flex-direction:column;gap:7px">
+              <div style="display:flex;align-items:center;gap:8px"><div style="width:9px;height:9px;border-radius:50%;background:#6366f1"></div><span style="font-size:11px">Languages</span></div>
+              <div style="display:flex;align-items:center;gap:8px"><div style="width:9px;height:9px;border-radius:50%;background:#8b5cf6"></div><span style="font-size:11px">Frameworks</span></div>
+              <div style="display:flex;align-items:center;gap:8px"><div style="width:9px;height:9px;border-radius:50%;background:#10b981"></div><span style="font-size:11px">Infrastructure</span></div>
+              <div style="display:flex;align-items:center;gap:8px"><div style="width:9px;height:9px;border-radius:50%;background:#f59e0b"></div><span style="font-size:11px">Databases</span></div>
+              <div style="display:flex;align-items:center;gap:8px"><div style="width:9px;height:9px;border-radius:50%;background:#06b6d4"></div><span style="font-size:11px">Other</span></div>
+            </div>
+          </div>
+          <div class="card" style="max-height:220px;overflow-y:auto">
+            <div class="card-header"><div class="card-title">Skill Nodes</div></div>
+            <div id="dna-skill-list" style="display:flex;flex-direction:column;gap:5px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SKILL DECAY VIEW -->
+    <div x-show="view==='decay'" style="display:none">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Skill Decay</div>
+          <div class="page-subtitle">Skills decay without practice — see what needs your attention</div>
+        </div>
+        <button class="btn btn-primary btn-sm" @click="go('assessment')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          Start Review
+        </button>
+      </div>
+
+      <!-- Summary metrics -->
+      <div class="grid-4" style="margin-bottom:16px">
+        <div class="metric-card red">
+          <div class="metric-icon" style="background:rgba(239,68,68,.15);color:#ef4444"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+          <div class="metric-value" id="decay-critical" style="color:#ef4444">0</div>
+          <div class="metric-label">Critical</div>
+        </div>
+        <div class="metric-card amber">
+          <div class="metric-icon" style="background:rgba(245,158,11,.15);color:#f59e0b"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+          <div class="metric-value" id="decay-warning" style="color:#f59e0b">0</div>
+          <div class="metric-label">Needs Practice</div>
+        </div>
+        <div class="metric-card green">
+          <div class="metric-icon" style="background:rgba(16,185,129,.15);color:#10b981"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="metric-value" id="decay-healthy" style="color:#10b981">0</div>
+          <div class="metric-label">Healthy</div>
+        </div>
+        <div class="metric-card indigo">
+          <div class="metric-icon indigo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+          <div class="metric-value" id="decay-avg">—</div>
+          <div class="metric-label">Avg Health</div>
+        </div>
+      </div>
+
+      <!-- Main grid: decay timeline + skill cards -->
+      <div style="display:grid;grid-template-columns:1fr 300px;gap:16px">
+
+        <!-- Left: Skill decay cards -->
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div id="decay-list">
+            <div style="display:flex;align-items:center;justify-content:center;height:200px;color:#7b82a0;font-size:13px">
+              Complete assessments to see your decay forecast
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Decay chart + info -->
+        <div style="display:flex;flex-direction:column;gap:12px;position:sticky;top:20px">
+
+          <!-- Decay forecast chart -->
+          <div class="card">
+            <div class="card-header"><div class="card-title">30-Day Forecast</div></div>
+            <div style="height:140px;position:relative">
+              <canvas id="decay-chart"></canvas>
+            </div>
+          </div>
+
+          <!-- How decay works -->
+          <div class="card">
+            <div class="card-header"><div class="card-title">How Decay Works</div></div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;gap:10px;align-items:flex-start">
+                <div style="width:8px;height:8px;border-radius:50%;background:#10b981;margin-top:4px;flex-shrink:0"></div>
+                <div><div style="font-size:11px;font-weight:600;margin-bottom:2px">Healthy</div><div style="font-size:10px;color:#7b82a0">Assessed within 30 days</div></div>
+              </div>
+              <div style="display:flex;gap:10px;align-items:flex-start">
+                <div style="width:8px;height:8px;border-radius:50%;background:#f59e0b;margin-top:4px;flex-shrink:0"></div>
+                <div><div style="font-size:11px;font-weight:600;margin-bottom:2px">Needs Practice</div><div style="font-size:10px;color:#7b82a0">30–60 days since last assessment</div></div>
+              </div>
+              <div style="display:flex;gap:10px;align-items:flex-start">
+                <div style="width:8px;height:8px;border-radius:50%;background:#ef4444;margin-top:4px;flex-shrink:0"></div>
+                <div><div style="font-size:11px;font-weight:600;margin-bottom:2px">Critical</div><div style="font-size:10px;color:#7b82a0">60+ days or never assessed</div></div>
+              </div>
+              <div style="margin-top:4px;padding:10px;background:var(--bg3);border-radius:8px;font-size:10px;color:#7b82a0;line-height:1.6">
+                Skills decay at different rates. High-confidence skills decay slower. Low-confidence skills need more frequent re-assessment.
+              </div>
+            </div>
+          </div>
+
+          <!-- Priority queue -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Review Queue</div>
+              <span id="decay-queue-count" style="font-family:DM Mono,monospace;font-size:10px;color:#7b82a0"></span>
+            </div>
+            <div id="decay-queue" style="display:flex;flex-direction:column;gap:6px">
+              <div style="font-size:11px;color:#7b82a0">No skills due for review</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- BOUNTIES VIEW -->
+    <div x-show="view==='bounties'" style="display:none">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Skill Bounties</div>
+          <div class="page-subtitle">Complete challenges · Earn badges · Climb the leaderboard</div>
+        </div>
+        <div style="display:flex;gap:9px">
+          <button class="btn btn-ghost btn-sm" @click="generateAIBounties()" :disabled="bountiesLoading">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            AI Generate
+          </button>
+          <button class="btn btn-primary btn-sm" @click="showCreateBounty=true">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Post Bounty
+          </button>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div style="display:flex;gap:4px;margin-bottom:18px;background:var(--bg2);padding:4px;border-radius:10px;width:fit-content">
+        <button @click="bountyTab='all'" :style="bountyTab==='all'?'background:var(--bg3);color:var(--text)':'color:var(--muted)'" style="padding:6px 16px;border:none;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s">All Bounties</button>
+        <button @click="bountyTab='eligible'" :style="bountyTab==='eligible'?'background:var(--bg3);color:var(--text)':'color:var(--muted)'" style="padding:6px 16px;border:none;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s">Can Claim Now</button>
+        <button @click="bountyTab='claimed'; loadMyClaims()" :style="bountyTab==='claimed'?'background:var(--bg3);color:var(--text)':'color:var(--muted)'" style="padding:6px 16px;border:none;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s">My Claims</button>
+      </div>
+
+      <!-- Loading -->
+      <div x-show="bountiesLoading" style="display:flex;gap:10px;flex-direction:column">
+        <template x-for="i in 3" :key="i">
+          <div class="skeleton" style="height:120px;border-radius:12px"></div>
+        </template>
+      </div>
+
+      <!-- Bounty list -->
+      <div x-show="!bountiesLoading" style="display:flex;flex-direction:column;gap:12px">
+        <template x-for="b in filteredBounties" :key="b.id">
+          <div class="card" style="border-left:3px solid"
+            :style="'border-left-color:' + (b.user_claimed?'#10b981':b.user_eligible?'#6366f1':b.status==='closed'?'#2a3147':'#2a3147')">
+
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+              <div style="flex:1">
+                <!-- Title row -->
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
+                  <span style="font-size:14px;font-weight:600" x-text="b.title"></span>
+                  <span x-show="b.is_ai_generated" style="font-size:10px;background:rgba(99,102,241,.15);color:#a78bfa;padding:2px 7px;border-radius:8px">🤖 AI</span>
+                  <span x-show="b.user_claimed" style="font-size:10px;background:rgba(16,185,129,.15);color:#10b981;padding:2px 7px;border-radius:8px">✅ Claimed</span>
+                  <span x-show="b.user_eligible && !b.user_claimed" style="font-size:10px;background:rgba(99,102,241,.15);color:#6366f1;padding:2px 7px;border-radius:8px">⚡ Eligible</span>
+                  <span x-show="b.reward_label" style="font-size:10px;background:rgba(245,158,11,.15);color:#f59e0b;padding:2px 8px;border-radius:8px;font-weight:600" x-text="b.reward_label"></span>
+                </div>
+
+                <!-- Description -->
+                <div x-show="b.description" style="font-size:11px;color:#7b82a0;margin-bottom:10px" x-text="b.description"></div>
+
+                <!-- Required skills -->
+                <div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px">
+                  <template x-for="req in b.required_skills" :key="req.skill">
+                    <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;"
+                      :style="'background:' + (b.user_scores[req.skill]>=req.min_score?'rgba(16,185,129,.12)':'rgba(239,68,68,.1)') + ';color:' + (b.user_scores[req.skill]>=req.min_score?'#10b981':'#ef4444')">
+                      <span x-text="req.skill"></span>
+                      <span style="opacity:.7">≥</span>
+                      <span x-text="Math.round(req.min_score*100)+'%'"></span>
+                      <span x-show="b.user_scores[req.skill]" style="opacity:.6" x-text="'(you: '+Math.round((b.user_scores[req.skill]||0)*100)+'%)'"></span>
+                    </div>
+                  </template>
+                </div>
+
+                <!-- Meta row -->
+                <div style="display:flex;align-items:center;gap:14px;font-size:10px;color:#7b82a0">
+                  <span x-show="b.posted_by_username"><span x-text="b.posted_by_username"></span></span>
+                  <span x-show="b.is_ai_generated && !b.posted_by_username">👤 SkillForge AI</span>
+                  <span><span x-text="b.claim_count"></span> claims</span>
+                  <span x-show="b.top_claimant">1st <span x-text="b.top_claimant"></span></span>
+                  <span x-show="b.expires_at">Expires <span x-text="formatExpiry(b.expires_at)"></span></span>
+                </div>
+              </div>
+
+              <!-- Action buttons -->
+              <div style="display:flex;flex-direction:column;gap:7px;flex-shrink:0">
+                <button x-show="!b.user_claimed && b.status==='open'"
+                  @click="claimBounty(b)"
+                  class="btn btn-sm"
+                  :class="b.user_eligible ? 'btn-primary' : 'btn-ghost'"
+                  :disabled="!b.user_eligible">
+                  <span x-text="b.user_eligible ? 'Claim' : 'Not Eligible'"></span>
+                </button>
+                <button x-show="b.user_claimed" class="btn btn-ghost btn-sm" style="color:#10b981;border-color:#10b981" disabled>
+                  ✅ Claimed
+                </button>
+                <button @click="viewLeaderboard(b)" class="btn btn-ghost btn-sm" x-show="b.claim_count > 0">
+                  🏆 Board
+                </button>
+              </div>
+            </div>
+
+            <!-- Progress bar showing composite score -->
+            <div x-show="!b.user_claimed && Object.keys(b.user_scores).length > 0" style="margin-top:10px">
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+                <span style="font-size:10px;color:#7b82a0">Your progress</span>
+                <span style="font-size:10px;font-family:DM Mono,monospace;color:#7b82a0" x-text="Math.round(b.user_composite*100)+'%'"></span>
+              </div>
+              <div style="height:4px;background:var(--bg3);border-radius:2px;overflow:hidden">
+                <div :style="'width:'+Math.round(b.user_composite*100)+'%;background:'+(b.user_eligible?'#6366f1':'#f59e0b')+';height:100%;border-radius:2px;transition:width 1s ease'" style="width:0%"></div>
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <!-- Empty state -->
+        <div x-show="filteredBounties.length===0 && !bountiesLoading" style="text-align:center;padding:60px 0">
+          <div style="font-size:36px;margin-bottom:12px">🏆</div>
+          <div style="font-size:15px;font-weight:600;margin-bottom:6px" x-text="bountyTab==='claimed'?'No bounties claimed yet':'No bounties available'"></div>
+          <div style="font-size:12px;color:#7b82a0;margin-bottom:20px">
+            <span x-show="bountyTab!=='claimed'">Click "AI Generate" to create personalized bounties based on your skills</span>
+            <span x-show="bountyTab==='claimed'">Complete assessments and claim bounties to see them here</span>
+          </div>
+          <button x-show="bountyTab!=='claimed'" @click="generateAIBounties()" class="btn btn-primary">🤖 Generate My Bounties</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CAREER GPS VIEW -->
+    <div x-show="view==='gps'" style="display:none">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Career GPS</div>
+          <div class="page-subtitle">Real-time job market intelligence powered by GitHub + AI</div>
+        </div>
+        <div style="display:flex;gap:9px;align-items:center">
+          <div style="display:flex;align-items:center;gap:7px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:6px 12px">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7b82a0" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+            <input x-model="gpsLocation" @keydown.enter="loadGPS()" placeholder="remote, USA, London..." style="background:none;border:none;outline:none;color:var(--text);font-size:12px;width:140px">
+          </div>
+          <button class="btn btn-primary btn-sm" @click="loadGPS()" :disabled="gpsLoading">
+            <span x-show="!gpsLoading">🔍 Analyze Market</span>
+            <span x-show="gpsLoading" style="display:flex;align-items:center;gap:6px"><div class="spinner"></div> Scanning...</span>
+          </button>
+        </div>
+      </div>
+      <div x-show="gpsLoading" style="display:flex;flex-direction:column;gap:12px">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+          <template x-for="i in 4" :key="i"><div class="skeleton" style="height:90px;border-radius:12px"></div></template>
+        </div>
+        <div class="skeleton" style="height:300px;border-radius:12px"></div>
+      </div>
+      <div x-show="!gpsLoading && gpsData">
+        <div class="grid-4" style="margin-bottom:16px">
+          <div class="metric-card indigo">
+            <div class="metric-icon indigo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
+            <div class="metric-value" id="gps-jobs">0</div>
+            <div class="metric-label">Jobs You Qualify For</div>
+          </div>
+          <div class="metric-card green">
+            <div class="metric-icon green"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="metric-value" id="gps-coverage">0%</div>
+            <div class="metric-label">Market Coverage</div>
+          </div>
+          <div class="metric-card amber">
+            <div class="metric-icon amber"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+            <div class="metric-value" id="gps-salary">—</div>
+            <div class="metric-label">Est. Salary Range</div>
+          </div>
+          <div class="metric-card" style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px 18px">
+            <div class="metric-icon" style="background:rgba(6,182,212,.15);color:#06b6d4"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+            <div class="metric-value" id="gps-level" style="font-size:18px">—</div>
+            <div class="metric-label">Market Level</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:4px;margin-bottom:16px;background:var(--bg2);padding:4px;border-radius:10px;width:fit-content">
+          <button @click="gpsTab='overview'" :style="gpsTab==='overview'?'background:var(--bg3);color:var(--text)':'color:var(--muted)'" style="padding:6px 14px;border:none;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s">📊 Overview</button>
+          <button @click="gpsTab='jobs'; loadJobs()" :style="gpsTab==='jobs'?'background:var(--bg3);color:var(--text)':'color:var(--muted)'" style="padding:6px 14px;border:none;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s">💼 Live Jobs</button>
+          <button @click="gpsTab='gaps'; loadGaps()" :style="gpsTab==='gaps'?'background:var(--bg3);color:var(--text)':'color:var(--muted)'" style="padding:6px 14px;border:none;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s">🎯 Skill Gaps</button>
+          <button @click="gpsTab='salary'; loadSalary()" :style="gpsTab==='salary'?'background:var(--bg3);color:var(--text)':'color:var(--muted)'" style="padding:6px 14px;border:none;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s">💰 Salary</button>
+        </div>
+        <div x-show="gpsTab==='overview'">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <div class="card">
+              <div class="card-header"><div class="card-title">Skill Demand Map</div><span style="font-size:10px;color:#7b82a0">Bubble size = market demand</span></div>
+              <div style="position:relative;height:240px"><canvas id="gps-bubble-chart"></canvas></div>
+            </div>
+            <div class="card">
+              <div class="card-header"><div class="card-title">Jobs By Location</div></div>
+              <div style="display:flex;flex-direction:column;gap:9px" id="gps-location-list"></div>
+            </div>
+            <div class="card" style="grid-column:1/-1">
+              <div class="card-header"><div class="card-title">🔥 Hot Skills You Don't Have Yet</div></div>
+              <div style="display:flex;flex-wrap:wrap;gap:9px" id="gps-missing-skills"></div>
+            </div>
+          </div>
+        </div>
+        <div x-show="gpsTab==='jobs'">
+          <div x-show="!gpsJobs" style="text-align:center;padding:40px"><div class="spinner" style="margin:0 auto 12px"></div><div style="font-size:12px;color:#7b82a0">Scanning job market...</div></div>
+          <div x-show="gpsJobs" style="display:flex;flex-direction:column;gap:10px">
+            <template x-for="job in (gpsJobs?.jobs||[])" :key="job.title+job.company">
+              <div class="card" style="border-left:3px solid" :style="'border-left-color:'+(job.match_score>=80?'#10b981':job.match_score>=60?'#f59e0b':'#6366f1')">
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+                  <div style="flex:1">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap">
+                      <span style="font-size:13px;font-weight:600" x-text="job.title"></span>
+                      <span style="font-size:10px;padding:2px 7px;border-radius:8px;font-weight:600" :style="'background:'+(job.match_score>=80?'rgba(16,185,129,.15)':'rgba(245,158,11,.15)')+';color:'+(job.match_score>=80?'#10b981':'#f59e0b')" x-text="job.match_score+'% match'"></span>
+                      <span style="font-size:10px;background:var(--bg3);padding:2px 7px;border-radius:8px;color:#7b82a0" x-text="job.source"></span>
+                    </div>
+                    <div style="font-size:12px;color:#7b82a0;margin-bottom:6px"><span x-text="job.company"></span> - <span x-text="job.location"></span> - <span x-text="job.posted_days_ago+'d ago'"></span></div>
+                    <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:5px">
+                      <template x-for="skill in job.required_skills" :key="skill"><span style="font-size:10px;padding:2px 8px;background:var(--bg3);border-radius:6px" x-text="skill"></span></template>
+                    </div>
+                    <div style="font-size:11px;color:#7b82a0;font-style:italic" x-text="'matched: ' + job.match_reason"></div>
+                  </div>
+                  <div style="text-align:right;flex-shrink:0">
+                    <div style="font-size:13px;font-weight:600;color:#10b981;margin-bottom:4px" x-text="job.salary_range"></div>
+                    <div style="font-size:10px;color:#7b82a0;text-transform:capitalize" x-text="job.company_type"></div>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+        <div x-show="gpsTab==='gaps'">
+          <div x-show="!gpsGaps" style="text-align:center;padding:40px"><div class="spinner" style="margin:0 auto 12px"></div><div style="font-size:12px;color:#7b82a0">Analyzing skill gaps...</div></div>
+          <div x-show="gpsGaps">
+            <div x-show="gpsGaps?.career_advice" style="background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.2);border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:12px;color:#a78bfa" x-text="gpsGaps?.career_advice"></div>
+            <div x-show="gpsGaps?.quick_wins?.length" style="margin-bottom:14px">
+              <div style="font-size:11px;font-weight:600;color:#7b82a0;margin-bottom:8px">⚡ QUICK WINS</div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px">
+                <template x-for="skill in gpsGaps?.quick_wins||[]" :key="skill">
+                  <div @click="go('assessment')" style="padding:6px 14px;background:rgba(16,185,129,.12);color:#10b981;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer" x-text="skill + ' ->'"></div>
+                </template>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <template x-for="gap in gpsGaps?.gaps||[]" :key="gap.skill">
+                <div class="card" :style="'border-left:3px solid '+(gap.priority==='high'?'#6366f1':'#f59e0b')">
+                  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px">
+                    <div><div style="font-size:13px;font-weight:600;margin-bottom:3px" x-text="gap.skill"></div><div style="font-size:11px;color:#7b82a0" x-text="gap.why"></div></div>
+                    <div style="text-align:right"><div style="font-size:16px;font-weight:700;color:#10b981" x-text="'+' + gap.jobs_unlocked?.toLocaleString() + ' jobs'"></div><div style="font-size:10px;color:#7b82a0" x-text="gap.effort_weeks + ' weeks'"></div></div>
+                  </div>
+                  <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px">
+                    <template x-for="r in gap.learning_path||[]" :key="r"><span style="font-size:10px;padding:3px 9px;background:var(--bg3);border-radius:6px;color:#7b82a0" x-text="r"></span></template>
+                  </div>
+                  <button @click="go('assessment')" class="btn btn-ghost btn-sm" style="width:100%">Improve Now →</button>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+        <div x-show="gpsTab==='salary'">
+          <div x-show="!gpsSalary" style="text-align:center;padding:40px"><div class="spinner" style="margin:0 auto 12px"></div><div style="font-size:12px;color:#7b82a0">Calculating salary range...</div></div>
+          <div x-show="gpsSalary" style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <div class="card" style="grid-column:1/-1;background:linear-gradient(135deg,rgba(99,102,241,.08),rgba(139,92,246,.05));border-color:rgba(99,102,241,.2)">
+              <div style="text-align:center;padding:20px 0">
+                <div style="font-size:12px;color:#7b82a0;margin-bottom:8px">Your estimated market salary</div>
+                <div style="font-family:Syne,sans-serif;font-size:40px;font-weight:700;letter-spacing:-2px" x-text="gpsSalary?.formatted||'--'"></div
+                <div style="font-size:13px;color:#7b82a0;margin-top:6px"><span style="color:#a78bfa;font-weight:600" x-text="gpsSalary?.level"></span> - <span x-text="gpsLocation"></span></div>
+                <div style="max-width:400px;margin:20px auto 0">
+                  <div style="display:flex;justify-content:space-between;font-size:10px;color:#7b82a0;margin-bottom:6px"><span>Entry $50k</span><span>Mid $100k</span><span>Senior $180k</span><span>Staff $250k+</span></div>
+                  <div style="height:8px;background:var(--bg3);border-radius:4px;overflow:hidden;position:relative">
+                    <div style="position:absolute;height:100%;background:linear-gradient(90deg,#6366f1,#8b5cf6);border-radius:4px" :style="'width:'+(gpsSalary?.salary_max||0)/2500+'%'"></div>
+                  </div>
+                  <div style="font-size:10px;color:#6366f1;text-align:center;margin-top:6px" x-text="'Top '+(100-(gpsSalary?.percentile||50))+'% of developers'"></div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><div class="card-title">💡 Boost Your Salary</div></div>
+              <div style="display:flex;flex-direction:column;gap:9px">
+                <template x-for="tip in gpsSalary?.improvement_tips||[]" :key="tip.skill">
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 11px;background:var(--bg3);border-radius:8px">
+                    <div><div style="font-size:12px;font-weight:500" x-text="tip.skill"></div><div style="font-size:10px;color:#7b82a0" x-text="'Improve '+tip.current+'% -> '+tip.target+'%'"></div></div>
+                    <div style="font-size:14px;font-weight:700;color:#10b981" x-text="tip.salary_boost"></div>
+                  </div>
+                </template>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><div class="card-title">📊 Score Summary</div></div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="display:flex;justify-content:space-between"><span style="font-size:11px;color:#7b82a0">Avg Skill Score</span><span style="font-family:DM Mono,monospace;font-size:12px" x-text="(gpsSalary?.avg_skill_score||0)+'%'"></span></div>
+                <div style="display:flex;justify-content:space-between"><span style="font-size:11px;color:#7b82a0">Market Level</span><span style="font-size:12px;font-weight:600;color:#a78bfa" x-text="gpsSalary?.level"></span></div>
+                <div style="display:flex;justify-content:space-between"><span style="font-size:11px;color:#7b82a0">Salary Floor</span><span style="font-family:DM Mono,monospace;font-size:12px;color:#10b981" x-text="(gpsSalary?.currency||'$')+Math.round((gpsSalary?.salary_min||0)/1000)+'k'"></span></div>
+                <div style="display:flex;justify-content:space-between"><span style="font-size:11px;color:#7b82a0">Salary Ceiling</span><span style="font-family:DM Mono,monospace;font-size:12px;color:#10b981" x-text="(gpsSalary?.currency||'$')+Math.round((gpsSalary?.salary_max||0)/1000)+'k'"></span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div x-show="!gpsLoading && !gpsData" style="text-align:center;padding:80px 0">
+        <div style="font-size:48px;margin-bottom:16px">🗺️</div>
+        <div style="font-size:18px;font-weight:600;margin-bottom:8px">Your Career GPS is ready</div>
+        <div style="font-size:13px;color:#7b82a0;margin-bottom:24px;max-width:400px;margin-left:auto;margin-right:auto">Enter a location and click Analyze Market to see real-time job intelligence based on your skill matrix</div>
+        <button @click="loadGPS()" class="btn btn-primary" style="font-size:14px;padding:12px 28px">🔍 Analyze My Market</button>
+      </div>
+
+    <!-- GHOST INTERVIEW VIEW -->
+    <div x-show="view==='ghost'" style="display:none">
+
+      <!-- SETUP TAB -->
+      <div x-show="ghostTab==='setup'">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Ghost Interview</div>
+            <div class="page-subtitle">Practice with an AI interviewer — get a real hiring recommendation</div>
+          </div>
+          <button x-show="ghostHistory.length" @click="ghostTab='history'" class="btn btn-ghost btn-sm">📋 Past Interviews</button>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <!-- Setup form -->
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div class="card">
+              <div class="card-header"><div class="card-title">👤 Interviewer Persona</div></div>
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <div>
+                  <label class="form-label">Interviewer Name</label>
+                  <input class="input" x-model="ghostSetup.persona_name" placeholder="e.g. Sarah Chen, Alex Kumar">
+                </div>
+                <div>
+                  <label class="form-label">Their Role</label>
+                  <input class="input" x-model="ghostSetup.persona_role" placeholder="e.g. Senior SWE at Google, CTO at Stripe">
+                </div>
+                <div>
+                  <label class="form-label">Interview Style</label>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">
+                    <template x-for="style in [{v:'professional',l:'🤝 Professional',d:'Balanced and thorough'},{v:'tough',l:'⚡ Tough',d:'Direct and challenging'},{v:'friendly',l:'😊 Friendly',d:'Warm but rigorous'},{v:'skeptical',l:'🔍 Skeptical',d:'Pushes for proof'}]" :key="style.v">
+                      <div @click="ghostSetup.persona_style=style.v" style="padding:9px 12px;border-radius:8px;cursor:pointer;border:1px solid;transition:all .15s"
+                        :style="ghostSetup.persona_style===style.v?'border-color:#6366f1;background:rgba(99,102,241,.1)':'border-color:var(--border);background:var(--bg3)'">
+                        <div style="font-size:12px;font-weight:600" x-text="style.l"></div>
+                        <div style="font-size:10px;color:#7b82a0;margin-top:2px" x-text="style.d"></div>
+                      </div>
+                    </template>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header"><div class="card-title">🎯 Interview Settings</div></div>
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <div>
+                  <label class="form-label">Role You're Applying For</label>
+                  <input class="input" x-model="ghostSetup.target_role" placeholder="e.g. Senior Backend Engineer, Staff SWE">
+                </div>
+                <div>
+                  <label class="form-label">Interview Type</label>
+                  <div style="display:flex;gap:7px">
+                    <template x-for="type in [{v:'technical',l:'⚙️ Technical'},{v:'behavioral',l:'🧠 Behavioral'},{v:'mixed',l:'🔀 Mixed'}]" :key="type.v">
+                      <div @click="ghostSetup.interview_type=type.v" style="flex:1;padding:8px;border-radius:8px;cursor:pointer;border:1px solid;text-align:center;transition:all .15s"
+                        :style="ghostSetup.interview_type===type.v?'border-color:#6366f1;background:rgba(99,102,241,.1)':'border-color:var(--border);background:var(--bg3)'">
+                        <div style="font-size:11px;font-weight:600" x-text="type.l"></div>
+                      </div>
+                    </template>
+                  </div>
+                </div>
+                <div>
+                  <label class="form-label">Number of Questions: <span style="color:#6366f1;font-weight:600" x-text="ghostSetup.num_questions"></span></label>
+                  <input type="range" min="3" max="15" x-model="ghostSetup.num_questions" style="width:100%;accent-color:#6366f1">
+                  <div style="display:flex;justify-content:space-between;font-size:10px;color:#7b82a0;margin-top:2px">
+                    <span>3 (~10 min)</span><span>8 (~25 min)</span><span>15 (~45 min)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button @click="startGhostInterview()" class="btn btn-primary"
+              :disabled="!ghostSetup.persona_name||!ghostSetup.persona_role||!ghostSetup.target_role"
+              style="width:100%;padding:14px;font-size:14px">
+              👻 Start Ghost Interview
+            </button>
+          </div>
+
+          <!-- Preview + tips -->
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <!-- Live preview -->
+            <div class="card" style="background:linear-gradient(135deg,rgba(139,92,246,.06),rgba(99,102,241,.04));border-color:rgba(139,92,246,.2)">
+              <div class="card-header"><div class="card-title">👻 Interview Preview</div></div>
+              <div x-show="ghostSetup.persona_name && ghostSetup.target_role">
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+                  <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#8b5cf6,#6366f1);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff" x-text="ghostSetup.persona_name[0]||'?'"></div>
+                  <div>
+                    <div style="font-size:13px;font-weight:600" x-text="ghostSetup.persona_name||'Your Interviewer'"></div>
+                    <div style="font-size:11px;color:#7b82a0" x-text="ghostSetup.persona_role||'Role'"></div>
+                  </div>
+                </div>
+                <div style="background:var(--bg3);border-radius:10px;padding:12px;font-size:12px;color:#e2e6f3;line-height:1.6;font-style:italic">
+                  "Hi, I'm <span x-text="ghostSetup.persona_name"></span>. I'll be interviewing you today for the <span x-text="ghostSetup.target_role||'position'"></span> role. We'll have <span x-text="ghostSetup.num_questions"></span> questions -- <span x-text="ghostSetup.interview_type==='mixed'?'a mix of technical and behavioral':ghostSetup.interview_type"></span>. Ready?"
+                </div>
+              </div>
+              <div x-show="!ghostSetup.persona_name || !ghostSetup.target_role" style="text-align:center;padding:20px;color:#7b82a0;font-size:12px">
+                Fill in the details to see a preview
+              </div>
+            </div>
+
+            <!-- Tips -->
+            <div class="card">
+              <div class="card-header"><div class="card-title">💡 Pro Tips</div></div>
+              <div style="display:flex;flex-direction:column;gap:9px">
+                <div style="display:flex;gap:9px"><span style="font-size:14px">🎯</span><div style="font-size:11px;color:#e2e6f3">Be specific in your answers — use real examples and numbers</div></div>
+                <div style="display:flex;gap:9px"><span style="font-size:14px">⏱️</span><div style="font-size:11px;color:#e2e6f3">Aim for 3-5 sentence answers — not too brief, not too long</div></div>
+                <div style="display:flex;gap:9px"><span style="font-size:14px">🧠</span><div style="font-size:11px;color:#e2e6f3">For technical questions, explain your reasoning out loud</div></div>
+                <div style="display:flex;gap:9px"><span style="font-size:14px">❓</span><div style="font-size:11px;color:#e2e6f3">It's ok to ask clarifying questions — real interviewers expect it</div></div>
+                <div style="display:flex;gap:9px"><span style="font-size:14px">🏆</span><div style="font-size:11px;color:#e2e6f3">You'll get a real hiring recommendation at the end</div></div>
+              </div>
+            </div>
+
+            <!-- Past interviews -->
+            <div class="card" x-show="ghostHistory.length">
+              <div class="card-header"><div class="card-title">Recent Interviews</div></div>
+              <div style="display:flex;flex-direction:column;gap:7px">
+                <template x-for="h in ghostHistory.slice(0,3)" :key="h.id">
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--bg3);border-radius:8px">
+                    <div>
+                      <div style="font-size:11px;font-weight:500" x-text="h.target_role"></div>
+                      <div style="font-size:10px;color:#7b82a0" x-text="'with ' + h.persona_name"></div>
+                    </div>
+                    <span x-show="h.verdict" style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px"
+                      :style="h.verdict==='Strong Hire'||h.verdict==='Hire'?'background:rgba(16,185,129,.15);color:#10b981':'background:rgba(239,68,68,.15);color:#ef4444'"
+                      x-text="h.verdict"></span>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- INTERVIEW TAB -->
+      <div x-show="ghostTab==='interview'" style="display:grid;grid-template-columns:1fr 280px;gap:14px;align-items:start">
+
+        <!-- Chat window -->
+        <div>
+          <div class="card" style="margin-bottom:12px">
+            <!-- Interviewer header -->
+            <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:12px;border-bottom:1px solid var(--border);margin-bottom:12px">
+              <div style="display:flex;align-items:center;gap:10px">
+                <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#8b5cf6,#6366f1);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fff" x-text="ghostSession?.persona_name?.[0]||'?'"></div>
+                <div>
+                  <div style="font-size:13px;font-weight:600" x-text="ghostSession?.persona_name"></div>
+                  <div style="font-size:10px;color:#7b82a0" x-text="ghostSession?.persona_role"></div>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px">
+                <div style="font-size:11px;color:#7b82a0">Q <span x-text="ghostSession?.questions_asked||0"></span>/<span x-text="ghostSession?.num_questions||8"></span></div>
+                <div style="width:80px;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden">
+                  <div style="height:100%;background:#6366f1;border-radius:2px;transition:width .5s" :style="'width:'+(((ghostSession?.questions_asked||0)/(ghostSession?.num_questions||8))*100)+'%'"></div>
+                </div>
+                <button @click="endInterview()" class="btn btn-ghost btn-sm" style="font-size:10px;color:#ef4444;border-color:#ef4444">End</button>
+              </div>
+            </div>
+
+            <!-- Messages -->
+            <div id="ghost-messages" style="height:420px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;padding-right:4px">
+              <template x-for="(msg, idx) in ghostMessages" :key="idx">
+                <div :style="msg.role==='interviewer'?'align-self:flex-start;max-width:85%':'align-self:flex-end;max-width:85%'">
+                  <div style="display:flex;align-items:flex-start;gap:8px" :style="msg.role==='candidate'?'flex-direction:row-reverse':''">
+                    <!-- Avatar -->
+                    <div style="width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600"
+                      :style="msg.role==='interviewer'?'background:linear-gradient(135deg,#8b5cf6,#6366f1);color:#fff':'background:linear-gradient(135deg,#10b981,#06b6d4);color:#fff'"
+                      x-text="msg.role==='interviewer'?(ghostSession?.persona_name?.[0]||'I'):'Me'"></div>
+                    <!-- Bubble -->
+                    <div style="padding:10px 13px;border-radius:12px;font-size:12.5px;line-height:1.6"
+                      :style="msg.role==='interviewer'?'background:var(--bg3);border-radius:4px 12px 12px 12px':'background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.2);border-radius:12px 4px 12px 12px'"
+                      x-text="msg.content"></div>
+                  </div>
+                </div>
+              </template>
+              <!-- Typing indicator -->
+              <div x-show="ghostSending" style="align-self:flex-start">
+                <div style="display:flex;align-items:center;gap:8px">
+                  <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#8b5cf6,#6366f1);flex-shrink:0"></div>
+                  <div style="background:var(--bg3);padding:10px 16px;border-radius:4px 12px 12px 12px">
+                    <div style="display:flex;gap:4px;align-items:center">
+                      <div style="width:6px;height:6px;border-radius:50%;background:#7b82a0;animation:pulse 1s infinite"></div>
+                      <div style="width:6px;height:6px;border-radius:50%;background:#7b82a0;animation:pulse 1s .2s infinite"></div>
+                      <div style="width:6px;height:6px;border-radius:50%;background:#7b82a0;animation:pulse 1s .4s infinite"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Input area -->
+            <div style="border-top:1px solid var(--border);margin-top:12px;padding-top:12px">
+              <textarea class="textarea" x-model="ghostAnswer"
+                @keydown.ctrl.enter="sendGhostAnswer()"
+                :disabled="ghostSending || ghostSession?.status==='completed'"
+                placeholder="Type your answer... (Ctrl+Enter to send)"
+                rows="3" style="margin-bottom:8px;resize:none"></textarea>
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <span style="font-size:10px;color:#7b82a0">Ctrl+Enter to send</span>
+                <button @click="sendGhostAnswer()" class="btn btn-primary btn-sm"
+                  :disabled="!ghostAnswer.trim()||ghostSending||ghostSession?.status==='completed'">
+                  <span x-show="!ghostSending">Send →</span>
+                  <span x-show="ghostSending" style="display:flex;align-items:center;gap:5px"><div class="spinner"></div>Thinking...</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right panel -->
+        <div style="display:flex;flex-direction:column;gap:12px;position:sticky;top:20px">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Interview Info</div></div>
+            <div style="display:flex;flex-direction:column;gap:8px;font-size:11px">
+              <div style="display:flex;justify-content:space-between"><span style="color:#7b82a0">Role</span><span style="font-weight:500" x-text="ghostSession?.target_role"></span></div>
+              <div style="display:flex;justify-content:space-between"><span style="color:#7b82a0">Type</span><span style="text-transform:capitalize" x-text="ghostSession?.interview_type"></span></div>
+              <div style="display:flex;justify-content:space-between"><span style="color:#7b82a0">Progress</span><span x-text="(ghostSession?.questions_asked||0)+' / '+(ghostSession?.num_questions||8)+' questions'"></span></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">💡 Quick Tips</div></div>
+            <div style="font-size:11px;color:#7b82a0;line-height:1.7">
+              • Use the STAR method for behavioral<br>
+              • Show your thinking process<br>
+              • Be specific with examples<br>
+              • Ask if unclear
+            </div>
+          </div>
+          <button x-show="ghostSession?.status==='completed'" @click="loadGhostDebrief()" class="btn btn-primary" style="width:100%">
+            📊 See My Results →
+          </button>
+        </div>
+      </div>
+
+      <!-- DEBRIEF TAB -->
+      <div x-show="ghostTab==='debrief'">
+        <div x-show="ghostDebriefLoading" style="text-align:center;padding:60px">
+          <div class="spinner" style="margin:0 auto 16px;width:28px;height:28px;border-width:3px"></div>
+          <div style="font-size:13px;color:#7b82a0">Generating your hiring recommendation...</div>
+        </div>
+
+        <div x-show="!ghostDebriefLoading && ghostDebrief">
+          <!-- Verdict banner -->
+          <div style="text-align:center;padding:32px;margin-bottom:20px;border-radius:16px;border:1px solid"
+            style="background:rgba(99,102,241,.06);border-color:rgba(99,102,241,.2)">
+            <div style="font-size:48px;margin-bottom:12px"
+              x-text="ghostDebrief?.verdict"></div>
+            <div style="font-family:Syne,sans-serif;font-size:32px;font-weight:700;letter-spacing:-1px;margin-bottom:8px"
+              style="color:#a78bfa"
+              x-text="ghostDebrief?.verdict"></div>
+            <div style="font-size:13px;color:#7b82a0;margin-bottom:6px">
+              from <span style="color:#a78bfa;font-weight:600" x-text="ghostDebrief?.persona_name"></span> - <span x-text="ghostDebrief?.persona_role
+            </div>
+            <div style="font-size:14px;color:#e2e6f3;max-width:600px;margin:0 auto;line-height:1.7" x-text="ghostDebrief?.summary"></div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+            <!-- Score -->
+            <div class="card" style="text-align:center">
+              <div class="card-title" style="margin-bottom:12px">Overall Score</div>
+              <div style="font-family:Syne,sans-serif;font-size:52px;font-weight:700;letter-spacing:-2px"
+                style="color:#10b981"
+                x-text="(ghostDebrief?.overall_score||0)+'/10'"></div>
+              <div style="font-size:11px;color:#7b82a0;margin-top:4px" x-text="(ghostDebrief?.questions_asked||0)+' q '+( ghostDebrief?.duration_minutes||0)+' min'"></div>
+            </div>
+
+            <!-- Standout moment -->
+            <div class="card">
+              <div class="card-title" style="margin-bottom:8px">⭐ Standout Moment</div>
+              <div style="font-size:12px;color:#e2e6f3;line-height:1.6;font-style:italic" x-text="ghostDebrief?.standout_moment"></div>
+            </div>
+          </div>
+
+          <!-- Strengths + Weaknesses -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+            <div class="card">
+              <div class="card-title" style="margin-bottom:10px">💪 Strengths</div>
+              <div style="display:flex;flex-direction:column;gap:7px">
+                <template x-for="s in ghostDebrief?.strengths||[]" :key="s">
+                  <div style="display:flex;align-items:flex-start;gap:8px;font-size:12px">
+                    <span style="color:#10b981;flex-shrink:0">✓</span><span x-text="s"></span>
+                  </div>
+                </template>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title" style="margin-bottom:10px">📈 Areas to Improve</div>
+              <div style="display:flex;flex-direction:column;gap:7px">
+                <template x-for="w in ghostDebrief?.improvement_areas||[]" :key="w">
+                  <div style="display:flex;align-items:flex-start;gap:8px;font-size:12px">
+                    <span style="color:#f59e0b;flex-shrink:0">-></span><span x-text="w"></span>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hiring recommendation -->
+          <div class="card" style="margin-bottom:14px">
+            <div class="card-title" style="margin-bottom:10px">📋 Full Recommendation</div>
+            <div style="font-size:12.5px;color:#e2e6f3;line-height:1.8" x-text="ghostDebrief?.hiring_recommendation"></div>
+          </div>
+
+          <!-- Actions -->
+          <div style="display:flex;gap:10px">
+            <button @click="ghostTab='setup'; ghostSession=null; ghostMessages=[];" class="btn btn-primary" style="flex:1;padding:12px">
+              🔄 Try Again
+            </button>
+            <button @click="ghostTab='history'" class="btn btn-ghost" style="flex:1;padding:12px">
+              📋 All Interviews
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- HISTORY TAB -->
+      <div x-show="ghostTab==='history'">
+        <div class="page-header">
+          <div><div class="page-title">Interview History</div></div>
+          <button @click="ghostTab='setup'" class="btn btn-primary btn-sm">+ New Interview</button>
+        </div>
+        <div x-show="!ghostHistory.length" style="text-align:center;padding:60px;color:#7b82a0">
+          <div style="font-size:36px;margin-bottom:12px">👻</div>
+          <div>No interviews yet — start your first one!</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <template x-for="h in ghostHistory" :key="h.id">
+            <div class="card" style="border-left:3px solid"
+              :style="'border-left-color:'+(h.verdict==='Strong Hire'||h.verdict==='Hire'?'#10b981':h.verdict?'#ef4444':'#6366f1')">
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <div>
+                  <div style="font-size:13px;font-weight:600;margin-bottom:3px" x-text="h.target_role"></div>
+                  <div style="font-size:11px;color:#7b82a0" x-text="'by '+h.persona_name+' - '+new Date(h.started_at).toLocaleDateString()
+                </div>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span x-show="h.verdict" style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:10px"
+                    :style="h.verdict==='Strong Hire'||h.verdict==='Hire'?'background:rgba(16,185,129,.15);color:#10b981':'background:rgba(239,68,68,.15);color:#ef4444'"
+                    x-text="h.verdict"></span>
+                  <span x-show="h.status==='active'" style="font-size:11px;color:#f59e0b">In Progress</span>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+</div>
+
+<!-- Create Bounty Modal -->
+<div class="modal-backdrop" x-show="showCreateBounty" @click.self="showCreateBounty=false" style="display:none">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-title">Post a Skill Bounty</div>
+    <div style="font-size:12px;color:#7b82a0;margin-bottom:18px">Challenge the community to prove their skills</div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div>
+        <label class="form-label">Title</label>
+        <input class="input" x-model="newBounty.title" placeholder="e.g. Python Backend Developer Challenge">
+      </div>
+      <div>
+        <label class="form-label">Description (optional)</label>
+        <textarea class="textarea" x-model="newBounty.description" rows="2" placeholder="What's this bounty about?"></textarea>
+      </div>
+      <div>
+        <label class="form-label">Reward Label</label>
+        <input class="input" x-model="newBounty.reward_label" placeholder="e.g. Interview Fast-Track, Senior Badge">
+      </div>
+      <div>
+        <label class="form-label">Required Skills</label>
+        <template x-for="(req, idx) in newBounty.required_skills" :key="idx">
+          <div style="display:flex;gap:8px;margin-bottom:7px;align-items:center">
+            <input class="input" x-model="req.skill" placeholder="Skill name" style="flex:2">
+            <div style="flex:1;display:flex;align-items:center;gap:6px">
+              <input type="range" min="0.3" max="1.0" step="0.05" x-model="req.min_score" style="flex:1">
+              <span style="font-family:DM Mono,monospace;font-size:11px;width:32px" x-text="Math.round(req.min_score*100)+'%'"></span>
+            </div>
+            <button x-show="newBounty.required_skills.length>1" @click="newBounty.required_skills.splice(idx,1)" style="color:#ef4444;background:none;border:none;cursor:pointer;font-size:16px">×</button>
+          </div>
+        </template>
+        <button x-show="newBounty.required_skills.length<5" @click="newBounty.required_skills.push({skill:'',min_score:0.7})" class="btn btn-ghost btn-sm" style="width:100%;margin-top:4px">+ Add Skill</button>
+      </div>
+      <div>
+        <label class="form-label">Expires in (days)</label>
+        <input class="input" type="number" x-model="newBounty.expires_days" min="1" max="90" style="width:100px">
+      </div>
+    </div>
+
+    <div style="display:flex;gap:9px;margin-top:18px;justify-content:flex-end">
+      <button class="btn btn-ghost" @click="showCreateBounty=false">Cancel</button>
+      <button class="btn btn-primary" @click="submitBounty()">Post Bounty 🏆</button>
+    </div>
+  </div>
+</div>
+
+<!-- Leaderboard Modal -->
+<div class="modal-backdrop" x-show="showLeaderboard" @click.self="showLeaderboard=false" style="display:none">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-title">🏆 Leaderboard</div>
+    <div style="font-size:12px;color:#7b82a0;margin-bottom:14px" x-text="activeBountyTitle"></div>
+    <div x-show="leaderboardLoading" style="text-align:center;padding:20px"><div class="spinner" style="margin:0 auto"></div></div>
+    <div x-show="!leaderboardLoading" style="display:flex;flex-direction:column;gap:7px">
+      <template x-for="(entry, idx) in leaderboard" :key="entry.username">
+        <div style="display:flex;align-items:center;gap:12px;padding:9px 12px;background:var(--bg3);border-radius:9px">
+          <span style="font-size:18px" x-text="idx===0?'1st':idx===1?'2nd':idx===2?'3rd':'#'+(idx+1)"></span>
+          <div style="flex:1">
+            <div style="font-size:12px;font-weight:600" x-text="entry.username"></div>
+            <div style="font-size:10px;color:#7b82a0" x-text="new Date(entry.claimed_at).toLocaleDateString()"></div>
+          </div>
+          <span style="font-family:DM Mono,monospace;font-size:12px;color:#10b981" x-text="Math.round(entry.score*100)+'%'"></span>
+        </div>
+      </template>
+      <div x-show="leaderboard.length===0" style="text-align:center;padding:20px;color:#7b82a0;font-size:12px">No claims yet — be the first!</div>
+    </div>
+    <button class="btn btn-ghost" @click="showLeaderboard=false" style="width:100%;margin-top:14px">Close</button>
+  </div>
+</div>
+<div class="modal-backdrop" x-show="showCreateRoom" @click.self="showCreateRoom=false" style="display:none">
+  <div class="modal">
+    <div class="modal-title">Create a room</div>
+    <div style="font-size:12.5px;color:var(--muted);margin-bottom:18px">Share the room code with your team</div>
+    <div class="form-group"><label class="form-label">Room name</label><input class="input" placeholder="e.g. Frontend Team Q2" x-model="newRoomName"></div>
+    <div style="display:flex;gap:7px;margin-top:5px">
+      <button class="btn btn-primary" @click="createRoom()" :disabled="roomLoading">
+        <span x-show="!roomLoading">Create room</span><span x-show="roomLoading" class="spinner"></span>
+      </button>
+      <button class="btn btn-ghost" @click="showCreateRoom=false">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Join room modal -->
+<div class="modal-backdrop" x-show="showJoinRoom" @click.self="showJoinRoom=false" style="display:none">
+  <div class="modal">
+    <div class="modal-title">Join a room</div>
+    <div style="font-size:12.5px;color:var(--muted);margin-bottom:18px">Enter the 6-character room code</div>
+    <div class="form-group"><label class="form-label">Room code</label><input class="input" :class="{error:errors.roomCode}" placeholder="ABC123" x-model="joinCode" style="font-family:'DM Mono',monospace;letter-spacing:4px;text-transform:uppercase" @input="errors.roomCode=''"></div>
+    <div class="field-error" x-show="errors.roomCode" x-text="errors.roomCode"></div>
+    <div style="display:flex;gap:7px;margin-top:5px">
+      <button class="btn btn-primary" @click="joinRoom()" :disabled="roomLoading">
+        <span x-show="!roomLoading">Join</span><span x-show="roomLoading" class="spinner"></span>
+      </button>
+      <button class="btn btn-ghost" @click="showJoinRoom=false">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════
+// API CLIENT — all calls go through here
+// ════════════════════════════════════════════════════════════
+const API = '/api';
+
+async function api(path, opts = {}) {
+  const token = localStorage.getItem('sf_token');
+  const res = await fetch(API + path, {
+    ...opts,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(opts.headers || {}),
+    },
+  });
+
+  if (res.status === 401) {
+    // Try token refresh
+    const refreshed = await tryRefresh();
+    if (refreshed) return api(path, opts);       // retry once
+    window._alpine && Alpine.store && Alpine.store('app')?.doLogout?.();
+    return null;
+  }
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => 'Request failed');
+    let detail = text;
+    try { detail = JSON.parse(text)?.detail || text; } catch {}
+    throw Object.assign(new Error(detail), { status: res.status, detail });
+  }
+
+  const ct = res.headers.get('content-type') || '';
+  if (ct.includes('application/json')) return res.json();
+  return null;
+}
+
+async function tryRefresh() {
+  try {
+    const data = await fetch(API + '/auth/refresh', { method: 'POST', credentials: 'include' })
+      .then(r => r.ok ? r.json() : null);
+    if (data?.access_token) {
+      localStorage.setItem('sf_token', data.access_token);
+      return true;
+    }
+  } catch {}
+  return false;
+}
+
+// ════════════════════════════════════════════════════════════
+// TOAST
+// ════════════════════════════════════════════════════════════
+function toast(msg, type = 'info') {
+  const colors = { success:'#10b981', error:'#ef4444', info:'#6366f1', warning:'#f59e0b' };
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.style.borderLeft = `3px solid ${colors[type]||colors.info}`;
+  el.textContent = msg;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(() => { el.style.animation = 'fadeOut .25s ease forwards'; setTimeout(() => el.remove(), 260); }, 3400);
+}
+
+// ════════════════════════════════════════════════════════════
+// ANIMATIONS
+// ════════════════════════════════════════════════════════════
+function countUp(el, target, dur = 1200, suffix = '') {
+  if (!el || window.matchMedia('(prefers-reduced-motion:reduce)').matches) { if(el) el.textContent = target+suffix; return; }
+  const start = performance.now(), init = parseInt(el.textContent) || 0;
+  const step = now => {
+    const p = Math.min((now - start) / dur, 1), e = 1 - (1-p)**3;
+    el.textContent = Math.round(init + (target - init) * e) + suffix;
+    if (p < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+function animateSkillBars() {
+  if (window.matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+  document.querySelectorAll('.skill-bar').forEach((bar, i) => {
+    const t = parseInt(bar.dataset.target) || 0;
+    bar.style.width = '0%';
+    setTimeout(() => {
+      bar.style.width = t + '%';
+      const lbl = bar.closest('.skill-row')?.querySelector('.skill-pct');
+      if (lbl) countUp(lbl, t, 900, '%');
+    }, i * 100);
+  });
+}
+
+function typewriter(el, text, speed = 16) {
+  if (!el) return;
+  el.textContent = '';
+  let i = 0;
+  const t = () => { if (i < text.length) { el.textContent += text[i++]; setTimeout(t, speed); } };
+  t();
+}
+
+function showGradeFeedback(grade, feedback) {
+  const ring = document.getElementById('grade-ring');
+  const gText = document.getElementById('grade-text');
+  const gLabel = document.getElementById('grade-label');
+  const fText = document.getElementById('feedback-txt');
+  if (!ring) return;
+  const pct = Math.round(grade * 100);
+  const c = pct >= 70 ? '#10b981' : pct >= 40 ? '#f59e0b' : '#ef4444';
+  const lbl = pct >= 80 ? 'Excellent!' : pct >= 60 ? 'Good answer' : pct >= 40 ? 'Partial answer' : 'Needs improvement';
+  const circ = 2 * Math.PI * 20;
+  ring.style.stroke = c; ring.style.strokeDasharray = circ; ring.style.strokeDashoffset = circ;
+  if (gText) { gText.style.fill = c; gText.textContent = '0%'; }
+  if (gLabel) gLabel.textContent = lbl;
+  if (fText) fText.textContent = feedback || '';
+  requestAnimationFrame(() => setTimeout(() => {
+    ring.style.transition = 'stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1)';
+    ring.style.strokeDashoffset = circ * (1 - grade);
+    if (gText) countUp(gText, pct, 1000, '%');
+  }, 80));
+}
+
+// Chart singletons
+window._radar = null; window._donut = null; window._teamRadar = null;
+
+function renderRadar(matrix) {
+  const canvas = document.getElementById('radarChart'); if (!canvas) return;
+  const labels = Object.keys(matrix), data = Object.values(matrix).map(v => Math.round(v*100));
+  if (!labels.length) return;
+  if (window._radar) { window._radar.data.labels = labels; window._radar.data.datasets[0].data = data; window._radar.update({duration:800,easing:'easeInOutQuart'}); return; }
+  window._radar = new Chart(canvas, { type:'radar', data:{ labels, datasets:[{ label:'Proficiency', data, backgroundColor:'rgba(99,102,241,.12)', borderColor:'#6366f1', borderWidth:2, pointBackgroundColor:'#6366f1', pointBorderColor:'transparent', pointRadius:4, pointHoverRadius:6 }] }, options:{ responsive:true, maintainAspectRatio:true, animation:{duration:1400,easing:'easeInOutQuart',animateScale:true,animateRotate:true}, plugins:{legend:{display:false},tooltip:{backgroundColor:'#111420',borderColor:'#252d45',borderWidth:1,titleColor:'#e2e6f3',bodyColor:'#6a738f',callbacks:{label:c=>`${c.raw}% proficiency`}}}, scales:{r:{min:0,max:100,grid:{color:'rgba(255,255,255,.05)'},angleLines:{color:'rgba(255,255,255,.05)'},ticks:{display:false},pointLabels:{color:'#6a738f',font:{size:10}}}} } });
+}
+
+function renderDonut(dist) {
+  const canvas = document.getElementById('donutChart'); if (!canvas) return;
+  if (window._donut) { window._donut.destroy(); window._donut = null; }
+  window._donut = new Chart(canvas, { type:'doughnut', data:{ labels:['Expert','Intermediate','Beginner','Unassessed'], datasets:[{ data:dist, backgroundColor:['#6366f1','#10b981','#f59e0b','#1e2438'], borderWidth:0, hoverOffset:5 }] }, options:{ responsive:true, cutout:'72%', animation:{animateRotate:true,duration:1200,easing:'easeInOutQuart'}, plugins:{legend:{display:false},tooltip:{backgroundColor:'#111420',borderColor:'#252d45',borderWidth:1,titleColor:'#e2e6f3',bodyColor:'#6a738f'}} } });
+}
+
+function renderTeamRadar(matrix) {
+  const canvas = document.getElementById('teamRadar'); if (!canvas || !Object.keys(matrix).length) return;
+  if (window._teamRadar) { window._teamRadar.destroy(); window._teamRadar = null; }
+  window._teamRadar = new Chart(canvas, { type:'radar', data:{ labels:Object.keys(matrix), datasets:[{ label:'Team', data:Object.values(matrix).map(v=>Math.round(v*100)), backgroundColor:'rgba(99,102,241,.12)', borderColor:'#6366f1', borderWidth:2, pointRadius:3, pointBackgroundColor:'#6366f1', pointBorderColor:'transparent' }] }, options:{ responsive:true, animation:{duration:1200,easing:'easeInOutQuart'}, plugins:{legend:{display:false}}, scales:{r:{min:0,max:100,grid:{color:'rgba(255,255,255,.05)'},angleLines:{color:'rgba(255,255,255,.05)'},ticks:{display:false},pointLabels:{color:'#6a738f',font:{size:10}}}} } });
+}
+
+// ════════════════════════════════════════════════════════════
+// ALPINE APP
+// ════════════════════════════════════════════════════════════
+document.addEventListener('alpine:init', () => {
+  Alpine.data('app', () => ({
+    // ── auth ──
+    user: null,
+    authMode: 'login',
+    loginForm: { email:'', password:'' },
+    regForm: { username:'', email:'', password:'' },
+    loginLoading: false, regLoading: false,
+    errors: {},
+
+    // ── nav ──
+    view: 'landing',
+
+    // ── data ──
+    skillMatrix: {},
+    skillDetails: [],  // full list with last_assessed, confidence per skill
+    spacedQueue: [],
+    // Bounties
+    bounties: [],
+    bountiesLoading: false,
+    showCreateBounty: false,
+    bountyTab: 'all',   // 'all' | 'mine' | 'claimed'
+    newBounty: { title: '', description: '', reward_label: '', expires_days: 30, required_skills: [{skill:'',min_score:0.7}] },
+    // Career GPS
+    gpsData: null,
+    gpsJobs: null,
+    gpsGaps: null,
+    gpsSalary: null,
+    gpsLoading: false,
+    gpsLocation: 'remote',
+    gpsTab: 'overview',
+    gpsBubbleChart: null,
+    // Ghost Interview
+    ghostTab: 'setup',      // 'setup' | 'interview' | 'debrief' | 'history'
+    ghostSession: null,
+    ghostMessages: [],
+    ghostAnswer: '',
+    ghostSending: false,
+    ghostDebrief: null,
+    ghostDebriefLoading: false,
+    ghostHistory: [],
+    ghostSetup: {
+      persona_name: '',
+      persona_role: '',
+      persona_style: 'professional',
+      interview_type: 'mixed',
+      target_role: '',
+      num_questions: 8,
+      focus_skills: [],
+    },
+    sessions: [],
+
+    // ── assessment ──
+    activeSession: null,
+    currentQuestion: null,
+    userAnswer: '',
+    gradeFeedback: null,
+    qLoading: false,
+    aLoading: false,
+    selectedSkill: '',
+    customSkill: '',
+    availableSkills: ['Python','JavaScript','TypeScript','React','Node.js','FastAPI','Go','Rust','PostgreSQL','Redis','Docker','Kubernetes','AWS','GraphQL','System Design'],
+
+    // ── projects ──
+    projectIdea: '',
+    techStack: [],
+    newTech: '',
+    validationResult: null,
+    projLoading: false,
+    blueprint: null,
+    bpLoading: false,
+
+    // ── issues ──
+    issues: [],
+    filteredIssues: [],
+    issueFilter: 'all',
+    issuesLoading: false,
+
+    // ── room ──
+    activeRoom: null,
+    showCreateRoom: false,
+    showJoinRoom: false,
+    newRoomName: '',
+    joinCode: '',
+    roomLoading: false,
+    wsConn: null,
+    roomMessages: [],
+    chatMsg: '',
+
+    // ── boot ──────────────────────────────────────────────────
+    async boot() {
+      const token = localStorage.getItem('sf_token');
+      if (token) {
+        try {
+          const me = await api('/auth/me');
+          if (me) { this.user = me; await this.go('dashboard'); return; }
+        } catch {}
+        localStorage.removeItem('sf_token');
+      }
+      // Landing stat animations
+      setTimeout(() => {
+        countUp(document.getElementById('s-devs'), 12847, 1800);
+        countUp(document.getElementById('s-skills'), 48, 1400);
+        countUp(document.getElementById('s-acc'), 94, 1600, '%');
+      }, 500);
+    },
+
+    // ── view switching ────────────────────────────────────────
+    async go(newView) {
+      const vc = document.getElementById('vc');
+      if (vc) { vc.style.opacity = '0'; vc.style.transform = 'translateY(8px)'; }
+      await new Promise(r => setTimeout(r, 160));
+      this.view = newView;
+      await this.$nextTick();
+      if (vc) { vc.style.transition = 'opacity 200ms ease,transform 200ms ease'; vc.style.transform = 'translateY(0)'; vc.style.opacity = '1'; }
+
+      if (newView === 'dashboard')  this.loadDashboard();
+      if (newView === 'issues' && !this.issues.length) this.fetchIssues();
+      if (newView === 'room' && this.activeRoom) setTimeout(() => renderTeamRadar(this.activeRoom.team_matrix || {}), 200);
+      if (newView === 'dna') setTimeout(() => initDNA(this.skillMatrix), 300);
+      if (newView === 'decay') {
+        // Always fetch fresh data so last_assessed is current
+        api('/skills/matrix').then(function(matrixData) {
+          var app = Alpine.$data(document.querySelector('[x-data]'));
+          app.skillMatrix = matrixData?.matrix || {};
+          app.skillDetails = matrixData?.skills || [];
+          setTimeout(() => initDecay(app.skillMatrix, app.spacedQueue, app.skillDetails), 100);
+        });
+      }
+      if (newView === 'bounties') this.loadBounties();
+      if (newView === 'gps') this.loadGPS();
+      if (newView === 'ghost') this.loadGhostHistory();
+    },
+
+    // ── dashboard ─────────────────────────────────────────────
+    async loadDashboard() {
+      try {
+        const [matrixData, queueData] = await Promise.all([
+          api('/skills/matrix'),
+          api('/skills/matrix/spaced-queue'),
+        ]);
+
+        this.skillMatrix = matrixData?.matrix || {};
+        this.skillDetails = matrixData?.skills || [];
+        this.spacedQueue = queueData?.items || [];
+
+        await this.$nextTick();
+        this.renderSkillBars();
+
+        // Metrics
+        const overall = matrixData?.overall_score || 0;
+        const total   = matrixData?.total_assessed || 0;
+        const topScore = Object.values(this.skillMatrix).reduce((a,b) => Math.max(a,b), 0);
+        countUp(document.getElementById('m-score'),  Math.round(overall * 100), 1200);
+        countUp(document.getElementById('m-skills'), total, 900);
+        countUp(document.getElementById('m-queue'),  this.spacedQueue.length, 800);
+        countUp(document.getElementById('m-top'),    Math.round(topScore * 100), 1000);
+
+        setTimeout(() => {
+          renderRadar(this.skillMatrix);
+          const expert = Object.values(this.skillMatrix).filter(v => v>=.7).length;
+          const inter  = Object.values(this.skillMatrix).filter(v => v>=.4&&v<.7).length;
+          const beg    = Object.values(this.skillMatrix).filter(v => v<.4&&v>0).length;
+          const unass  = Math.max(0, 8 - total);
+          renderDonut([expert, inter, beg, unass]);
+          animateSkillBars();
+        }, 100);
+
+      } catch (err) {
+        toast('Failed to load dashboard data', 'error');
+      }
+    },
+
+    renderSkillBars() {
+      const el = document.getElementById('skill-bars');
+      if (!el) return;
+      const entries = Object.entries(this.skillMatrix).sort((a,b) => b[1]-a[1]);
+      el.innerHTML = entries.map(([skill, score]) => `
+        <div class="skill-row">
+          <span class="skill-name">${skill}</span>
+          <div class="skill-track"><div class="skill-bar" data-target="${Math.round(score*100)}" style="background:${this.sColor(score)}"></div></div>
+          <span class="skill-pct">0%</span>
+        </div>`).join('');
+    },
+
+    // ── auth ──────────────────────────────────────────────────
+    async doLogin() {
+      this.errors = {};
+      if (!this.loginForm.email) { this.errors.email = 'Email is required'; return; }
+      if (!this.loginForm.password) { this.errors.password = 'Password is required'; return; }
+      this.loginLoading = true;
+      try {
+        const data = await api('/auth/login', { method:'POST', body: JSON.stringify(this.loginForm) });
+        localStorage.setItem('sf_token', data.access_token);
+        this.user = data.user;
+        await this.go('dashboard');
+        toast(`Welcome back, ${data.user.username}! 👋`, 'success');
+      } catch (err) {
+        this.errors.auth = err.detail || 'Invalid email or password';
+      } finally { this.loginLoading = false; }
+    },
+
+    async doRegister() {
+      this.errors = {};
+      if (!this.regForm.username) { this.errors.username = 'Username is required'; return; }
+      if (!this.regForm.email) { this.errors.email = 'Email is required'; return; }
+      if ((this.regForm.password||'').length < 8) { this.errors.password = 'Password must be at least 8 characters'; return; }
+      this.regLoading = true;
+      try {
+        const data = await api('/auth/register', { method:'POST', body: JSON.stringify(this.regForm) });
+        localStorage.setItem('sf_token', data.access_token);
+        this.user = data.user;
+        await this.go('dashboard');
+        toast('Account created! Start your first assessment.', 'success');
+      } catch (err) {
+        if (err.status === 409) {
+          if ((err.detail||'').includes('Email')) this.errors.email = 'Email already registered';
+          else this.errors.username = 'Username already taken';
+        } else { this.errors.auth = err.detail || 'Registration failed'; }
+      } finally { this.regLoading = false; }
+    },
+
+    doGithubLogin() {
+      toast('Redirecting to GitHub…', 'info');
+      window.location.href = API + '/auth/github/login';
+    },
+
+    async doLogout() {
+      try { await api('/auth/logout', { method:'POST', credentials:'include' }); } catch {}
+      localStorage.removeItem('sf_token');
+      this.user = null; this.skillMatrix = {}; this.activeSession = null;
+      if (this.wsConn) { this.wsConn.close(); this.wsConn = null; }
+      this.view = 'landing';
+      toast('Signed out', 'info');
+    },
+
+    // ── assessment ────────────────────────────────────────────
+    async startAssessment(skill) {
+      if (!skill?.trim()) return;
+      try {
+        const session = await api('/skills/session/start', { method:'POST', body: JSON.stringify({ skill_name: skill }) });
+        this.activeSession = { ...session, difficulty: 1, currentScore: 0 };
+        this.gradeFeedback = null; this.userAnswer = ''; this.currentQuestion = null;
+        this.view = 'assessment';
+        await this.fetchQuestion();
+      } catch (err) { toast('Could not start session: ' + (err.detail||err.message), 'error'); }
+    },
+
+    async fetchQuestion() {
+      if (!this.activeSession) return;
+      this.qLoading = true; this.gradeFeedback = null; this.userAnswer = ''; this.errors.answer = '';
+      const fp = document.getElementById('feedback-panel'); if (fp) fp.style.display = 'none';
+      try {
+        const q = await api(`/skills/session/${this.activeSession.session_id}/question`);
+        this.currentQuestion = q;
+        this.activeSession = { ...this.activeSession, difficulty: q.difficulty, questions_asked: q.questions_asked };
+        this.qLoading = false;
+        setTimeout(() => typewriter(document.getElementById('q-text'), q.question || ''), 30);
+      } catch (err) {
+        this.qLoading = false;
+        if (err.status === 409) { await this.endSession(); return; }
+        toast('Could not load question', 'error');
+      }
+    },
+
+    async submitAnswer() {
+      this.errors.answer = '';
+      if (!this.userAnswer.trim()) { this.errors.answer = 'Please write an answer before submitting'; return; }
+      if (this.userAnswer.trim().length < 10) { this.errors.answer = 'Answer is too short — explain your understanding'; return; }
+      this.aLoading = true;
+      try {
+        const result = await api(`/skills/session/${this.activeSession.session_id}/answer`, {
+          method: 'POST',
+          body: JSON.stringify({
+            question_text: this.currentQuestion?.question || '',
+            expected_topics: [],
+            user_answer: this.userAnswer,
+            difficulty: this.activeSession?.difficulty || 1,
+          }),
+        });
+        this.gradeFeedback = result;
+        this.activeSession = {
+          ...this.activeSession,
+          questions_asked: result.questions_asked,
+          currentScore: result.new_skill_score,
+          difficulty: result.new_difficulty,
+        };
+        // Update skill matrix immediately
+        if (this.activeSession.skill_name) {
+          this.skillMatrix = { ...this.skillMatrix, [this.activeSession.skill_name]: result.new_skill_score };
+        }
+        const fp = document.getElementById('feedback-panel'); if (fp) fp.style.display = 'block';
+        showGradeFeedback(result.score, result.feedback);
+        if (result.session_complete) toast('Assessment complete! Skill score updated.', 'success');
+      } catch (err) {
+        toast('Grading failed: ' + (err.detail || err.message), 'error');
+      } finally { this.aLoading = false; }
+    },
+
+    async nextQuestion() { await this.fetchQuestion(); },
+
+    async endSession() {
+      if (this.activeSession?.session_id) {
+        try { await api(`/skills/session/${this.activeSession.session_id}/complete`, { method:'POST' }); } catch {}
+      }
+      const skill = this.activeSession?.skill_name;
+      const score = this.activeSession?.currentScore;
+      this.activeSession = null; this.currentQuestion = null; this.gradeFeedback = null; this.userAnswer = '';
+      if (skill && score !== undefined) toast(`${skill} score updated to ${Math.round(score*100)}%`, 'success');
+      await this.go('dashboard');
+    },
+
+    // ── projects ──────────────────────────────────────────────
+    addTech() {
+      const t = this.newTech.trim();
+      if (t && !this.techStack.includes(t)) { this.techStack = [...this.techStack, t]; this.newTech = ''; }
+    },
+    removeTech(t) { this.techStack = this.techStack.filter(x => x !== t); },
+
+    async doValidate() {
+      this.errors.idea = '';
+      if (!this.projectIdea.trim()) { this.errors.idea = 'Please describe your project idea'; return; }
+      if (this.projectIdea.trim().length < 10) { this.errors.idea = 'Description is too short — add more detail'; return; }
+      this.projLoading = true; this.validationResult = null;
+      try {
+        this.validationResult = await api('/projects/validate', {
+          method: 'POST',
+          body: JSON.stringify({ idea: this.projectIdea, tech_stack: this.techStack }),
+        });
+        toast('Analysis complete!', 'success');
+      } catch (err) { toast('Validation failed: ' + (err.detail||err.message), 'error'); }
+      finally { this.projLoading = false; }
+    },
+
+    async doBlueprint() {
+      this.bpLoading = true; this.blueprint = null;
+      try {
+        this.blueprint = await api('/projects/blueprint');
+      } catch (err) { toast('Blueprint generation failed: ' + (err.detail||err.message), 'error'); }
+      finally { this.bpLoading = false; }
+    },
+
+    // ── issues ────────────────────────────────────────────────
+    async fetchIssues(force = false) {
+      if (this.issuesLoading) return;
+      this.issuesLoading = true;
+      try {
+        const label = this.issueFilter === 'all' ? 'help wanted' : this.issueFilter.replace('-', ' ');
+        this.issues = await api(`/github/issues?label=${encodeURIComponent(label)}&limit=25`) || [];
+        this.filterIssues();
+      } catch (err) {
+        toast('Could not load issues: ' + (err.detail||err.message), 'error');
+        this.issues = [];
+      } finally { this.issuesLoading = false; }
+    },
+
+    filterIssues() {
+      if (this.issueFilter === 'all') { this.filteredIssues = this.issues; return; }
+      this.filteredIssues = this.issues.filter(i => i.label === this.issueFilter);
+    },
+
+    // ── rooms ─────────────────────────────────────────────────
+    async createRoom() {
+      if (!this.newRoomName.trim()) return;
+      this.roomLoading = true;
+      try {
+        const room = await api('/rooms', { method:'POST', body: JSON.stringify({ name: this.newRoomName }) });
+        this.showCreateRoom = false; this.newRoomName = '';
+        this.activeRoom = { ...room, online_count: 1, role_gaps: [], team_matrix: {} };
+        this.connectWs(room.room_id);
+        toast(`Room ${room.room_id} created! Share this code with your team.`, 'success');
+      } catch (err) { toast('Could not create room: ' + (err.detail||err.message), 'error'); }
+      finally { this.roomLoading = false; }
+    },
+
+    async joinRoom() {
+      this.errors.roomCode = '';
+      const code = (this.joinCode||'').trim().toUpperCase();
+      if (!code) { this.errors.roomCode = 'Enter a room code'; return; }
+      if (code.length !== 6) { this.errors.roomCode = 'Room codes are exactly 6 characters'; return; }
+      this.roomLoading = true;
+      try {
+        const state = await api(`/rooms/${code}/join`, { method:'POST' });
+        this.showJoinRoom = false; this.joinCode = '';
+        this.activeRoom = state;
+        this.connectWs(code);
+        toast(`Joined room ${code}!`, 'success');
+        setTimeout(() => renderTeamRadar(state.team_matrix || {}), 300);
+      } catch (err) {
+        if (err.status === 404) this.errors.roomCode = 'Room not found — check the code';
+        else toast('Could not join room: ' + (err.detail||err.message), 'error');
+      } finally { this.roomLoading = false; }
+    },
+
+    async leaveRoom() {
+      if (!this.activeRoom) return;
+      try { await api(`/rooms/${this.activeRoom.room_id}/leave`, { method:'POST' }); } catch {}
+      if (this.wsConn) { this.wsConn.close(); this.wsConn = null; }
+      this.activeRoom = null; this.roomMessages = [];
+      toast('Left the room', 'info');
+    },
+
+    connectWs(roomId) {
+      const token = localStorage.getItem('sf_token');
+      const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+      this.wsConn = new WebSocket(`${proto}//${location.host}/ws/room/${roomId}?token=${token}`);
+
+      this.wsConn.onopen = () => { console.log('WS connected'); };
+
+      this.wsConn.onmessage = ({ data }) => {
+        try {
+          const msg = JSON.parse(data);
+          if (msg.type === 'room_update') {
+            this.activeRoom = msg.payload;
+            this.$nextTick(() => renderTeamRadar(msg.payload.team_matrix || {}));
+          } else if (msg.type === 'chat') {
+            this.roomMessages = [...this.roomMessages, { id: Date.now(), username: msg.username, text: msg.text }];
+            this.$nextTick(() => { const el = document.getElementById('chat-msgs'); if(el) el.scrollTop = el.scrollHeight; });
+          } else if (msg.type === 'join') {
+            toast(`${msg.username} joined the room`, 'info');
+          } else if (msg.type === 'leave') {
+            toast(`${msg.username} left the room`, 'info');
+          }
+        } catch {}
+      };
+
+      this.wsConn.onclose = () => {
+        // Auto-reconnect after 3s if still in a room — refresh token first
+        if (this.activeRoom) {
+          setTimeout(async () => {
+            // Refresh token before reconnecting to avoid 403
+            try {
+              const r = await fetch('/api/auth/refresh', { method: 'POST', credentials: 'include' });
+              if (r.ok) {
+                const d = await r.json();
+                localStorage.setItem('sf_token', d.access_token);
+              }
+            } catch {}
+            this.connectWs(roomId);
+          }, 3000);
+        }
+      };
+
+      this.wsConn.onerror = () => toast('WebSocket connection issue — reconnecting…', 'warning');
+    },
+
+    sendChat() {
+      if (!this.chatMsg.trim() || !this.wsConn || this.wsConn.readyState !== WebSocket.OPEN) return;
+      this.wsConn.send(JSON.stringify({ type: 'chat', text: this.chatMsg }));
+      this.chatMsg = '';
+    },
+
+    // ── helpers ───────────────────────────────────────────────
+    sColor(score) {
+      if (score >= 0.7) return '#10b981';
+      if (score >= 0.4) return '#f59e0b';
+      return '#ef4444';
+    },
+    diffClass(d) { return d<=2?'diff-easy':d===3?'diff-medium':d===4?'diff-hard':'diff-expert'; },
+    diffLabel(d) { return ['','Basic','Beginner','Intermediate','Advanced','Expert'][d]||'Intermediate'; },
+
+    // ── bounties ──────────────────────────────────────────────
+    showLeaderboard: false,
+    leaderboard: [],
+    leaderboardLoading: false,
+    activeBountyTitle: '',
+
+    get filteredBounties() {
+      if (this.bountyTab === 'eligible') return this.bounties.filter(b => b.user_eligible && !b.user_claimed);
+      if (this.bountyTab === 'claimed')  return this.bounties.filter(b => b.user_claimed);
+      return this.bounties;
+    },
+
+    async loadBounties() {
+      this.bountiesLoading = true;
+      try {
+        this.bounties = await api('/bounties') || [];
+      } catch(e) { toast('Failed to load bounties', 'error'); }
+      this.bountiesLoading = false;
+    },
+
+    async loadMyClaims() {
+      this.bountiesLoading = true;
+      try {
+        const claimed = await api('/bounties/my-claims') || [];
+        // Merge into bounties list marking them claimed
+        claimed.forEach(b => {
+          const existing = this.bounties.find(x => x.id === b.id);
+          if (!existing) this.bounties.unshift(b);
+        });
+      } catch(e) {}
+      this.bountiesLoading = false;
+    },
+
+    async generateAIBounties() {
+      this.bountiesLoading = true;
+      try {
+        const generated = await api('/bounties/ai-generate') || [];
+        this.bounties = [...generated, ...this.bounties];
+        toast('AI generated ' + generated.length + ' bounties for you!', 'success');
+      } catch(e) { toast('Failed to generate bounties', 'error'); }
+      this.bountiesLoading = false;
+    },
+
+    async claimBounty(bounty) {
+      try {
+        const result = await api('/bounties/'+bounty.id+'/claim', { method:'POST' });
+        if (result.success) {
+          toast(result.message, 'success');
+          bounty.user_claimed = true;
+          bounty.claim_count++;
+        } else {
+          toast(result.message, 'error');
+        }
+      } catch(e) { toast('Failed to claim bounty', 'error'); }
+    },
+
+    async viewLeaderboard(bounty) {
+      this.showLeaderboard = true;
+      this.activeBountyTitle = bounty.title;
+      this.leaderboardLoading = true;
+      this.leaderboard = [];
+      try {
+        this.leaderboard = await api('/bounties/'+bounty.id+'/leaderboard') || [];
+      } catch(e) {}
+      this.leaderboardLoading = false;
+    },
+
+    async submitBounty() {
+      if (!this.newBounty.title.trim()) { toast('Please add a title', 'error'); return; }
+      const validSkills = this.newBounty.required_skills.filter(r => r.skill.trim());
+      if (!validSkills.length) { toast('Add at least one required skill', 'error'); return; }
+      try {
+        const created = await api('/bounties', {
+          method: 'POST',
+          body: JSON.stringify({ ...this.newBounty, required_skills: validSkills }),
+        });
+        this.bounties.unshift(created);
+        this.showCreateBounty = false;
+        this.newBounty = { title:'', description:'', reward_label:'', expires_days:30, required_skills:[{skill:'',min_score:0.7}] };
+        toast('Bounty posted!', 'success');
+      } catch(e) { toast('Failed to post bounty', 'error'); }
+    },
+
+    formatExpiry(dateStr) {
+      if (!dateStr) return '';
+      const days = Math.ceil((new Date(dateStr) - new Date()) / 86400000);
+      return days <= 0 ? 'Expired' : days === 1 ? 'tomorrow' : 'in ' + days + ' days';
+    },
+
+    // ── career gps ────────────────────────────────────────────
+    async loadGPS() {
+      this.gpsLoading = true;
+      this.gpsData = null; this.gpsJobs = null; this.gpsGaps = null; this.gpsSalary = null;
+      this.gpsTab = 'overview';
+      try {
+        const [market, salary] = await Promise.all([
+          api('/career-gps/market?location=' + encodeURIComponent(this.gpsLocation)),
+          api('/career-gps/salary-hints?location=' + encodeURIComponent(this.gpsLocation)),
+        ]);
+        this.gpsData = market;
+        this.gpsSalary = salary;
+        await this.$nextTick();
+        this._renderGPSOverview(market, salary);
+      } catch(e) { toast('Failed to load market data', 'error'); }
+      this.gpsLoading = false;
+    },
+
+    async loadJobs() {
+      if (this.gpsJobs) return;
+      try {
+        this.gpsJobs = null;
+        this.gpsJobs = await api('/career-gps/opportunities?location=' + encodeURIComponent(this.gpsLocation));
+      } catch(e) { toast('Failed to load jobs', 'error'); this.gpsJobs = {jobs:[]}; }
+    },
+
+    async loadGaps() {
+      if (this.gpsGaps) return;
+      try {
+        this.gpsGaps = null;
+        this.gpsGaps = await api('/career-gps/skill-gaps?location=' + encodeURIComponent(this.gpsLocation));
+      } catch(e) { toast('Failed to load skill gaps', 'error'); this.gpsGaps = {gaps:[],quick_wins:[],career_advice:''}; }
+    },
+
+    async loadSalary() {
+      if (this.gpsSalary) return;
+      try {
+        this.gpsSalary = await api('/career-gps/salary-hints?location=' + encodeURIComponent(this.gpsLocation));
+      } catch(e) { toast('Failed to load salary data', 'error'); }
+    },
+
+    _renderGPSOverview(market, salary) {
+      // Animate metrics
+      const summary = market?.summary || {};
+      countUp(document.getElementById('gps-jobs'), summary.estimated_jobs || 0, 1200);
+      const covEl = document.getElementById('gps-coverage');
+      if (covEl) covEl.textContent = (summary.market_coverage || 0) + '%';
+      const salEl = document.getElementById('gps-salary');
+      if (salEl) salEl.textContent = salary?.formatted || '—';
+      const lvlEl = document.getElementById('gps-level');
+      if (lvlEl) lvlEl.textContent = salary?.level || '—';
+
+      // Location list
+      const locList = document.getElementById('gps-location-list');
+      if (locList && market?.location_breakdown) {
+        const maxJobs = Math.max(...market.location_breakdown.map(l => l.jobs));
+        locList.innerHTML = market.location_breakdown.map(l => {
+          const pct = maxJobs > 0 ? Math.round(l.jobs / maxJobs * 100) : 0;
+          return '<div style="display:flex;flex-direction:column;gap:4px">' +
+            '<div style="display:flex;justify-content:space-between;align-items:center">' +
+              '<span style="font-size:12px">' + l.region + '</span>' +
+              '<div style="text-align:right"><span style="font-family:DM Mono,monospace;font-size:11px;color:#10b981">' + l.jobs.toLocaleString() + '</span>' +
+              '<span style="font-size:10px;color:#7b82a0;margin-left:6px">' + l.growth + '</span></div>' +
+            '</div>' +
+            '<div style="height:4px;background:var(--bg3);border-radius:2px;overflow:hidden">' +
+              '<div style="height:100%;background:#6366f1;border-radius:2px;width:0%;transition:width 1s ease" data-w="' + pct + '"></div></div>' +
+            '<div style="font-size:10px;color:#7b82a0">' + l.avg_salary + '</div></div>';
+        }).join('');
+        setTimeout(() => {
+          locList.querySelectorAll('[data-w]').forEach(el => { el.style.width = el.dataset.w + '%'; });
+        }, 100);
+      }
+
+      // Missing hot skills
+      const missingEl = document.getElementById('gps-missing-skills');
+      if (missingEl && market?.missing_hot_skills) {
+        missingEl.innerHTML = market.missing_hot_skills.map(s =>
+          '<div style="display:flex;align-items:center;gap:7px;padding:8px 14px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.15);border-radius:20px;cursor:pointer" onclick="Alpine.$data(document.querySelector(\'[x-data]\')).go(\'assessment\')">' +
+            '<span style="font-size:12px;font-weight:500">' + s.skill + '</span>' +
+            '<span style="font-size:10px;color:#7b82a0">' + s.demand.toLocaleString() + ' jobs</span>' +
+            '<span style="font-size:10px;color:#6366f1">+ Learn →</span>' +
+          '</div>'
+        ).join('');
+      }
+
+      // Bubble chart
+      setTimeout(() => this._renderBubbleChart(market?.skill_bubbles || []), 100);
+    },
+
+
+    // ── ghost interview ───────────────────────────────────────
+    async loadGhostHistory() {
+      try {
+        const data = await api('/ghost-interview/history');
+        this.ghostHistory = data?.interviews || [];
+      } catch(e) {}
+    },
+
+    async startGhostInterview() {
+      if (!this.ghostSetup.persona_name || !this.ghostSetup.persona_role || !this.ghostSetup.target_role) {
+        toast('Please fill in all fields', 'error'); return;
+      }
+      try {
+        const result = await api('/ghost-interview/start', {
+          method: 'POST',
+          body: JSON.stringify({
+            ...this.ghostSetup,
+            num_questions: parseInt(this.ghostSetup.num_questions),
+          }),
+        });
+        this.ghostSession = {
+          session_id: result.session_id,
+          persona_name: result.persona_name,
+          persona_role: result.persona_role,
+          target_role: this.ghostSetup.target_role,
+          interview_type: this.ghostSetup.interview_type,
+          num_questions: result.num_questions,
+          questions_asked: 0,
+          status: 'active',
+        };
+        this.ghostMessages = [{
+          role: 'interviewer',
+          content: result.opening_message,
+          timestamp: new Date().toISOString(),
+        }];
+        this.ghostTab = 'interview';
+        this.$nextTick(() => this._scrollGhostChat());
+      } catch(e) { toast('Failed to start interview', 'error'); }
+    },
+
+    async sendGhostAnswer() {
+      if (!this.ghostAnswer.trim() || this.ghostSending) return;
+      const answer = this.ghostAnswer.trim();
+      this.ghostAnswer = '';
+      this.ghostSending = true;
+
+      // Add candidate message immediately
+      this.ghostMessages.push({ role: 'candidate', content: answer, timestamp: new Date().toISOString() });
+      this.$nextTick(() => this._scrollGhostChat());
+
+      try {
+        const result = await api('/ghost-interview/'+this.ghostSession.session_id+'/respond', {
+          method: 'POST',
+          body: JSON.stringify({ answer }),
+        });
+
+        this.ghostMessages.push({
+          role: 'interviewer',
+          content: result.interviewer_message,
+          timestamp: new Date().toISOString(),
+        });
+
+        this.ghostSession.questions_asked = result.questions_asked;
+        this.ghostSession.status = result.interview_done ? 'completed' : 'active';
+
+        if (result.interview_done) {
+          toast('Interview complete! Click "See My Results" to get your verdict.', 'success');
+        }
+
+        this.$nextTick(() => this._scrollGhostChat());
+      } catch(e) { toast('Failed to send answer', 'error'); }
+      this.ghostSending = false;
+    },
+
+    async loadGhostDebrief() {
+      this.ghostTab = 'debrief';
+      this.ghostDebriefLoading = true;
+      this.ghostDebrief = null;
+      try {
+        this.ghostDebrief = await api('/ghost-interview/'+this.ghostSession.session_id+'/debrief');
+        await this.loadGhostHistory();
+      } catch(e) { toast('Failed to load debrief', 'error'); }
+      this.ghostDebriefLoading = false;
+    },
+
+    endInterview() {
+      if (confirm('End the interview early? You can still see your results.')) {
+        this.ghostSession.status = 'completed';
+        // Send a completion signal to backend so it knows interview ended early
+        api('/ghost-interview/'+this.ghostSession.session_id+'/respond', {
+          method: 'POST',
+          body: JSON.stringify({ answer: '[INTERVIEW_ENDED_EARLY]' }),
+        }).catch(() => {}).finally(() => {
+          this.loadGhostDebrief();
+        });
+      }
+    },
+
+    _scrollGhostChat() {
+      const el = document.getElementById('ghost-messages');
+      if (el) el.scrollTop = el.scrollHeight;
+    },
+
+    _renderBubbleChart(bubbles) {
+      const ctx = document.getElementById('gps-bubble-chart');
+      if (!ctx || !bubbles.length) return;
+      if (this.gpsBubbleChart) { this.gpsBubbleChart.destroy(); this.gpsBubbleChart = null; }
+      const maxDemand = Math.max(...bubbles.map(b => b.demand));
+      const datasets = [{
+        label: 'Skills',
+        data: bubbles.map((b, i) => ({
+          x: b.score,
+          y: Math.round(b.demand / maxDemand * 100),
+          r: Math.max(6, Math.round(b.demand / maxDemand * 28)),
+          skill: b.skill,
+          eligible: b.eligible,
+        })),
+        backgroundColor: bubbles.map(b => b.eligible ? 'rgba(16,185,129,0.6)' : 'rgba(99,102,241,0.5)'),
+        borderColor: bubbles.map(b => b.eligible ? '#10b981' : '#6366f1'),
+        borderWidth: 1.5,
+      }];
+      this.gpsBubbleChart = new Chart(ctx, {
+        type: 'bubble',
+        data: { datasets },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          animation: { duration: 1000 },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#161b27', borderColor: '#2a3147', borderWidth: 1,
+              callbacks: {
+                label: ctx => {
+                  const d = ctx.raw;
+                  return [d.skill, 'Your score: ' + d.x + '%', 'Market demand: ' + d.y + '%', d.eligible ? '✅ Eligible' : '🔒 Need more practice'];
+                }
+              }
+            }
+          },
+          scales: {
+            x: { min: 0, max: 100, title: { display: true, text: 'Your Score %', color: '#7b82a0', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#7b82a0', font: { size: 9 } } },
+            y: { min: 0, max: 100, title: { display: true, text: 'Market Demand %', color: '#7b82a0', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#7b82a0', font: { size: 9 } } },
+          }
+        }
+      });
+    },
+  }));
+});
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+var _dnaRenderer=null,_dnaAnimId=null,_dnaAutoRotate=true,_dnaSkillMeshes=[];
+
+var DNA_CAT={
+  Python:'language',JavaScript:'language',TypeScript:'language',Go:'language',
+  Rust:'language',Java:'language',Ruby:'language',PHP:'language',Swift:'language',
+  Kotlin:'language','C++':'language','C#':'language',
+  React:'framework','Node.js':'framework',FastAPI:'framework',Django:'framework',
+  Vue:'framework',Angular:'framework',Spring:'framework',Rails:'framework',
+  NextJS:'framework',Express:'framework',
+  PostgreSQL:'database',MySQL:'database',Redis:'database',MongoDB:'database',
+  SQLite:'database',Cassandra:'database',
+  Docker:'infra',Kubernetes:'infra',AWS:'infra',Terraform:'infra',
+  Linux:'infra',Nginx:'infra',Git:'infra',
+  GraphQL:'other','Machine Learning':'other',CSS:'other','System Design':'other'
+};
+
+var DNA_COLOR_NUM={language:0x6366f1,framework:0x8b5cf6,database:0xf59e0b,infra:0x10b981,other:0x06b6d4};
+var DNA_COLOR_HEX={language:'#6366f1',framework:'#8b5cf6',database:'#f59e0b',infra:'#10b981',other:'#06b6d4'};
+var CAT_LABEL={language:'Language',framework:'Framework',database:'Database',infra:'Infrastructure',other:'Other'};
+
+function getCat(s){return DNA_CAT[s]||'other';}
+
+function disposeDNA(){
+  if(_dnaAnimId){cancelAnimationFrame(_dnaAnimId);_dnaAnimId=null;}
+  if(_dnaRenderer){_dnaRenderer.dispose();var el=_dnaRenderer.domElement;if(el.parentNode)el.parentNode.removeChild(el);_dnaRenderer=null;}
+  _dnaSkillMeshes=[];
+}
+
+function initDNA(skillMatrix){
+  disposeDNA();
+  var wrap=document.getElementById('dna-canvas');
+  var loading=document.getElementById('dna-loading');
+  if(!wrap)return;
+  if(!skillMatrix||!Object.keys(skillMatrix).length){if(loading)loading.style.display='flex';return;}
+
+  var W=wrap.clientWidth||680, H=wrap.clientHeight||580;
+  var scene=new THREE.Scene();
+  scene.background=new THREE.Color(0x0a0c14);
+  scene.fog=new THREE.FogExp2(0x0a0c14,0.025);
+
+  var cam=new THREE.PerspectiveCamera(50,W/H,0.1,100);
+  cam.position.set(0,0,20);
+
+  var renderer=new THREE.WebGLRenderer({antialias:true});
+  renderer.setSize(W,H);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.domElement.style.width='100%';
+  renderer.domElement.style.height='100%';
+  wrap.appendChild(renderer.domElement);
+  _dnaRenderer=renderer;
+
+  scene.add(new THREE.AmbientLight(0xffffff,0.5));
+  var dl=new THREE.DirectionalLight(0x6366f1,1.5);dl.position.set(5,10,5);scene.add(dl);
+  var dl2=new THREE.DirectionalLight(0x8b5cf6,1.0);dl2.position.set(-5,-5,5);scene.add(dl2);
+
+  var skills=Object.entries(skillMatrix).sort(function(a,b){return b[1]-a[1];});
+  var N=skills.length;
+  var R=3.5, H2=14, TURNS=2.5;
+
+  // Backbone strands
+  var pts1=[],pts2=[];
+  for(var i=0;i<=80;i++){
+    var t=i/80, ang=t*Math.PI*2*TURNS, y=(t-0.5)*H2;
+    pts1.push(new THREE.Vector3(Math.cos(ang)*R,y,Math.sin(ang)*R));
+    pts2.push(new THREE.Vector3(Math.cos(ang+Math.PI)*R,y,Math.sin(ang+Math.PI)*R));
+  }
+  function addTube(pts,col){
+    var curve=new THREE.CatmullRomCurve3(pts);
+    var geo=new THREE.TubeGeometry(curve,80,0.07,8,false);
+    var mat=new THREE.MeshStandardMaterial({color:col,transparent:true,opacity:0.3,roughness:0.3,metalness:0.7});
+    scene.add(new THREE.Mesh(geo,mat));
+  }
+  addTube(pts1,0x6366f1);addTube(pts2,0x8b5cf6);
+
+  // Skill nodes + rungs
+  skills.forEach(function(entry,i){
+    var skill=entry[0],score=entry[1];
+    var t=(i+0.5)/N, ang=t*Math.PI*2*TURNS, y=(t-0.5)*H2;
+    var cat=getCat(skill), col=DNA_COLOR_NUM[cat];
+    var rad=0.18+score*0.42;
+    var x1=Math.cos(ang)*R, z1=Math.sin(ang)*R;
+    var x2=Math.cos(ang+Math.PI)*R, z2=Math.sin(ang+Math.PI)*R;
+
+    // Main node
+    var geo=new THREE.SphereGeometry(rad,16,16);
+    var mat=new THREE.MeshStandardMaterial({
+      color:col,emissive:col,emissiveIntensity:0.4+score*0.4,
+      roughness:0.2,metalness:0.5,transparent:true,opacity:0.6+score*0.4
+    });
+    var mesh=new THREE.Mesh(geo,mat);
+    mesh.position.set(x1,y,z1);
+    mesh.userData={skill:skill,score:score,cat:cat,col:DNA_COLOR_HEX[cat]};
+    scene.add(mesh);
+    _dnaSkillMeshes.push(mesh);
+
+    // Mirror node
+    var geo2=new THREE.SphereGeometry(rad*0.45,12,12);
+    var mat2=new THREE.MeshStandardMaterial({color:col,emissive:col,emissiveIntensity:0.1,transparent:true,opacity:0.25});
+    var m2=new THREE.Mesh(geo2,mat2);m2.position.set(x2,y,z2);scene.add(m2);
+
+    // Rung
+    var dx=x2-x1,dz=z2-z1,len=Math.sqrt(dx*dx+dz*dz);
+    var rGeo=new THREE.CylinderGeometry(0.025,0.025,len,6);
+    var rMat=new THREE.MeshStandardMaterial({color:col,transparent:true,opacity:0.18});
+    var rung=new THREE.Mesh(rGeo,rMat);
+    rung.position.set((x1+x2)/2,y,(z1+z2)/2);
+    rung.lookAt(new THREE.Vector3(x2,y,z2));
+    rung.rotateX(Math.PI/2);
+    scene.add(rung);
+  });
+
+  // Stars
+  var sPts=new Float32Array(300*3);
+  for(var s=0;s<300;s++){sPts[s*3]=(Math.random()-.5)*50;sPts[s*3+1]=(Math.random()-.5)*35;sPts[s*3+2]=(Math.random()-.5)*20-10;}
+  var sGeo=new THREE.BufferGeometry();sGeo.setAttribute('position',new THREE.BufferAttribute(sPts,3));
+  scene.add(new THREE.Points(sGeo,new THREE.PointsMaterial({color:0x1e2535,size:0.09})));
+
+  // Tooltip + raycaster
+  var raycaster=new THREE.Raycaster();
+  var mouse=new THREE.Vector2(-999,-999);
+  var tooltip=document.getElementById('dna-tooltip');
+  var canvasEl=renderer.domElement;
+
+  canvasEl.addEventListener('mousemove',function(e){
+    var rect=canvasEl.getBoundingClientRect();
+    mouse.x=((e.clientX-rect.left)/rect.width)*2-1;
+    mouse.y=-((e.clientY-rect.top)/rect.height)*2+1;
+    raycaster.setFromCamera(mouse,cam);
+    var hits=raycaster.intersectObjects(_dnaSkillMeshes);
+    if(hits.length>0){
+      var d=hits[0].object.userData;
+      document.getElementById('tt-skill').textContent=d.skill;
+      document.getElementById('tt-score').textContent=Math.round(d.score*100)+'%';
+      document.getElementById('tt-fill').style.width=Math.round(d.score*100)+'%';
+      document.getElementById('tt-fill').style.background=d.col;
+      document.getElementById('tt-cat').textContent=CAT_LABEL[d.cat]||'Other';
+      var pct=Math.round(d.score*100);
+      document.getElementById('tt-health').innerHTML=pct>=70?'<span style="color:#10b981">Strong</span>':pct>=40?'<span style="color:#f59e0b">Developing</span>':'<span style="color:#ef4444">Needs work</span>';
+      tooltip.style.display='block';
+      tooltip.style.left=(e.clientX-rect.left+16)+'px';
+      tooltip.style.top=(e.clientY-rect.top-10)+'px';
+      canvasEl.style.cursor='pointer';
+    } else {
+      tooltip.style.display='none';canvasEl.style.cursor='default';
+    }
+  });
+  canvasEl.addEventListener('mouseleave',function(){tooltip.style.display='none';});
+
+  // Drag rotate
+  var drag=false,px=0,py=0;
+  canvasEl.addEventListener('mousedown',function(e){drag=true;px=e.clientX;py=e.clientY;_dnaAutoRotate=false;});
+  window.addEventListener('mouseup',function(){drag=false;});
+  canvasEl.addEventListener('mousemove',function(e){
+    if(!drag)return;
+    scene.rotation.y+=(e.clientX-px)*0.008;
+    scene.rotation.x+=(e.clientY-py)*0.004;
+    px=e.clientX;py=e.clientY;
+  });
+  canvasEl.addEventListener('wheel',function(e){cam.position.z=Math.max(8,Math.min(32,cam.position.z+e.deltaY*0.02));});
+
+  // Stats
+  if(loading)loading.style.display='none';
+  document.getElementById('dna-total').textContent=N+' skills';
+  var catC={};skills.forEach(function(e){var c=getCat(e[0]);catC[c]=(catC[c]||0)+1;});
+  var dom=Object.entries(catC).sort(function(a,b){return b[1]-a[1];})[0];
+  if(dom){document.getElementById('dna-dominant').textContent=CAT_LABEL[dom[0]];document.getElementById('dna-dominant').style.color=DNA_COLOR_HEX[dom[0]];}
+  var avg=skills.reduce(function(s,e){return s+e[1];},0)/N;
+  document.getElementById('dna-strength').textContent=avg>=0.7?'Strong':avg>=0.4?'Growing':'Beginner';
+  var hash=skills.slice(0,6).map(function(e){return e[0][0]+Math.round(e[1]*9);}).join('').toUpperCase();
+  document.getElementById('dna-hash').textContent=hash||'——';
+
+  var listEl=document.getElementById('dna-skill-list');
+  listEl.innerHTML=skills.map(function(e){
+    var cat=getCat(e[0]),col=DNA_COLOR_HEX[cat];
+    return '<div style="display:flex;align-items:center;gap:8px;padding:3px 0">'
+      +'<div style="width:7px;height:7px;border-radius:50%;background:'+col+';flex-shrink:0"></div>'
+      +'<span style="font-size:11px;flex:1">'+e[0]+'</span>'
+      +'<span style="font-family:DM Mono,monospace;font-size:10px;color:#7b82a0">'+Math.round(e[1]*100)+'%</span>'
+      +'</div>';
+  }).join('');
+
+  // Animate
+  var clock=new THREE.Clock();
+  function animate(){
+    _dnaAnimId=requestAnimationFrame(animate);
+    var t=clock.getElapsedTime();
+    if(_dnaAutoRotate)scene.rotation.y+=0.004;
+    _dnaSkillMeshes.forEach(function(m,i){
+      m.material.emissiveIntensity=0.3+(m.userData.score||0)*0.4+Math.sin(t*1.5+i*0.4)*0.15;
+    });
+    renderer.render(scene,cam);
+  }
+  animate();
+
+  // Resize
+  var ro=new ResizeObserver(function(){
+    if(!_dnaRenderer)return;
+    var w=wrap.clientWidth,h=wrap.clientHeight;
+    cam.aspect=w/h;cam.updateProjectionMatrix();renderer.setSize(w,h);
+  });
+  ro.observe(wrap);
+}
+
+function rotateDNA(){_dnaAutoRotate=!_dnaAutoRotate;}
+
+function exportDNA(){
+  try{
+    var app=Alpine.$data(document.querySelector('[x-data]'));
+    var skills=Object.entries(app.skillMatrix||{}).sort(function(a,b){return b[1]-a[1];});
+    var hash=skills.slice(0,6).map(function(e){return e[0][0]+Math.round(e[1]*9);}).join('').toUpperCase();
+    var text='My Skill DNA on SkillForge\n\nHash: '+hash+'\n\n'+skills.map(function(e){return e[0]+': '+Math.round(e[1]*100)+'%';}).join('\n')+'\n\nGenerated by SkillForge';
+    navigator.clipboard.writeText(text).then(function(){toast('DNA copied to clipboard!','success');});
+  }catch(e){toast('Could not copy','error');}
+}
+</script>
+<script>
+// ════════════════════════════════════════════════════════════
+// SKILL DECAY ENGINE
+// ════════════════════════════════════════════════════════════
+
+var _decayChart = null;
+
+// Decay rate per day based on confidence
+// High confidence = slow decay, low confidence = fast decay
+function getDecayRate(confidence) {
+  if (confidence >= 0.8) return 0.003;   // Very slow — 1% per ~3 days
+  if (confidence >= 0.5) return 0.006;   // Moderate — 1% per ~1.5 days
+  if (confidence >= 0.2) return 0.010;   // Fast — 1% per day
+  return 0.015;                           // Very fast — new skills decay quickly
+}
+
+// Calculate current decayed score based on days since assessment
+function calcDecayedScore(score, confidence, daysSince) {
+  var rate = getDecayRate(confidence);
+  var decayFactor = Math.pow(1 - rate, daysSince);
+  return Math.max(0.05, score * decayFactor);
+}
+
+// Get health status
+function getHealthStatus(daysSince, decayedScore) {
+  if (daysSince === null || daysSince === undefined) return 'critical';
+  if (daysSince > 60 || decayedScore < 0.3) return 'critical';
+  if (daysSince > 30 || decayedScore < 0.5) return 'warning';
+  return 'healthy';
+}
+
+function getDaysSince(lastAssessed) {
+  if (!lastAssessed) return null;
+  var now = new Date();
+  var last = new Date(lastAssessed);
+  return Math.floor((now - last) / (1000 * 60 * 60 * 24));
+}
+
+function initDecay(skillMatrix, spacedQueue, skillDetails) {
+  if (!skillMatrix || !Object.keys(skillMatrix).length) return;
+
+  // Build a lookup from skillDetails (has last_assessed + confidence from DB)
+  var detailsMap = {};
+  (skillDetails || []).forEach(function(d) {
+    detailsMap[d.skill_name] = d;
+  });
+
+  // Build enriched skill data — prefer skillDetails over spacedQueue
+  var skills = Object.entries(skillMatrix).map(function(entry) {
+    var skill = entry[0], score = entry[1];
+
+    // First try skillDetails (most accurate — comes straight from DB)
+    var detail = detailsMap[skill];
+    // Fallback to spaced queue
+    var queueItem = !detail && (spacedQueue || []).find(function(q) { return q.skill_name === skill; });
+
+    var confidence   = detail ? detail.confidence : (queueItem ? queueItem.confidence : 0.5);
+    var lastAssessed = detail ? detail.last_assessed : (queueItem ? queueItem.last_assessed : null);
+    var daysSince    = getDaysSince(lastAssessed);
+    var decayedScore = daysSince !== null ? calcDecayedScore(score, confidence, daysSince) : score * 0.7;
+    var status       = getHealthStatus(daysSince, decayedScore);
+
+    return { skill: skill, score: score, confidence: confidence, lastAssessed: lastAssessed, daysSince: daysSince, decayedScore: decayedScore, status: status };
+  });
+
+  // Sort: critical first, then warning, then healthy, then by decayed score
+  var statusOrder = { critical: 0, warning: 1, healthy: 2 };
+  skills.sort(function(a, b) {
+    if (statusOrder[a.status] !== statusOrder[b.status]) return statusOrder[a.status] - statusOrder[b.status];
+    return a.decayedScore - b.decayedScore;
+  });
+
+  // Update metrics
+  var critical = skills.filter(function(s) { return s.status === 'critical'; }).length;
+  var warning  = skills.filter(function(s) { return s.status === 'warning'; }).length;
+  var healthy  = skills.filter(function(s) { return s.status === 'healthy'; }).length;
+  var avgHealth = Math.round(skills.reduce(function(sum, s) { return sum + s.decayedScore; }, 0) / skills.length * 100);
+
+  countUp(document.getElementById('decay-critical'), critical, 600);
+  countUp(document.getElementById('decay-warning'),  warning,  600);
+  countUp(document.getElementById('decay-healthy'),  healthy,  600);
+  document.getElementById('decay-avg').textContent = avgHealth + '%';
+
+  // Render skill cards
+  var listEl = document.getElementById('decay-list');
+  listEl.innerHTML = skills.map(function(s) {
+    var statusColor = s.status === 'critical' ? '#ef4444' : s.status === 'warning' ? '#f59e0b' : '#10b981';
+    var statusLabel = s.status === 'critical' ? '🔴 Critical' : s.status === 'warning' ? '⚠️ Needs Practice' : '✅ Healthy';
+    var daysText = s.daysSince === null ? 'Never assessed' : s.daysSince === 0 ? 'Assessed today' : s.daysSince + ' days ago';
+    var originalPct = Math.round(s.score * 100);
+    var decayedPct  = Math.round(s.decayedScore * 100);
+    var lost = originalPct - decayedPct;
+
+    // Forecast: days until critical
+    var daysUntilCritical = '';
+    if (s.status !== 'critical') {
+      var rate = getDecayRate(s.confidence);
+      var targetScore = 0.3;
+      if (s.decayedScore > targetScore) {
+        var daysLeft = Math.floor(Math.log(targetScore / s.decayedScore) / Math.log(1 - rate));
+        daysUntilCritical = daysLeft > 0 ? 'Critical in ~' + daysLeft + ' days' : 'Critical soon';
+      }
+    }
+
+    return '<div class="card" style="margin-bottom:0;border-left:3px solid '+statusColor+'">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">' +
+        '<div style="display:flex;align-items:center;gap:10px">' +
+          '<div style="font-size:13px;font-weight:600">' + s.skill + '</div>' +
+          '<span style="font-size:10px;font-weight:600;color:'+statusColor+'">' + statusLabel + '</span>' +
+        '</div>' +
+        '<button onclick="startDecayReview(\''+s.skill+'\')" style="font-size:11px;padding:4px 10px;background:rgba(99,102,241,.15);color:#a78bfa;border:none;border-radius:6px;cursor:pointer">Review →</button>' +
+      '</div>' +
+      '<div style="display:flex;gap:16px;margin-bottom:10px">' +
+        '<div><div style="font-size:10px;color:#7b82a0;margin-bottom:2px">Original Score</div><div style="font-family:DM Mono,monospace;font-size:14px;font-weight:600">' + originalPct + '%</div></div>' +
+        '<div><div style="font-size:10px;color:#7b82a0;margin-bottom:2px">Current Est.</div><div style="font-family:DM Mono,monospace;font-size:14px;font-weight:600;color:'+statusColor+'">' + decayedPct + '%</div></div>' +
+        '<div><div style="font-size:10px;color:#7b82a0;margin-bottom:2px">Decay</div><div style="font-family:DM Mono,monospace;font-size:14px;font-weight:600;color:'+(lost>0?'#ef4444':'#10b981')+'">' + (lost>0?'-'+lost:'0') + '%</div></div>' +
+        '<div><div style="font-size:10px;color:#7b82a0;margin-bottom:2px">Last Assessed</div><div style="font-size:11px;font-weight:500">' + daysText + '</div></div>' +
+      '</div>' +
+      // Decay bar
+      '<div style="display:flex;align-items:center;gap:8px">' +
+        '<div style="flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;position:relative">' +
+          '<div style="position:absolute;left:0;top:0;height:100%;width:'+originalPct+'%;background:rgba(99,102,241,.2);border-radius:3px"></div>' +
+          '<div class="decay-bar-fill" data-width="'+decayedPct+'" style="position:absolute;left:0;top:0;height:100%;width:0%;background:'+statusColor+';border-radius:3px;transition:width 1.2s cubic-bezier(.4,0,.2,1)"></div>' +
+        '</div>' +
+        '<span style="font-size:10px;color:#7b82a0;width:28px;text-align:right">' + decayedPct + '%</span>' +
+      '</div>' +
+      (daysUntilCritical ? '<div style="font-size:10px;color:#f59e0b;margin-top:6px">⏱ ' + daysUntilCritical + '</div>' : '') +
+    '</div>';
+  }).join('');
+
+  // Animate bars
+  setTimeout(function() {
+    document.querySelectorAll('.decay-bar-fill').forEach(function(bar) {
+      bar.style.width = bar.dataset.width + '%';
+    });
+  }, 100);
+
+  // Review queue (skills due now)
+  var queueEl = document.getElementById('decay-queue');
+  var queueSkills = skills.filter(function(s) { return s.status !== 'healthy'; }).slice(0, 5);
+  document.getElementById('decay-queue-count').textContent = queueSkills.length + ' due';
+  if (queueSkills.length) {
+    queueEl.innerHTML = queueSkills.map(function(s) {
+      var col = s.status === 'critical' ? '#ef4444' : '#f59e0b';
+      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 9px;background:var(--bg3);border-radius:7px;border-left:2px solid '+col+'">' +
+        '<div><div style="font-size:11px;font-weight:500">' + s.skill + '</div>' +
+        '<div style="font-size:10px;color:#7b82a0">' + Math.round(s.decayedScore*100) + '% estimated</div></div>' +
+        '<button onclick="startDecayReview(\''+s.skill+'\')" style="font-size:10px;padding:3px 8px;background:rgba(99,102,241,.15);color:#a78bfa;border:none;border-radius:5px;cursor:pointer">Go</button>' +
+      '</div>';
+    }).join('');
+  }
+
+  // 30-day forecast chart
+  renderDecayChart(skills);
+}
+
+function renderDecayChart(skills) {
+  var ctx = document.getElementById('decay-chart');
+  if (!ctx) return;
+  if (_decayChart) { _decayChart.destroy(); _decayChart = null; }
+
+  var days = [];
+  for (var d = 0; d <= 30; d++) days.push(d);
+
+  // Show top 4 skills
+  var topSkills = skills.slice(0, 4);
+  var colors = ['#6366f1', '#10b981', '#f59e0b', '#ef4444'];
+
+  var datasets = topSkills.map(function(s, i) {
+    var data = days.map(function(d) {
+      return Math.round(calcDecayedScore(s.decayedScore, s.confidence, d) * 100);
+    });
+    return {
+      label: s.skill,
+      data: data,
+      borderColor: colors[i],
+      backgroundColor: 'transparent',
+      borderWidth: 2,
+      pointRadius: 0,
+      tension: 0.4,
+    };
+  });
+
+  _decayChart = new Chart(ctx, {
+    type: 'line',
+    data: { labels: days.map(function(d) { return d === 0 ? 'Now' : d === 30 ? '+30d' : d % 10 === 0 ? '+'+d+'d' : ''; }), datasets: datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 1000, easing: 'easeInOutQuart' },
+      plugins: {
+        legend: { display: true, position: 'bottom', labels: { color: '#7b82a0', font: { size: 10 }, boxWidth: 10, padding: 8 } },
+        tooltip: { backgroundColor: '#161b27', borderColor: '#2a3147', borderWidth: 1, titleColor: '#e2e6f3', bodyColor: '#7b82a0',
+          callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + ctx.raw + '%'; } }
+        }
+      },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#7b82a0', font: { size: 9 } } },
+        y: { min: 0, max: 100, grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#7b82a0', font: { size: 9 }, callback: function(v) { return v + '%'; } } }
+      }
+    }
+  });
+}
+
+function startDecayReview(skillName) {
+  var app = Alpine.$data(document.querySelector('[x-data]'));
+  app.selectedSkill = skillName;
+  app.go('assessment');
+  setTimeout(function() { app.startAssessment(skillName); }, 400);
+}
+</script>
+</body>
+</html>

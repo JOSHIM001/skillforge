@@ -1,0 +1,70 @@
+version: "3.9"
+
+# ── Production overrides ──────────────────────────────────────
+# Usage: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# Key differences from dev:
+#  - No source volume mounts (code baked into image)
+#  - No --reload flag on uvicorn
+#  - Multiple uvicorn workers
+#  - Resource limits on all containers
+#  - Celery concurrency bumped to 4
+
+services:
+
+  api:
+    volumes: []           # remove dev source mount
+    command: >
+      uvicorn main:app
+        --host 0.0.0.0
+        --port 8000
+        --workers 4
+        --loop uvloop
+        --http httptools
+        --log-level warning
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          memory: 256M
+
+  worker:
+    volumes: []
+    command: >
+      celery -A tasks.celery_app.celery_app worker
+        --loglevel=warning
+        --concurrency=4
+        --queues=default
+        -E
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+
+  beat:
+    volumes: []
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 128M
+
+  postgres:
+    # Never expose DB port in production
+    ports: []
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1G
+
+  redis:
+    ports: []
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
