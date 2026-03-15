@@ -521,9 +521,17 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
                    @click="startAssessment(skill)"
                    @mouseenter="$el.style.borderColor='var(--accent)'"
                    @mouseleave="$el.style.borderColor='var(--border)'">
-                <div style="font-size:12px;font-weight:600;margin-bottom:5px" x-text="skill"></div>
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+                  <div style="font-size:12px;font-weight:600" x-text="skill"></div>
+                  <span style="font-size:9px;font-weight:700;padding:1px 5px;border-radius:6px"
+                    :style="getMarketTrend(skill).color"
+                    x-text="getMarketTrend(skill).label"></span>
+                </div>
                 <div style="height:3px;background:var(--bg4);border-radius:2px;margin-bottom:5px"><div :style="'width:'+Math.round(score*100)+'%;height:100%;background:'+sColor(score)+';border-radius:2px'"></div></div>
-                <div style="font-size:11px;font-family:monospace" :style="'color:'+sColor(score)" x-text="Math.round(score*100)+'%'"></div>
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                  <div style="font-size:11px;font-family:monospace" :style="'color:'+sColor(score)" x-text="Math.round(score*100)+'%'"></div>
+                  <div style="font-size:9px;color:#7b82a0" x-text="getMarketTrend(skill).jobs"></div>
+                </div>
               </div>
             </template>
           </div>
@@ -2525,7 +2533,41 @@ document.addEventListener('alpine:init', () => {
     },
 
 
-    // ── ghost interview ───────────────────────────────────────
+    // ── market trend lookup ───────────────────────────────────
+    getMarketTrend(skill) {
+      const trends = {
+        // 🔥 Hot — high demand, growing fast (India job market 2025)
+        'Python':         { label:'🔥 Hot',      color:'background:rgba(239,68,68,.15);color:#ef4444',   jobs:'95k+ jobs' },
+        'JavaScript':     { label:'🔥 Hot',      color:'background:rgba(239,68,68,.15);color:#ef4444',   jobs:'88k+ jobs' },
+        'TypeScript':     { label:'🔥 Hot',      color:'background:rgba(239,68,68,.15);color:#ef4444',   jobs:'72k+ jobs' },
+        'React':          { label:'🔥 Hot',      color:'background:rgba(239,68,68,.15);color:#ef4444',   jobs:'74k+ jobs' },
+        'Node.js':        { label:'🔥 Hot',      color:'background:rgba(239,68,68,.15);color:#ef4444',   jobs:'65k+ jobs' },
+        'AWS':            { label:'🔥 Hot',      color:'background:rgba(239,68,68,.15);color:#ef4444',   jobs:'84k+ jobs' },
+        'Docker':         { label:'🔥 Hot',      color:'background:rgba(239,68,68,.15);color:#ef4444',   jobs:'71k+ jobs' },
+        'Kubernetes':     { label:'🔥 Hot',      color:'background:rgba(239,68,68,.15);color:#ef4444',   jobs:'52k+ jobs' },
+        'Go':             { label:'🔥 Hot',      color:'background:rgba(239,68,68,.15);color:#ef4444',   jobs:'42k+ jobs' },
+        'Machine Learning':{ label:'🔥 Hot',     color:'background:rgba(239,68,68,.15);color:#ef4444',   jobs:'55k+ jobs' },
+        'Rust':           { label:'🔥 Rising',   color:'background:rgba(245,158,11,.15);color:#f59e0b',  jobs:'18k+ jobs' },
+        'FastAPI':        { label:'🔥 Rising',   color:'background:rgba(245,158,11,.15);color:#f59e0b',  jobs:'18k+ jobs' },
+        'GraphQL':        { label:'🔥 Rising',   color:'background:rgba(245,158,11,.15);color:#f59e0b',  jobs:'28k+ jobs' },
+        // ✅ Stable — consistent demand
+        'Java':           { label:'✅ Stable',   color:'background:rgba(16,185,129,.15);color:#10b981',  jobs:'81k+ jobs' },
+        'PostgreSQL':     { label:'✅ Stable',   color:'background:rgba(16,185,129,.15);color:#10b981',  jobs:'58k+ jobs' },
+        'MySQL':          { label:'✅ Stable',   color:'background:rgba(16,185,129,.15);color:#10b981',  jobs:'62k+ jobs' },
+        'Redis':          { label:'✅ Stable',   color:'background:rgba(16,185,129,.15);color:#10b981',  jobs:'45k+ jobs' },
+        'MongoDB':        { label:'✅ Stable',   color:'background:rgba(16,185,129,.15);color:#10b981',  jobs:'41k+ jobs' },
+        'Django':         { label:'✅ Stable',   color:'background:rgba(16,185,129,.15);color:#10b981',  jobs:'25k+ jobs' },
+        'Vue':            { label:'✅ Stable',   color:'background:rgba(16,185,129,.15);color:#10b981',  jobs:'32k+ jobs' },
+        'Angular':        { label:'✅ Stable',   color:'background:rgba(16,185,129,.15);color:#10b981',  jobs:'38k+ jobs' },
+        'Spring':         { label:'✅ Stable',   color:'background:rgba(16,185,129,.15);color:#10b981',  jobs:'44k+ jobs' },
+        'Terraform':      { label:'✅ Stable',   color:'background:rgba(16,185,129,.15);color:#10b981',  jobs:'38k+ jobs' },
+        // 📉 Declining
+        'PHP':            { label:'📉 Declining', color:'background:rgba(107,114,128,.15);color:#6b7280', jobs:'38k jobs' },
+        'Ruby':           { label:'📉 Declining', color:'background:rgba(107,114,128,.15);color:#6b7280', jobs:'22k jobs' },
+        'C++':            { label:'📉 Niche',     color:'background:rgba(107,114,128,.15);color:#6b7280', jobs:'55k jobs' },
+      };
+      return trends[skill] || { label:'📊 Active', color:'background:rgba(99,102,241,.15);color:#a78bfa', jobs:'market data' };
+    },
     async loadGhostHistory() {
       try {
         const data = await api('/ghost-interview/history');
