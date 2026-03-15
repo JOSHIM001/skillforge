@@ -45,9 +45,8 @@ async def lifespan(app: FastAPI):
     if not await ping_redis():
         logger.error("Redis unreachable on startup — check REDIS_URL")
 
-    if not settings.is_production:
-        await init_db()
-        logger.info("Database tables verified/created")
+    await init_db()
+    logger.info("Database tables verified/created")
 
     yield
 
