@@ -102,7 +102,7 @@ def create_app() -> FastAPI:
     app.include_router(ws_router,                                      tags=["WebSocket"])
 
     # ── Serve frontend ────────────────────────────────────────────
-    frontend_path = os.path.join(os.path.dirname(__file__), "..", "frontend")
+    frontend_path = os.path.join(os.path.dirname(__file__), "frontend")
     if os.path.exists(frontend_path):
         app.mount("/static", StaticFiles(directory=frontend_path), name="static")
 
