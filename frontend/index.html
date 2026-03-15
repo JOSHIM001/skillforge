@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SkillForge — AI Career Assessment</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%236366f1'/><text x='16' y='22' font-family='monospace' font-size='18' font-weight='bold' fill='white' text-anchor='middle'>S</text></svg>">
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -44,7 +43,6 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .app-shell{display:grid;grid-template-columns:210px 1fr;min-height:100vh;position:relative;z-index:1}
 .sidebar{background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow:hidden}
 .main-content{padding:28px 32px;min-height:100vh}
-.main-content > div{display:none}
 
 /* ── Sidebar ── */
 .sidebar-logo{padding:20px 18px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px}
@@ -374,11 +372,6 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
         Career GPS
         <span style="margin-left:auto;font-size:9px;font-weight:700;background:linear-gradient(135deg,#06b6d4,#6366f1);color:#fff;padding:2px 6px;border-radius:8px">NEW</span>
       </div>
-      <div class="nav-item" :class="{active:view==='ghost'}" @click="go('ghost')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2a7 7 0 0 0-7 7v4l-2 2v1h18v-1l-2-2V9a7 7 0 0 0-7-7z"/><path d="M9 21a3 3 0 0 0 6 0"/></svg>
-        Ghost Interview
-        <span style="margin-left:auto;font-size:9px;font-weight:700;background:linear-gradient(135deg,#8b5cf6,#ef4444);color:#fff;padding:2px 6px;border-radius:8px">NEW</span>
-      </div>
       <div class="nav-section-label" style="margin-top:6px">Team</div>
       <div class="nav-item" :class="{active:view==='room'}" @click="go('room')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -522,17 +515,9 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
                    @click="startAssessment(skill)"
                    @mouseenter="$el.style.borderColor='var(--accent)'"
                    @mouseleave="$el.style.borderColor='var(--border)'">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
-                  <div style="font-size:12px;font-weight:600" x-text="skill"></div>
-                  <span style="font-size:9px;font-weight:700;padding:1px 5px;border-radius:6px"
-                    :style="getMarketTrend(skill).color"
-                    x-text="getMarketTrend(skill).label"></span>
-                </div>
+                <div style="font-size:12px;font-weight:600;margin-bottom:5px" x-text="skill"></div>
                 <div style="height:3px;background:var(--bg4);border-radius:2px;margin-bottom:5px"><div :style="'width:'+Math.round(score*100)+'%;height:100%;background:'+sColor(score)+';border-radius:2px'"></div></div>
-                <div style="display:flex;justify-content:space-between;align-items:center">
-                  <div style="font-size:11px;font-family:monospace" :style="'color:'+sColor(score)" x-text="Math.round(score*100)+'%'"></div>
-                  <div style="font-size:9px;color:#7b82a0" x-text="getMarketTrend(skill).jobs"></div>
-                </div>
+                <div style="font-size:11px;font-family:monospace" :style="'color:'+sColor(score)" x-text="Math.round(score*100)+'%'"></div>
               </div>
             </template>
           </div>
@@ -607,7 +592,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
                 <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--muted)">Running score</span><span style="font-family:monospace;font-weight:600" :style="'color:'+sColor(activeSession?.currentScore||0)" x-text="Math.round((activeSession?.currentScore||0)*100)+'%'"></span></div>
                 <div style="height:3px;background:var(--bg4);border-radius:2px"><div :style="'width:'+Math.round((activeSession?.currentScore||0)*100)+'%;height:100%;background:var(--accent);border-radius:2px;transition:width .8s ease'"></div></div>
                 <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--muted)">Questions done</span><span style="font-family:monospace" x-text="activeSession?.questions_asked||0"></span></div>
-                <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--muted)">Difficulty</span><span x-text="activeSession?.difficulty||1" style="font-family:monospace;color:var(--accent3)"></span></div>
+                <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--muted)">Difficulty</span><span x-text="['','■□□□□','■■□□□','■■■□□','■■■■□','■■■■■'][activeSession?.difficulty||1]" style="font-family:monospace;color:var(--accent3)"></span></div>
               </div>
             </div>
             <div class="card" x-show="gradeFeedback?.topics_covered?.length">
@@ -788,7 +773,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
           <span class="dot online"></span>
           <span style="font-size:13px;font-weight:500">Room:</span>
           <span style="font-family:'DM Mono',monospace;font-size:13px;color:var(--accent3)" x-text="activeRoom?.room_id"></span>
-          <span style="font-size:12px;color:var(--muted)" x-text="'- '+(activeRoom?.online_count||0)+' online'"></span>
+          <span style="font-size:12px;color:var(--muted)" x-text="'· '+(activeRoom?.online_count||0)+' online'"></span>
           <button class="btn btn-ghost btn-sm" style="margin-left:auto" @click="leaveRoom()">Leave</button>
         </div>
 
@@ -1059,7 +1044,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
                   <span x-show="b.is_ai_generated" style="font-size:10px;background:rgba(99,102,241,.15);color:#a78bfa;padding:2px 7px;border-radius:8px">🤖 AI</span>
                   <span x-show="b.user_claimed" style="font-size:10px;background:rgba(16,185,129,.15);color:#10b981;padding:2px 7px;border-radius:8px">✅ Claimed</span>
                   <span x-show="b.user_eligible && !b.user_claimed" style="font-size:10px;background:rgba(99,102,241,.15);color:#6366f1;padding:2px 7px;border-radius:8px">⚡ Eligible</span>
-                  <span x-show="b.reward_label" style="font-size:10px;background:rgba(245,158,11,.15);color:#f59e0b;padding:2px 8px;border-radius:8px;font-weight:600" x-text="b.reward_label"></span>
+                  <span x-show="b.reward_label" style="font-size:10px;background:rgba(245,158,11,.15);color:#f59e0b;padding:2px 8px;border-radius:8px;font-weight:600" x-text="'🏆 ' + b.reward_label"></span>
                 </div>
 
                 <!-- Description -->
@@ -1080,11 +1065,11 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
                 <!-- Meta row -->
                 <div style="display:flex;align-items:center;gap:14px;font-size:10px;color:#7b82a0">
-                  <span x-show="b.posted_by_username"><span x-text="b.posted_by_username"></span></span>
+                  <span x-show="b.posted_by_username">👤 <span x-text="b.posted_by_username"></span></span>
                   <span x-show="b.is_ai_generated && !b.posted_by_username">👤 SkillForge AI</span>
-                  <span><span x-text="b.claim_count"></span> claims</span>
-                  <span x-show="b.top_claimant">1st <span x-text="b.top_claimant"></span></span>
-                  <span x-show="b.expires_at">Expires <span x-text="formatExpiry(b.expires_at)"></span></span>
+                  <span>🏅 <span x-text="b.claim_count"></span> claims</span>
+                  <span x-show="b.top_claimant">🥇 <span x-text="b.top_claimant"></span></span>
+                  <span x-show="b.expires_at">⏰ Expires <span x-text="formatExpiry(b.expires_at)"></span></span>
                 </div>
               </div>
 
@@ -1095,7 +1080,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
                   class="btn btn-sm"
                   :class="b.user_eligible ? 'btn-primary' : 'btn-ghost'"
                   :disabled="!b.user_eligible">
-                  <span x-text="b.user_eligible ? 'Claim' : 'Not Eligible'"></span>
+                  <span x-text="b.user_eligible ? '⚡ Claim' : '🔒 Not Eligible'"></span>
                 </button>
                 <button x-show="b.user_claimed" class="btn btn-ghost btn-sm" style="color:#10b981;border-color:#10b981" disabled>
                   ✅ Claimed
@@ -1213,11 +1198,11 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
                       <span style="font-size:10px;padding:2px 7px;border-radius:8px;font-weight:600" :style="'background:'+(job.match_score>=80?'rgba(16,185,129,.15)':'rgba(245,158,11,.15)')+';color:'+(job.match_score>=80?'#10b981':'#f59e0b')" x-text="job.match_score+'% match'"></span>
                       <span style="font-size:10px;background:var(--bg3);padding:2px 7px;border-radius:8px;color:#7b82a0" x-text="job.source"></span>
                     </div>
-                    <div style="font-size:12px;color:#7b82a0;margin-bottom:6px"><span x-text="job.company"></span> - <span x-text="job.location"></span> - <span x-text="job.posted_days_ago+'d ago'"></span></div>
+                    <div style="font-size:12px;color:#7b82a0;margin-bottom:6px"><span x-text="job.company"></span> · <span x-text="job.location"></span> · <span x-text="job.posted_days_ago+'d ago'"></span></div>
                     <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:5px">
                       <template x-for="skill in job.required_skills" :key="skill"><span style="font-size:10px;padding:2px 8px;background:var(--bg3);border-radius:6px" x-text="skill"></span></template>
                     </div>
-                    <div style="font-size:11px;color:#7b82a0;font-style:italic" x-text="'matched: ' + job.match_reason"></div>
+                    <div style="font-size:11px;color:#7b82a0;font-style:italic" x-text="'✓ ' + job.match_reason"></div>
                   </div>
                   <div style="text-align:right;flex-shrink:0">
                     <div style="font-size:13px;font-weight:600;color:#10b981;margin-bottom:4px" x-text="job.salary_range"></div>
@@ -1231,12 +1216,12 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
         <div x-show="gpsTab==='gaps'">
           <div x-show="!gpsGaps" style="text-align:center;padding:40px"><div class="spinner" style="margin:0 auto 12px"></div><div style="font-size:12px;color:#7b82a0">Analyzing skill gaps...</div></div>
           <div x-show="gpsGaps">
-            <div x-show="gpsGaps?.career_advice" style="background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.2);border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:12px;color:#a78bfa" x-text="gpsGaps?.career_advice"></div>
+            <div x-show="gpsGaps?.career_advice" style="background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.2);border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:12px;color:#a78bfa" x-text="'💡 ' + gpsGaps?.career_advice"></div>
             <div x-show="gpsGaps?.quick_wins?.length" style="margin-bottom:14px">
               <div style="font-size:11px;font-weight:600;color:#7b82a0;margin-bottom:8px">⚡ QUICK WINS</div>
               <div style="display:flex;flex-wrap:wrap;gap:8px">
                 <template x-for="skill in gpsGaps?.quick_wins||[]" :key="skill">
-                  <div @click="go('assessment')" style="padding:6px 14px;background:rgba(16,185,129,.12);color:#10b981;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer" x-text="skill + ' ->'"></div>
+                  <div @click="go('assessment')" style="padding:6px 14px;background:rgba(16,185,129,.12);color:#10b981;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer" x-text="skill + ' →'"></div>
                 </template>
               </div>
             </div>
@@ -1248,7 +1233,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
                     <div style="text-align:right"><div style="font-size:16px;font-weight:700;color:#10b981" x-text="'+' + gap.jobs_unlocked?.toLocaleString() + ' jobs'"></div><div style="font-size:10px;color:#7b82a0" x-text="gap.effort_weeks + ' weeks'"></div></div>
                   </div>
                   <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px">
-                    <template x-for="r in gap.learning_path||[]" :key="r"><span style="font-size:10px;padding:3px 9px;background:var(--bg3);border-radius:6px;color:#7b82a0" x-text="r"></span></template>
+                    <template x-for="r in gap.learning_path||[]" :key="r"><span style="font-size:10px;padding:3px 9px;background:var(--bg3);border-radius:6px;color:#7b82a0" x-text="'📚 '+r"></span></template>
                   </div>
                   <button @click="go('assessment')" class="btn btn-ghost btn-sm" style="width:100%">Improve Now →</button>
                 </div>
@@ -1262,8 +1247,8 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
             <div class="card" style="grid-column:1/-1;background:linear-gradient(135deg,rgba(99,102,241,.08),rgba(139,92,246,.05));border-color:rgba(99,102,241,.2)">
               <div style="text-align:center;padding:20px 0">
                 <div style="font-size:12px;color:#7b82a0;margin-bottom:8px">Your estimated market salary</div>
-                <div style="font-family:Syne,sans-serif;font-size:40px;font-weight:700;letter-spacing:-2px" x-text="gpsSalary?.formatted||'--'"></div
-                <div style="font-size:13px;color:#7b82a0;margin-top:6px"><span style="color:#a78bfa;font-weight:600" x-text="gpsSalary?.level"></span> - <span x-text="gpsLocation"></span></div>
+                <div style="font-family:Syne,sans-serif;font-size:40px;font-weight:700;letter-spacing:-2px" x-text="gpsSalary?.formatted||'—'"></div>
+                <div style="font-size:13px;color:#7b82a0;margin-top:6px"><span style="color:#a78bfa;font-weight:600" x-text="gpsSalary?.level"></span> · <span x-text="gpsLocation"></span></div>
                 <div style="max-width:400px;margin:20px auto 0">
                   <div style="display:flex;justify-content:space-between;font-size:10px;color:#7b82a0;margin-bottom:6px"><span>Entry $50k</span><span>Mid $100k</span><span>Senior $180k</span><span>Staff $250k+</span></div>
                   <div style="height:8px;background:var(--bg3);border-radius:4px;overflow:hidden;position:relative">
@@ -1278,7 +1263,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
               <div style="display:flex;flex-direction:column;gap:9px">
                 <template x-for="tip in gpsSalary?.improvement_tips||[]" :key="tip.skill">
                   <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 11px;background:var(--bg3);border-radius:8px">
-                    <div><div style="font-size:12px;font-weight:500" x-text="tip.skill"></div><div style="font-size:10px;color:#7b82a0" x-text="'Improve '+tip.current+'% -> '+tip.target+'%'"></div></div>
+                    <div><div style="font-size:12px;font-weight:500" x-text="tip.skill"></div><div style="font-size:10px;color:#7b82a0" x-text="'Improve '+tip.current+'% → '+tip.target+'%'"></div></div>
                     <div style="font-size:14px;font-weight:700;color:#10b981" x-text="tip.salary_boost"></div>
                   </div>
                 </template>
@@ -1302,356 +1287,6 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
         <div style="font-size:13px;color:#7b82a0;margin-bottom:24px;max-width:400px;margin-left:auto;margin-right:auto">Enter a location and click Analyze Market to see real-time job intelligence based on your skill matrix</div>
         <button @click="loadGPS()" class="btn btn-primary" style="font-size:14px;padding:12px 28px">🔍 Analyze My Market</button>
       </div>
-
-    </div>
-
-    </div>
-
-    <!-- GHOST INTERVIEW VIEW -->
-    <div x-show="view==='ghost'" style="display:none">
-
-      <!-- SETUP TAB -->
-      <div x-show="ghostTab==='setup'">
-        <div class="page-header">
-          <div>
-            <div class="page-title">Ghost Interview</div>
-            <div class="page-subtitle">Practice with an AI interviewer — get a real hiring recommendation</div>
-          </div>
-          <button x-show="ghostHistory.length" @click="ghostTab='history'" class="btn btn-ghost btn-sm">📋 Past Interviews</button>
-        </div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-          <!-- Setup form -->
-          <div style="display:flex;flex-direction:column;gap:12px">
-            <div class="card">
-              <div class="card-header"><div class="card-title">👤 Interviewer Persona</div></div>
-              <div style="display:flex;flex-direction:column;gap:10px">
-                <div>
-                  <label class="form-label">Interviewer Name</label>
-                  <input class="input" x-model="ghostSetup.persona_name" placeholder="e.g. Sarah Chen, Alex Kumar">
-                </div>
-                <div>
-                  <label class="form-label">Their Role</label>
-                  <input class="input" x-model="ghostSetup.persona_role" placeholder="e.g. Senior SWE at Google, CTO at Stripe">
-                </div>
-                <div>
-                  <label class="form-label">Interview Style</label>
-                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">
-                    <template x-for="style in [{v:'professional',l:'🤝 Professional',d:'Balanced and thorough'},{v:'tough',l:'⚡ Tough',d:'Direct and challenging'},{v:'friendly',l:'😊 Friendly',d:'Warm but rigorous'},{v:'skeptical',l:'🔍 Skeptical',d:'Pushes for proof'}]" :key="style.v">
-                      <div @click="ghostSetup.persona_style=style.v" style="padding:9px 12px;border-radius:8px;cursor:pointer;border:1px solid;transition:all .15s"
-                        :style="ghostSetup.persona_style===style.v?'border-color:#6366f1;background:rgba(99,102,241,.1)':'border-color:var(--border);background:var(--bg3)'">
-                        <div style="font-size:12px;font-weight:600" x-text="style.l"></div>
-                        <div style="font-size:10px;color:#7b82a0;margin-top:2px" x-text="style.d"></div>
-                      </div>
-                    </template>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="card">
-              <div class="card-header"><div class="card-title">🎯 Interview Settings</div></div>
-              <div style="display:flex;flex-direction:column;gap:10px">
-                <div>
-                  <label class="form-label">Role You're Applying For</label>
-                  <input class="input" x-model="ghostSetup.target_role" placeholder="e.g. Senior Backend Engineer, Staff SWE">
-                </div>
-                <div>
-                  <label class="form-label">Interview Type</label>
-                  <div style="display:flex;gap:7px">
-                    <template x-for="type in [{v:'technical',l:'⚙️ Technical'},{v:'behavioral',l:'🧠 Behavioral'},{v:'mixed',l:'🔀 Mixed'}]" :key="type.v">
-                      <div @click="ghostSetup.interview_type=type.v" style="flex:1;padding:8px;border-radius:8px;cursor:pointer;border:1px solid;text-align:center;transition:all .15s"
-                        :style="ghostSetup.interview_type===type.v?'border-color:#6366f1;background:rgba(99,102,241,.1)':'border-color:var(--border);background:var(--bg3)'">
-                        <div style="font-size:11px;font-weight:600" x-text="type.l"></div>
-                      </div>
-                    </template>
-                  </div>
-                </div>
-                <div>
-                  <label class="form-label">Number of Questions: <span style="color:#6366f1;font-weight:600" x-text="ghostSetup.num_questions"></span></label>
-                  <input type="range" min="3" max="15" x-model="ghostSetup.num_questions" style="width:100%;accent-color:#6366f1">
-                  <div style="display:flex;justify-content:space-between;font-size:10px;color:#7b82a0;margin-top:2px">
-                    <span>3 (~10 min)</span><span>8 (~25 min)</span><span>15 (~45 min)</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <button @click="startGhostInterview()" class="btn btn-primary"
-              :disabled="!ghostSetup.persona_name||!ghostSetup.persona_role||!ghostSetup.target_role"
-              style="width:100%;padding:14px;font-size:14px">
-              👻 Start Ghost Interview
-            </button>
-          </div>
-
-          <!-- Preview + tips -->
-          <div style="display:flex;flex-direction:column;gap:12px">
-            <!-- Live preview -->
-            <div class="card" style="background:linear-gradient(135deg,rgba(139,92,246,.06),rgba(99,102,241,.04));border-color:rgba(139,92,246,.2)">
-              <div class="card-header"><div class="card-title">👻 Interview Preview</div></div>
-              <div x-show="ghostSetup.persona_name && ghostSetup.target_role">
-                <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-                  <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#8b5cf6,#6366f1);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff" x-text="ghostSetup.persona_name[0]||'?'"></div>
-                  <div>
-                    <div style="font-size:13px;font-weight:600" x-text="ghostSetup.persona_name||'Your Interviewer'"></div>
-                    <div style="font-size:11px;color:#7b82a0" x-text="ghostSetup.persona_role||'Role'"></div>
-                  </div>
-                </div>
-                <div style="background:var(--bg3);border-radius:10px;padding:12px;font-size:12px;color:#e2e6f3;line-height:1.6;font-style:italic">
-                  "Hi, I'm <span x-text="ghostSetup.persona_name"></span>. I'll be interviewing you today for the <span x-text="ghostSetup.target_role||'position'"></span> role. We'll have <span x-text="ghostSetup.num_questions"></span> questions -- <span x-text="ghostSetup.interview_type==='mixed'?'a mix of technical and behavioral':ghostSetup.interview_type"></span>. Ready?"
-                </div>
-              </div>
-              <div x-show="!ghostSetup.persona_name || !ghostSetup.target_role" style="text-align:center;padding:20px;color:#7b82a0;font-size:12px">
-                Fill in the details to see a preview
-              </div>
-            </div>
-
-            <!-- Tips -->
-            <div class="card">
-              <div class="card-header"><div class="card-title">💡 Pro Tips</div></div>
-              <div style="display:flex;flex-direction:column;gap:9px">
-                <div style="display:flex;gap:9px"><span style="font-size:14px">🎯</span><div style="font-size:11px;color:#e2e6f3">Be specific in your answers — use real examples and numbers</div></div>
-                <div style="display:flex;gap:9px"><span style="font-size:14px">⏱️</span><div style="font-size:11px;color:#e2e6f3">Aim for 3-5 sentence answers — not too brief, not too long</div></div>
-                <div style="display:flex;gap:9px"><span style="font-size:14px">🧠</span><div style="font-size:11px;color:#e2e6f3">For technical questions, explain your reasoning out loud</div></div>
-                <div style="display:flex;gap:9px"><span style="font-size:14px">❓</span><div style="font-size:11px;color:#e2e6f3">It's ok to ask clarifying questions — real interviewers expect it</div></div>
-                <div style="display:flex;gap:9px"><span style="font-size:14px">🏆</span><div style="font-size:11px;color:#e2e6f3">You'll get a real hiring recommendation at the end</div></div>
-              </div>
-            </div>
-
-            <!-- Past interviews -->
-            <div class="card" x-show="ghostHistory.length">
-              <div class="card-header"><div class="card-title">Recent Interviews</div></div>
-              <div style="display:flex;flex-direction:column;gap:7px">
-                <template x-for="h in ghostHistory.slice(0,3)" :key="h.id">
-                  <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--bg3);border-radius:8px">
-                    <div>
-                      <div style="font-size:11px;font-weight:500" x-text="h.target_role"></div>
-                      <div style="font-size:10px;color:#7b82a0" x-text="'with ' + h.persona_name"></div>
-                    </div>
-                    <span x-show="h.verdict" style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px"
-                      :style="h.verdict==='Strong Hire'||h.verdict==='Hire'?'background:rgba(16,185,129,.15);color:#10b981':'background:rgba(239,68,68,.15);color:#ef4444'"
-                      x-text="h.verdict"></span>
-                  </div>
-                </template>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- INTERVIEW TAB -->
-      <div x-show="ghostTab==='interview'" style="display:grid;grid-template-columns:1fr 280px;gap:14px;align-items:start">
-
-        <!-- Chat window -->
-        <div>
-          <div class="card" style="margin-bottom:12px">
-            <!-- Interviewer header -->
-            <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:12px;border-bottom:1px solid var(--border);margin-bottom:12px">
-              <div style="display:flex;align-items:center;gap:10px">
-                <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#8b5cf6,#6366f1);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fff" x-text="ghostSession?.persona_name?.[0]||'?'"></div>
-                <div>
-                  <div style="font-size:13px;font-weight:600" x-text="ghostSession?.persona_name"></div>
-                  <div style="font-size:10px;color:#7b82a0" x-text="ghostSession?.persona_role"></div>
-                </div>
-              </div>
-              <div style="display:flex;align-items:center;gap:10px">
-                <div style="font-size:11px;color:#7b82a0">Q <span x-text="ghostSession?.questions_asked||0"></span>/<span x-text="ghostSession?.num_questions||8"></span></div>
-                <div style="width:80px;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden">
-                  <div style="height:100%;background:#6366f1;border-radius:2px;transition:width .5s" :style="'width:'+(((ghostSession?.questions_asked||0)/(ghostSession?.num_questions||8))*100)+'%'"></div>
-                </div>
-                <button @click="endInterview()" class="btn btn-ghost btn-sm" style="font-size:10px;color:#ef4444;border-color:#ef4444">End</button>
-              </div>
-            </div>
-
-            <!-- Messages -->
-            <div id="ghost-messages" style="height:420px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;padding-right:4px">
-              <template x-for="(msg, idx) in ghostMessages" :key="idx">
-                <div :style="msg.role==='interviewer'?'align-self:flex-start;max-width:85%':'align-self:flex-end;max-width:85%'">
-                  <div style="display:flex;align-items:flex-start;gap:8px" :style="msg.role==='candidate'?'flex-direction:row-reverse':''">
-                    <!-- Avatar -->
-                    <div style="width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600"
-                      :style="msg.role==='interviewer'?'background:linear-gradient(135deg,#8b5cf6,#6366f1);color:#fff':'background:linear-gradient(135deg,#10b981,#06b6d4);color:#fff'"
-                      x-text="msg.role==='interviewer'?(ghostSession?.persona_name?.[0]||'I'):'Me'"></div>
-                    <!-- Bubble -->
-                    <div style="padding:10px 13px;border-radius:12px;font-size:12.5px;line-height:1.6"
-                      :style="msg.role==='interviewer'?'background:var(--bg3);border-radius:4px 12px 12px 12px':'background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.2);border-radius:12px 4px 12px 12px'"
-                      x-text="msg.content"></div>
-                  </div>
-                </div>
-              </template>
-              <!-- Typing indicator -->
-              <div x-show="ghostSending" style="align-self:flex-start">
-                <div style="display:flex;align-items:center;gap:8px">
-                  <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#8b5cf6,#6366f1);flex-shrink:0"></div>
-                  <div style="background:var(--bg3);padding:10px 16px;border-radius:4px 12px 12px 12px">
-                    <div style="display:flex;gap:4px;align-items:center">
-                      <div style="width:6px;height:6px;border-radius:50%;background:#7b82a0;animation:pulse 1s infinite"></div>
-                      <div style="width:6px;height:6px;border-radius:50%;background:#7b82a0;animation:pulse 1s .2s infinite"></div>
-                      <div style="width:6px;height:6px;border-radius:50%;background:#7b82a0;animation:pulse 1s .4s infinite"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Input area -->
-            <div style="border-top:1px solid var(--border);margin-top:12px;padding-top:12px">
-              <textarea class="textarea" x-model="ghostAnswer"
-                @keydown.ctrl.enter="sendGhostAnswer()"
-                :disabled="ghostSending || ghostSession?.status==='completed'"
-                placeholder="Type your answer... (Ctrl+Enter to send)"
-                rows="3" style="margin-bottom:8px;resize:none"></textarea>
-              <div style="display:flex;justify-content:space-between;align-items:center">
-                <span style="font-size:10px;color:#7b82a0">Ctrl+Enter to send</span>
-                <button @click="sendGhostAnswer()" class="btn btn-primary btn-sm"
-                  :disabled="!ghostAnswer.trim()||ghostSending||ghostSession?.status==='completed'">
-                  <span x-show="!ghostSending">Send →</span>
-                  <span x-show="ghostSending" style="display:flex;align-items:center;gap:5px"><div class="spinner"></div>Thinking...</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Right panel -->
-        <div style="display:flex;flex-direction:column;gap:12px;position:sticky;top:20px">
-          <div class="card">
-            <div class="card-header"><div class="card-title">Interview Info</div></div>
-            <div style="display:flex;flex-direction:column;gap:8px;font-size:11px">
-              <div style="display:flex;justify-content:space-between"><span style="color:#7b82a0">Role</span><span style="font-weight:500" x-text="ghostSession?.target_role"></span></div>
-              <div style="display:flex;justify-content:space-between"><span style="color:#7b82a0">Type</span><span style="text-transform:capitalize" x-text="ghostSession?.interview_type"></span></div>
-              <div style="display:flex;justify-content:space-between"><span style="color:#7b82a0">Progress</span><span x-text="(ghostSession?.questions_asked||0)+' / '+(ghostSession?.num_questions||8)+' questions'"></span></div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-header"><div class="card-title">💡 Quick Tips</div></div>
-            <div style="font-size:11px;color:#7b82a0;line-height:1.7">
-              • Use the STAR method for behavioral<br>
-              • Show your thinking process<br>
-              • Be specific with examples<br>
-              • Ask if unclear
-            </div>
-          </div>
-          <button x-show="ghostSession?.status==='completed'" @click="loadGhostDebrief()" class="btn btn-primary" style="width:100%">
-            📊 See My Results →
-          </button>
-        </div>
-      </div>
-
-      <!-- DEBRIEF TAB -->
-      <div x-show="ghostTab==='debrief'">
-        <div x-show="ghostDebriefLoading" style="text-align:center;padding:60px">
-          <div class="spinner" style="margin:0 auto 16px;width:28px;height:28px;border-width:3px"></div>
-          <div style="font-size:13px;color:#7b82a0">Generating your hiring recommendation...</div>
-        </div>
-
-        <div x-show="!ghostDebriefLoading && ghostDebrief">
-          <!-- Verdict banner -->
-          <div style="text-align:center;padding:32px;margin-bottom:20px;border-radius:16px;border:1px solid"
-            style="background:rgba(99,102,241,.06);border-color:rgba(99,102,241,.2)">
-            <div style="font-size:48px;margin-bottom:12px"
-              x-text="ghostDebrief?.verdict"></div>
-            <div style="font-family:Syne,sans-serif;font-size:32px;font-weight:700;letter-spacing:-1px;margin-bottom:8px"
-              style="color:#a78bfa"
-              x-text="ghostDebrief?.verdict"></div>
-            <div style="font-size:13px;color:#7b82a0;margin-bottom:6px">
-              from <span style="color:#a78bfa;font-weight:600" x-text="ghostDebrief?.persona_name"></span> - <span x-text="ghostDebrief?.persona_role"></span>
-            </div>
-            <div style="font-size:14px;color:#e2e6f3;max-width:600px;margin:0 auto;line-height:1.7" x-text="ghostDebrief?.summary"></div>
-          </div>
-
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
-            <!-- Score -->
-            <div class="card" style="text-align:center">
-              <div class="card-title" style="margin-bottom:12px">Overall Score</div>
-              <div style="font-family:Syne,sans-serif;font-size:52px;font-weight:700;letter-spacing:-2px"
-                style="color:#10b981"
-                x-text="(ghostDebrief?.overall_score||0)+'/10'"></div>
-              <div style="font-size:11px;color:#7b82a0;margin-top:4px" x-text="(ghostDebrief?.questions_asked||0)+' q '+( ghostDebrief?.duration_minutes||0)+' min'"></div>
-            </div>
-
-            <!-- Standout moment -->
-            <div class="card">
-              <div class="card-title" style="margin-bottom:8px">⭐ Standout Moment</div>
-              <div style="font-size:12px;color:#e2e6f3;line-height:1.6;font-style:italic" x-text="ghostDebrief?.standout_moment"></div>
-            </div>
-          </div>
-
-          <!-- Strengths + Weaknesses -->
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
-            <div class="card">
-              <div class="card-title" style="margin-bottom:10px">💪 Strengths</div>
-              <div style="display:flex;flex-direction:column;gap:7px">
-                <template x-for="s in ghostDebrief?.strengths||[]" :key="s">
-                  <div style="display:flex;align-items:flex-start;gap:8px;font-size:12px">
-                    <span style="color:#10b981;flex-shrink:0">✓</span><span x-text="s"></span>
-                  </div>
-                </template>
-              </div>
-            </div>
-            <div class="card">
-              <div class="card-title" style="margin-bottom:10px">📈 Areas to Improve</div>
-              <div style="display:flex;flex-direction:column;gap:7px">
-                <template x-for="w in ghostDebrief?.improvement_areas||[]" :key="w">
-                  <div style="display:flex;align-items:flex-start;gap:8px;font-size:12px">
-                    <span style="color:#f59e0b;flex-shrink:0">-></span><span x-text="w"></span>
-                  </div>
-                </template>
-              </div>
-            </div>
-          </div>
-
-          <!-- Hiring recommendation -->
-          <div class="card" style="margin-bottom:14px">
-            <div class="card-title" style="margin-bottom:10px">📋 Full Recommendation</div>
-            <div style="font-size:12.5px;color:#e2e6f3;line-height:1.8" x-text="ghostDebrief?.hiring_recommendation"></div>
-          </div>
-
-          <!-- Actions -->
-          <div style="display:flex;gap:10px">
-            <button @click="ghostTab='setup'; ghostSession=null; ghostMessages=[];" class="btn btn-primary" style="flex:1;padding:12px">
-              🔄 Try Again
-            </button>
-            <button @click="ghostTab='history'" class="btn btn-ghost" style="flex:1;padding:12px">
-              📋 All Interviews
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- HISTORY TAB -->
-      <div x-show="ghostTab==='history'">
-        <div class="page-header">
-          <div><div class="page-title">Interview History</div></div>
-          <button @click="ghostTab='setup'" class="btn btn-primary btn-sm">+ New Interview</button>
-        </div>
-        <div x-show="!ghostHistory.length" style="text-align:center;padding:60px;color:#7b82a0">
-          <div style="font-size:36px;margin-bottom:12px">👻</div>
-          <div>No interviews yet — start your first one!</div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:10px">
-          <template x-for="h in ghostHistory" :key="h.id">
-            <div class="card" style="border-left:3px solid"
-              :style="'border-left-color:'+(h.verdict==='Strong Hire'||h.verdict==='Hire'?'#10b981':h.verdict?'#ef4444':'#6366f1')">
-              <div style="display:flex;align-items:center;justify-content:space-between">
-                <div>
-                  <div style="font-size:13px;font-weight:600;margin-bottom:3px" x-text="h.target_role"></div>
-                  <div style="font-size:11px;color:#7b82a0" x-text="'by '+h.persona_name+' - '+new Date(h.started_at).toLocaleDateString()"></div>
-
-                <div style="display:flex;align-items:center;gap:8px">
-                  <span x-show="h.verdict" style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:10px"
-                    :style="h.verdict==='Strong Hire'||h.verdict==='Hire'?'background:rgba(16,185,129,.15);color:#10b981':'background:rgba(239,68,68,.15);color:#ef4444'"
-                    x-text="h.verdict"></span>
-                  <span x-show="h.status==='active'" style="font-size:11px;color:#f59e0b">In Progress</span>
-                </div>
-              </div>
-            </div>
-          </template>
-        </div>
-      </div>
-
-    </div>
-
     </div>
 
   </main>
@@ -1712,7 +1347,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <div x-show="!leaderboardLoading" style="display:flex;flex-direction:column;gap:7px">
       <template x-for="(entry, idx) in leaderboard" :key="entry.username">
         <div style="display:flex;align-items:center;gap:12px;padding:9px 12px;background:var(--bg3);border-radius:9px">
-          <span style="font-size:18px" x-text="idx===0?'1st':idx===1?'2nd':idx===2?'3rd':'#'+(idx+1)"></span>
+          <span style="font-size:18px" x-text="idx===0?'🥇':idx===1?'🥈':idx===2?'🥉':'#'+(idx+1)"></span>
           <div style="flex:1">
             <div style="font-size:12px;font-weight:600" x-text="entry.username"></div>
             <div style="font-size:10px;color:#7b82a0" x-text="new Date(entry.claimed_at).toLocaleDateString()"></div>
@@ -1931,24 +1566,6 @@ document.addEventListener('alpine:init', () => {
     gpsLocation: 'Bangalore',
     gpsTab: 'overview',
     gpsBubbleChart: null,
-    // Ghost Interview
-    ghostTab: 'setup',      // 'setup' | 'interview' | 'debrief' | 'history'
-    ghostSession: null,
-    ghostMessages: [],
-    ghostAnswer: '',
-    ghostSending: false,
-    ghostDebrief: null,
-    ghostDebriefLoading: false,
-    ghostHistory: [],
-    ghostSetup: {
-      persona_name: '',
-      persona_role: '',
-      persona_style: 'professional',
-      interview_type: 'mixed',
-      target_role: '',
-      num_questions: 8,
-      focus_skills: [],
-    },
     sessions: [],
 
     // ── assessment ──
@@ -2031,7 +1648,6 @@ document.addEventListener('alpine:init', () => {
       }
       if (newView === 'bounties') this.loadBounties();
       if (newView === 'gps') this.loadGPS();
-      if (newView === 'ghost') this.loadGhostHistory();
     },
 
     // ── dashboard ─────────────────────────────────────────────
@@ -2328,20 +1944,8 @@ document.addEventListener('alpine:init', () => {
       };
 
       this.wsConn.onclose = () => {
-        // Auto-reconnect after 3s if still in a room — refresh token first
-        if (this.activeRoom) {
-          setTimeout(async () => {
-            // Refresh token before reconnecting to avoid 403
-            try {
-              const r = await fetch('/api/auth/refresh', { method: 'POST', credentials: 'include' });
-              if (r.ok) {
-                const d = await r.json();
-                localStorage.setItem('sf_token', d.access_token);
-              }
-            } catch {}
-            this.connectWs(roomId);
-          }, 3000);
-        }
+        // Auto-reconnect after 3s if still in a room
+        if (this.activeRoom) setTimeout(() => this.connectWs(roomId), 3000);
       };
 
       this.wsConn.onerror = () => toast('WebSocket connection issue — reconnecting…', 'warning');
@@ -2538,144 +2142,6 @@ document.addEventListener('alpine:init', () => {
 
       // Bubble chart
       setTimeout(() => this._renderBubbleChart(market?.skill_bubbles || []), 100);
-    },
-
-
-    // ── market trend lookup ───────────────────────────────────
-    getMarketTrend(skill) {
-      const trends = {
-        // 🔥 Hot — high demand, growing fast (India job market 2025)
-        'Python':         { label:'🔥 Hot',      color:'background:rgba(239,68,68,.15);color:#ef4444',   jobs:'95k+ jobs' },
-        'JavaScript':     { label:'🔥 Hot',      color:'background:rgba(239,68,68,.15);color:#ef4444',   jobs:'88k+ jobs' },
-        'TypeScript':     { label:'🔥 Hot',      color:'background:rgba(239,68,68,.15);color:#ef4444',   jobs:'72k+ jobs' },
-        'React':          { label:'🔥 Hot',      color:'background:rgba(239,68,68,.15);color:#ef4444',   jobs:'74k+ jobs' },
-        'Node.js':        { label:'🔥 Hot',      color:'background:rgba(239,68,68,.15);color:#ef4444',   jobs:'65k+ jobs' },
-        'AWS':            { label:'🔥 Hot',      color:'background:rgba(239,68,68,.15);color:#ef4444',   jobs:'84k+ jobs' },
-        'Docker':         { label:'🔥 Hot',      color:'background:rgba(239,68,68,.15);color:#ef4444',   jobs:'71k+ jobs' },
-        'Kubernetes':     { label:'🔥 Hot',      color:'background:rgba(239,68,68,.15);color:#ef4444',   jobs:'52k+ jobs' },
-        'Go':             { label:'🔥 Hot',      color:'background:rgba(239,68,68,.15);color:#ef4444',   jobs:'42k+ jobs' },
-        'Machine Learning':{ label:'🔥 Hot',     color:'background:rgba(239,68,68,.15);color:#ef4444',   jobs:'55k+ jobs' },
-        'Rust':           { label:'🔥 Rising',   color:'background:rgba(245,158,11,.15);color:#f59e0b',  jobs:'18k+ jobs' },
-        'FastAPI':        { label:'🔥 Rising',   color:'background:rgba(245,158,11,.15);color:#f59e0b',  jobs:'18k+ jobs' },
-        'GraphQL':        { label:'🔥 Rising',   color:'background:rgba(245,158,11,.15);color:#f59e0b',  jobs:'28k+ jobs' },
-        // ✅ Stable — consistent demand
-        'Java':           { label:'✅ Stable',   color:'background:rgba(16,185,129,.15);color:#10b981',  jobs:'81k+ jobs' },
-        'PostgreSQL':     { label:'✅ Stable',   color:'background:rgba(16,185,129,.15);color:#10b981',  jobs:'58k+ jobs' },
-        'MySQL':          { label:'✅ Stable',   color:'background:rgba(16,185,129,.15);color:#10b981',  jobs:'62k+ jobs' },
-        'Redis':          { label:'✅ Stable',   color:'background:rgba(16,185,129,.15);color:#10b981',  jobs:'45k+ jobs' },
-        'MongoDB':        { label:'✅ Stable',   color:'background:rgba(16,185,129,.15);color:#10b981',  jobs:'41k+ jobs' },
-        'Django':         { label:'✅ Stable',   color:'background:rgba(16,185,129,.15);color:#10b981',  jobs:'25k+ jobs' },
-        'Vue':            { label:'✅ Stable',   color:'background:rgba(16,185,129,.15);color:#10b981',  jobs:'32k+ jobs' },
-        'Angular':        { label:'✅ Stable',   color:'background:rgba(16,185,129,.15);color:#10b981',  jobs:'38k+ jobs' },
-        'Spring':         { label:'✅ Stable',   color:'background:rgba(16,185,129,.15);color:#10b981',  jobs:'44k+ jobs' },
-        'Terraform':      { label:'✅ Stable',   color:'background:rgba(16,185,129,.15);color:#10b981',  jobs:'38k+ jobs' },
-        // 📉 Declining
-        'PHP':            { label:'📉 Declining', color:'background:rgba(107,114,128,.15);color:#6b7280', jobs:'38k jobs' },
-        'Ruby':           { label:'📉 Declining', color:'background:rgba(107,114,128,.15);color:#6b7280', jobs:'22k jobs' },
-        'C++':            { label:'📉 Niche',     color:'background:rgba(107,114,128,.15);color:#6b7280', jobs:'55k jobs' },
-      };
-      return trends[skill] || { label:'📊 Active', color:'background:rgba(99,102,241,.15);color:#a78bfa', jobs:'market data' };
-    },
-    async loadGhostHistory() {
-      try {
-        const data = await api('/ghost-interview/history');
-        this.ghostHistory = data?.interviews || [];
-      } catch(e) {}
-    },
-
-    async startGhostInterview() {
-      if (!this.ghostSetup.persona_name || !this.ghostSetup.persona_role || !this.ghostSetup.target_role) {
-        toast('Please fill in all fields', 'error'); return;
-      }
-      try {
-        const result = await api('/ghost-interview/start', {
-          method: 'POST',
-          body: JSON.stringify({
-            ...this.ghostSetup,
-            num_questions: parseInt(this.ghostSetup.num_questions),
-          }),
-        });
-        this.ghostSession = {
-          session_id: result.session_id,
-          persona_name: result.persona_name,
-          persona_role: result.persona_role,
-          target_role: this.ghostSetup.target_role,
-          interview_type: this.ghostSetup.interview_type,
-          num_questions: result.num_questions,
-          questions_asked: 0,
-          status: 'active',
-        };
-        this.ghostMessages = [{
-          role: 'interviewer',
-          content: result.opening_message,
-          timestamp: new Date().toISOString(),
-        }];
-        this.ghostTab = 'interview';
-        this.$nextTick(() => this._scrollGhostChat());
-      } catch(e) { toast('Failed to start interview', 'error'); }
-    },
-
-    async sendGhostAnswer() {
-      if (!this.ghostAnswer.trim() || this.ghostSending) return;
-      const answer = this.ghostAnswer.trim();
-      this.ghostAnswer = '';
-      this.ghostSending = true;
-
-      // Add candidate message immediately
-      this.ghostMessages.push({ role: 'candidate', content: answer, timestamp: new Date().toISOString() });
-      this.$nextTick(() => this._scrollGhostChat());
-
-      try {
-        const result = await api('/ghost-interview/'+this.ghostSession.session_id+'/respond', {
-          method: 'POST',
-          body: JSON.stringify({ answer }),
-        });
-
-        this.ghostMessages.push({
-          role: 'interviewer',
-          content: result.interviewer_message,
-          timestamp: new Date().toISOString(),
-        });
-
-        this.ghostSession.questions_asked = result.questions_asked;
-        this.ghostSession.status = result.interview_done ? 'completed' : 'active';
-
-        if (result.interview_done) {
-          toast('Interview complete! Click "See My Results" to get your verdict.', 'success');
-        }
-
-        this.$nextTick(() => this._scrollGhostChat());
-      } catch(e) { toast('Failed to send answer', 'error'); }
-      this.ghostSending = false;
-    },
-
-    async loadGhostDebrief() {
-      this.ghostTab = 'debrief';
-      this.ghostDebriefLoading = true;
-      this.ghostDebrief = null;
-      try {
-        this.ghostDebrief = await api('/ghost-interview/'+this.ghostSession.session_id+'/debrief');
-        await this.loadGhostHistory();
-      } catch(e) { toast('Failed to load debrief', 'error'); }
-      this.ghostDebriefLoading = false;
-    },
-
-    endInterview() {
-      if (confirm('End the interview early? You can still see your results.')) {
-        this.ghostSession.status = 'completed';
-        // Send a completion signal to backend so it knows interview ended early
-        api('/ghost-interview/'+this.ghostSession.session_id+'/respond', {
-          method: 'POST',
-          body: JSON.stringify({ answer: '[INTERVIEW_ENDED_EARLY]' }),
-        }).catch(() => {}).finally(() => {
-          this.loadGhostDebrief();
-        });
-      }
-    },
-
-    _scrollGhostChat() {
-      const el = document.getElementById('ghost-messages');
-      if (el) el.scrollTop = el.scrollHeight;
     },
 
     _renderBubbleChart(bubbles) {
