@@ -46,6 +46,7 @@ COPY --from=builder /venv /venv
 
 # Copy application code
 COPY backend/ .
+COPY frontend/ /app/frontend/
 
 # Create log directory and own everything as appuser
 RUN mkdir -p /app/logs && chown -R appuser:appgroup /app
