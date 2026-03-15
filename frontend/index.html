@@ -2030,7 +2030,16 @@ document.addEventListener('alpine:init', () => {
       }
       if (newView === 'bounties') this.loadBounties();
       if (newView === 'gps') this.loadGPS();
-      if (newView === 'ghost') this.loadGhostHistory();
+      if (newView === 'ghost') {
+        this.loadGhostHistory();
+        setTimeout(() => {
+          const vc = document.getElementById('vc');
+          if (vc) vc.scrollTop = 0;
+          window.scrollTo(0, 0);
+          document.documentElement.scrollTop = 0;
+          document.body.scrollTop = 0;
+        }, 50);
+      }
     },
 
     // ── dashboard ─────────────────────────────────────────────
