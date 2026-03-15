@@ -43,7 +43,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 /* ── Layout ── */
 .app-shell{display:grid !important;grid-template-columns:210px 1fr;min-height:100vh;position:relative;z-index:1;align-items:start}
 .sidebar{background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow:hidden;align-self:start}
-.main-content{padding:28px 32px;min-height:100vh}
+.main-content{padding:28px 32px;min-height:100vh;position:relative}
 
 /* ── Sidebar ── */
 .sidebar-logo{padding:20px 18px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px}
@@ -57,6 +57,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .nav-item svg{width:14px;height:14px;opacity:.7;flex-shrink:0}
 .nav-item.active svg{opacity:1}
 .nav-badge{margin-left:auto;font-size:10px;font-family:'DM Mono',monospace;background:var(--accent);color:#fff;padding:1px 6px;border-radius:10px}
+[x-show][style*="display: none"]{position:absolute;pointer-events:none;opacity:0;height:0;overflow:hidden;}
 .sidebar-footer{padding:12px 14px;border-top:1px solid var(--border);margin-top:auto}
 .user-chip{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:var(--r-md);cursor:pointer;transition:background var(--t-base)}
 .user-chip:hover{background:var(--bg3)}
