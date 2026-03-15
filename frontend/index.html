@@ -41,9 +41,9 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg2)}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
 
 /* ── Layout ── */
-.app-shell{display:grid !important;grid-template-columns:210px 1fr;min-height:100vh;position:relative;z-index:1;align-items:start}
-.sidebar{background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow:hidden;align-self:start}
-.main-content{padding:28px 32px;min-height:100vh;position:relative}
+.app-shell{display:grid;grid-template-columns:210px 1fr;min-height:100vh;position:relative;z-index:1}
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow:hidden}
+.main-content{padding:28px 32px;min-height:100vh}
 
 /* ── Sidebar ── */
 .sidebar-logo{padding:20px 18px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px}
@@ -57,7 +57,6 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .nav-item svg{width:14px;height:14px;opacity:.7;flex-shrink:0}
 .nav-item.active svg{opacity:1}
 .nav-badge{margin-left:auto;font-size:10px;font-family:'DM Mono',monospace;background:var(--accent);color:#fff;padding:1px 6px;border-radius:10px}
-[x-show][style*="display: none"]{position:absolute;pointer-events:none;opacity:0;height:0;overflow:hidden;}
 .sidebar-footer{padding:12px 14px;border-top:1px solid var(--border);margin-top:auto}
 .user-chip{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:var(--r-md);cursor:pointer;transition:background var(--t-base)}
 .user-chip:hover{background:var(--bg3)}
@@ -495,7 +494,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
             <div class="card-header"><div class="card-title">Choose a skill</div></div>
             <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:13px">
               <template x-for="s in availableSkills" :key="s">
-                <span class="tag" :class="{active:selectedSkill===s}" @click="selectedSkill=s" x-text="s"></span>
+                <span class="tag" :class="{active:selectedSkill===s}" @click="selectedSkill===s ? selectedSkill='' : selectedSkill=s" x-text="s"></span>
               </template>
             </div>
             <div style="display:flex;gap:8px">
@@ -1296,7 +1295,6 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
           </div>
         </div>
       </div>
-      </div>
       <div x-show="view==='gps' && !gpsLoading && !gpsData" style="text-align:center;padding:80px 0">
         <div style="font-size:48px;margin-bottom:16px">🗺️</div>
         <div style="font-size:18px;font-weight:600;margin-bottom:8px">Your Career GPS is ready</div>
@@ -1304,12 +1302,12 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
         <button @click="loadGPS()" class="btn btn-primary" style="font-size:14px;padding:12px 28px">🔍 Analyze My Market</button>
       </div>
 
-    
+    </div>
+
     </div>
 
     <!-- GHOST INTERVIEW VIEW -->
-    <template x-if="view==='ghost'">
-    <div>
+    <div x-show="view==='ghost'" style="display:none">
 
       <!-- SETUP TAB -->
       <div x-show="ghostTab==='setup'">
@@ -1556,7 +1554,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
               style="color:#a78bfa"
               x-text="ghostDebrief?.verdict"></div>
             <div style="font-size:13px;color:#7b82a0;margin-bottom:6px">
-              from <span style="color:#a78bfa;font-weight:600" x-text="ghostDebrief?.persona_name"></span> - <span x-text="ghostDebrief?.persona_role"></span>
+              from <span style="color:#a78bfa;font-weight:600" x-text="ghostDebrief?.persona_name"></span> - <span x-text="ghostDebrief?.persona_role
             </div>
             <div style="font-size:14px;color:#e2e6f3;max-width:600px;margin:0 auto;line-height:1.7" x-text="ghostDebrief?.summary"></div>
           </div>
@@ -1654,9 +1652,9 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     </div>
 
     </div>
-    </template>
 
-  </main></div>
+  </main>
+</div>
 
 <!-- Create Bounty Modal -->
 <div class="modal-backdrop" x-show="showCreateBounty" @click.self="showCreateBounty=false" style="display:none">
@@ -2014,6 +2012,7 @@ document.addEventListener('alpine:init', () => {
       await new Promise(r => setTimeout(r, 160));
       this.view = newView;
       await this.$nextTick();
+      window.scrollTo(0,0);
       if (vc) { vc.style.transition = 'opacity 200ms ease,transform 200ms ease'; vc.style.transform = 'translateY(0)'; vc.style.opacity = '1'; }
 
       if (newView === 'dashboard')  this.loadDashboard();
@@ -2031,16 +2030,7 @@ document.addEventListener('alpine:init', () => {
       }
       if (newView === 'bounties') this.loadBounties();
       if (newView === 'gps') this.loadGPS();
-      if (newView === 'ghost') {
-        this.loadGhostHistory();
-        setTimeout(() => {
-          const vc = document.getElementById('vc');
-          if (vc) vc.scrollTop = 0;
-          window.scrollTo(0, 0);
-          document.documentElement.scrollTop = 0;
-          document.body.scrollTop = 0;
-        }, 50);
-      }
+      if (newView === 'ghost') this.loadGhostHistory();
     },
 
     // ── dashboard ─────────────────────────────────────────────
