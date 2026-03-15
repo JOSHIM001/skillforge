@@ -1488,6 +1488,21 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
                         </a>
                         <span style="font-size:10px;color:#7b82a0;font-style:italic" x-text="task.why"></span>
                       </div>
+                      <!-- Action buttons -->
+                      <div x-show="!task.completed" style="display:flex;gap:7px;margin-top:8px">
+                        <button @click="startVerifyTask(task)"
+                          style="flex:1;padding:6px;background:rgba(99,102,241,.12);color:#a78bfa;border:1px solid rgba(99,102,241,.2);border-radius:7px;font-size:11px;font-weight:600;cursor:pointer">
+                          ✅ Verify &amp; Complete (5 Qs)
+                        </button>
+                        <button @click="manualCompleteTask(task.id)"
+                          style="padding:6px 12px;background:var(--bg3);color:#7b82a0;border:1px solid var(--border);border-radius:7px;font-size:11px;cursor:pointer">
+                          Mark Done
+                        </button>
+                      </div>
+                      <div x-show="task.completed" style="margin-top:8px;font-size:11px;font-weight:600"
+                        :style="task.verified?'color:#10b981':'color:#f59e0b'"
+                        x-text="task.verified ? '✅ Verified ' + Math.round((task.verify_score||0)*100) + '%' : '✓ Marked complete'">
+                      </div>
                     </div>
                   </div>
                 </template>
@@ -1517,6 +1532,76 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     </div>
 
   </main>
+</div>
+
+
+<!-- Roadmap Verify Modal -->
+<div class="modal-backdrop" x-show="roadmapVerifyTask" @click.self="roadmapVerifyTask=null" style="display:none">
+  <div class="modal" style="max-width:640px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div>
+        <div style="font-size:14px;font-weight:700" x-text="roadmapVerifyTask?.title"></div>
+        <div style="font-size:11px;color:#7b82a0">Answer 5 questions to verify completion · Need 60% to pass</div>
+      </div>
+      <button @click="roadmapVerifyTask=null" style="background:none;border:none;color:#7b82a0;cursor:pointer;font-size:18px">×</button>
+    </div>
+
+    <!-- Loading -->
+    <div x-show="roadmapVerifyLoading" style="text-align:center;padding:40px">
+      <div class="spinner" style="margin:0 auto 12px;width:24px;height:24px;border-width:3px"></div>
+      <div style="font-size:12px;color:#7b82a0" x-show="roadmapVerifyStep==='questions'">Generating questions based on what you studied...</div>
+      <div style="font-size:12px;color:#7b82a0" x-show="roadmapVerifyStep==='result'">AI is grading your answers...</div>
+    </div>
+
+    <!-- Questions -->
+    <div x-show="!roadmapVerifyLoading && roadmapVerifyStep==='questions' && roadmapVerifyQuestions.length">
+      <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:16px">
+        <template x-for="(q, i) in roadmapVerifyQuestions" :key="i">
+          <div>
+            <div style="font-size:12px;font-weight:600;margin-bottom:6px;color:#e2e6f3" x-text="(i+1)+'. '+q"></div>
+            <textarea class="textarea" rows="2"
+              @input="roadmapVerifyAnswers[i]=$event.target.value"
+              :value="roadmapVerifyAnswers[i]||''",
+              placeholder="Your answer..." style="resize:none"></textarea>
+          </div>
+        </template>
+      </div>
+      <button @click="submitVerifyAnswers()"
+        :disabled="roadmapVerifyAnswers.filter(a=>a&&a.trim().length>5).length < 5"
+        class="btn btn-primary" style="width:100%;padding:12px">
+        Submit Answers for Grading →
+      </button>
+      <div style="font-size:10px;color:#7b82a0;text-align:center;margin-top:8px">All 5 answers required · Minimum 5 characters each</div>
+    </div>
+
+    <!-- Result -->
+    <div x-show="!roadmapVerifyLoading && roadmapVerifyStep==='result' && roadmapVerifyResult">
+      <!-- Pass/Fail banner -->
+      <div style="text-align:center;padding:20px;border-radius:12px;margin-bottom:16px;border:1px solid"
+        :style="roadmapVerifyResult?.passed?'background:rgba(16,185,129,.08);border-color:rgba(16,185,129,.2)':'background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.2)'">
+        <div style="font-size:32px;margin-bottom:8px" x-text="roadmapVerifyResult?.passed?'🎉':'📚'"></div>
+        <div style="font-size:20px;font-weight:700;margin-bottom:4px"
+          :style="roadmapVerifyResult?.passed?'color:#10b981':'color:#ef4444'"
+          x-text="roadmapVerifyResult?.passed?'Verified! Task Complete':'Not quite — try again'">        </div>
+        <div style="font-size:24px;font-weight:700;margin-bottom:6px"
+          x-text="roadmapVerifyResult?.score+'%'"></div>
+        <div style="font-size:12px;color:#7b82a0" x-text="roadmapVerifyResult?.summary"></div>
+      </div>
+      <!-- Per-question feedback -->
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
+        <template x-for="(fb, i) in roadmapVerifyResult?.feedback||[]" :key="i">
+          <div style="padding:8px 12px;background:var(--bg3);border-radius:8px;font-size:11px">
+            <span style="font-weight:600;color:#7b82a0" x-text="'Q'+(i+1)+': '"></span>
+            <span x-text="fb"></span>
+          </div>
+        </template>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button x-show="!roadmapVerifyResult?.passed" @click="roadmapVerifyStep='questions'; roadmapVerifyResult=null; roadmapVerifyAnswers=[]" class="btn btn-primary" style="flex:1">Try Again →</button>
+        <button @click="roadmapVerifyTask=null; loadRoadmap()" class="btn btn-ghost" style="flex:1" x-text="roadmapVerifyResult?.passed?'Continue':'Close'"></button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Create Bounty Modal -->
@@ -1800,6 +1885,12 @@ document.addEventListener('alpine:init', () => {
     roadmapSetup: { hours_per_day: 1, target_role: '', focus_area: 'balanced' },
     roadmapTab: 'overview',
     roadmapExpandedPhase: 1,
+    roadmapVerifyTask: null,      // task being verified
+    roadmapVerifyQuestions: [],   // 5 questions
+    roadmapVerifyAnswers: [],     // user answers
+    roadmapVerifyLoading: false,
+    roadmapVerifyStep: 'questions', // 'questions' | 'result'
+    roadmapVerifyResult: null,
     sessions: [],
 
     // ── assessment ──
@@ -2430,6 +2521,77 @@ document.addEventListener('alpine:init', () => {
         this.roadmapData.overall_completion = result.overall_completion;
         this.roadmapData.completed_tasks = result.completed_tasks;
       } catch(e) { toast('Failed to update progress', 'error'); }
+    },
+
+
+    // ── skill roadmap ─────────────────────────────────────────
+    async loadRoadmap() {
+      this.roadmapLoading = true;
+      try { this.roadmapData = await api('/roadmap'); }
+      catch(e) { this.roadmapData = { has_roadmap: false }; }
+      this.roadmapLoading = false;
+    },
+
+    async generateRoadmap() {
+      if (!Object.keys(this.skillMatrix).length) {
+        toast('Complete at least 2 skill assessments first', 'error'); return;
+      }
+      this.roadmapGenerating = true;
+      try {
+        this.roadmapData = await api('/roadmap/generate', {
+          method: 'POST',
+          body: JSON.stringify({
+            hours_per_day: parseFloat(this.roadmapSetup.hours_per_day),
+            target_role: this.roadmapSetup.target_role,
+            focus_area: this.roadmapSetup.focus_area,
+          }),
+        });
+        this.roadmapData.has_roadmap = true;
+        this.roadmapExpandedPhase = 1;
+        toast('Roadmap generated! Start with Phase 1.', 'success');
+      } catch(e) { toast('Failed to generate roadmap. Make sure you have 2+ assessments done.', 'error'); }
+      this.roadmapGenerating = false;
+    },
+
+    async startVerifyTask(task) {
+      this.roadmapVerifyTask = task;
+      this.roadmapVerifyQuestions = [];
+      this.roadmapVerifyAnswers = [];
+      this.roadmapVerifyResult = null;
+      this.roadmapVerifyStep = 'questions';
+      this.roadmapVerifyLoading = true;
+      try {
+        const data = await api('/roadmap/task/' + task.id + '/questions');
+        this.roadmapVerifyQuestions = data.questions || [];
+        this.roadmapVerifyAnswers = new Array(5).fill('');
+      } catch(e) {
+        toast('Failed to load questions', 'error');
+        this.roadmapVerifyTask = null;
+      }
+      this.roadmapVerifyLoading = false;
+    },
+
+    async submitVerifyAnswers() {
+      this.roadmapVerifyLoading = true;
+      this.roadmapVerifyStep = 'result';
+      try {
+        this.roadmapVerifyResult = await api('/roadmap/task/' + this.roadmapVerifyTask.id + '/verify', {
+          method: 'POST',
+          body: JSON.stringify({
+            questions: this.roadmapVerifyQuestions,
+            answers: this.roadmapVerifyAnswers,
+          }),
+        });
+      } catch(e) { toast('Grading failed', 'error'); this.roadmapVerifyStep = 'questions'; }
+      this.roadmapVerifyLoading = false;
+    },
+
+    async manualCompleteTask(taskId) {
+      try {
+        await api('/roadmap/task/' + taskId + '/complete', { method: 'PUT' });
+        await this.loadRoadmap();
+        toast('Task marked complete!', 'success');
+      } catch(e) { toast('Failed', 'error'); }
     },
 
     _renderBubbleChart(bubbles) {

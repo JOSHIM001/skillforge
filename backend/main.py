@@ -90,7 +90,9 @@ def create_app() -> FastAPI:
     from routers.ghost_interview import router as ghost_router
     from websocket.ws_router    import router as ws_router
     from routers.roadmap import router as roadmap_router
+    from routers.roadmap import router as roadmap_router
     
+    app.include_router(roadmap_router, prefix="/api/roadmap", tags=["Roadmap"])
     app.include_router(roadmap_router, prefix="/api/roadmap", tags=["Roadmap"])
     app.include_router(auth_router,     prefix="/api/auth",           tags=["Auth"])
     app.include_router(skills_router,   prefix="/api/skills",         tags=["Skills"])
