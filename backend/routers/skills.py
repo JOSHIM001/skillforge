@@ -288,6 +288,13 @@ async def submit_session_answer(
     if session.questions_asked >= _MAX_QUESTIONS:
         raise HTTPException(status.HTTP_409_CONFLICT, "Session already complete")
 
+    # Prevent duplicate submissions — Redis lock per session
+    from redis_client import cache_get, cache_set
+    lock_key = f"submit_lock:{session_id}"
+    if await cache_get(lock_key):
+        raise HTTPException(status.HTTP_429_TOO_MANY_REQUESTS, "Answer already being processed")
+    await cache_set(lock_key, "1", ttl=10)
+
     # Verify the question was actually served (anti-cheat)
     question_cache_key = f"question:{session.id}:current"
     cached_question = await cache_get(question_cache_key)
