@@ -2000,6 +2000,7 @@ document.addEventListener('alpine:init', () => {
       await new Promise(r => setTimeout(r, 160));
       this.view = newView;
       await this.$nextTick();
+      window.scrollTo(0, 0);
       if (vc) { vc.style.transition = 'opacity 200ms ease,transform 200ms ease'; vc.style.transform = 'translateY(0)'; vc.style.opacity = '1'; }
 
       if (newView === 'dashboard')  this.loadDashboard();
