@@ -326,7 +326,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 </div>
 
 <!-- ══════════ APP SHELL ══════════ -->
-<div x-show="view !== 'landing'" class="app-shell" style="display:none">
+<div x-show="view !== 'landing'" class="app-shell" x-cloak style="display:none" :style="view !== 'landing' ? 'display:grid' : 'display:none'">
   <aside class="sidebar">
     <div class="sidebar-logo">
       <div class="logo-mark">SF</div>
