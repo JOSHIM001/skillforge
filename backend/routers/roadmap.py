@@ -264,7 +264,11 @@ async def delete_roadmap(current_user: CurrentUser, db: AsyncSession = Depends(g
 
 def _fallback_roadmap(skill_matrix: dict, hours_per_day: float) -> dict:
     weak = sorted([(s,v) for s,v in skill_matrix.items() if v<0.6], key=lambda x:x[1])
+    # If no strong skills, use top skills from all
+    all_sorted = sorted(skill_matrix.items(), key=lambda x:x[1], reverse=True)
     strong = sorted([(s,v) for s,v in skill_matrix.items() if v>=0.6], key=lambda x:x[1], reverse=True)
+    if not strong:
+        strong = all_sorted[:3]  # use best skills even if below 0.6
     h = int(hours_per_day * 7)
     return {
         "summary": "Fix weaknesses first, then deepen strengths for maximum market impact.",
