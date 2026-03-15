@@ -2152,6 +2152,7 @@ document.addEventListener('alpine:init', () => {
     },
 
     async submitAnswer() {
+      if (this.aLoading) return;
       this.errors.answer = '';
       if (!this.userAnswer.trim()) { this.errors.answer = 'Please write an answer before submitting'; return; }
       if (this.userAnswer.trim().length < 10) { this.errors.answer = 'Answer is too short — explain your understanding'; return; }
