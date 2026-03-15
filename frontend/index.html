@@ -1307,7 +1307,8 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     </div>
 
     <!-- GHOST INTERVIEW VIEW -->
-    <div x-show="view==='ghost'" style="display:none">
+    <template x-if="view==='ghost'">
+    <div>
 
       <!-- SETUP TAB -->
       <div x-show="ghostTab==='setup'">
@@ -1652,9 +1653,9 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     </div>
 
     </div>
+    </template>
 
-  </main>
-</div>
+  </main></div>
 
 <!-- Create Bounty Modal -->
 <div class="modal-backdrop" x-show="showCreateBounty" @click.self="showCreateBounty=false" style="display:none">
