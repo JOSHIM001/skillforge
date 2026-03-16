@@ -615,88 +615,241 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <!-- ── PROJECTS ── -->
     <div x-show="view==='projects'" style="display:none">
       <div class="page-header">
-        <div><div class="page-title">Project Analyzer</div><div class="page-subtitle">Validate your stack · Get an AI-generated blueprint</div></div>
+        <div>
+          <div class="page-title">Project Analyzer</div>
+          <div class="page-subtitle">Describe your idea · AI validates your stack · Get a personalized blueprint</div>
+        </div>
       </div>
-      <div class="grid-main">
-        <div style="display:flex;flex-direction:column;gap:14px">
-          <div class="card animate-up">
-            <div class="card-header"><div class="card-title">Stack Validator</div></div>
-            <div class="form-group">
-              <label class="form-label">Project idea</label>
-              <textarea class="textarea" :class="{error:errors.idea}" placeholder="e.g. A real-time collaborative code editor with syntax highlighting, user presence, and version history…" x-model="projectIdea" rows="4" @input="errors.idea=''"></textarea>
-              <div class="field-error" x-show="errors.idea" x-text="errors.idea"></div>
+
+      <!-- Input section -->
+      <div style="display:grid;grid-template-columns:1fr 340px;gap:14px;margin-bottom:16px">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Your Project Idea</div></div>
+          <div class="form-group">
+            <textarea class="textarea" :class="{error:errors.idea}" placeholder="e.g. A campus navigation app where students can find buildings, rooms, and events on an interactive map…" x-model="projectIdea" rows="3" @input="errors.idea=''"></textarea>
+            <div class="field-error" x-show="errors.idea" x-text="errors.idea"></div>
+          </div>
+          <div class="form-group" style="margin-bottom:10px">
+            <label class="form-label">Your current tech stack</label>
+            <div style="display:flex;gap:7px;margin-bottom:7px">
+              <input class="input" placeholder="Add a technology… (e.g. React, Python)" x-model="newTech" @keydown.enter="addTech()">
+              <button class="btn btn-secondary" @click="addTech()">Add</button>
             </div>
-            <div class="form-group">
-              <label class="form-label">Current tech stack</label>
-              <div style="display:flex;gap:7px;margin-bottom:7px">
-                <input class="input" placeholder="Add a technology…" x-model="newTech" @keydown.enter="addTech()">
-                <button class="btn btn-secondary" @click="addTech()">Add</button>
+            <div style="display:flex;flex-wrap:wrap;gap:5px;min-height:28px">
+              <template x-for="t in techStack" :key="t">
+                <span class="badge badge-accent" style="cursor:pointer" @click="removeTech(t)"><span x-text="t"></span><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span>
+              </template>
+              <span x-show="!techStack.length" style="font-size:11px;color:#7b82a0">No technologies added yet</span>
+            </div>
+          </div>
+          <button class="btn btn-primary" @click="doValidate()" :disabled="!projectIdea.trim()||projLoading" style="width:100%">
+            <span x-show="!projLoading">🔍 Analyze My Stack</span>
+            <span x-show="projLoading" style="display:flex;align-items:center;justify-content:center;gap:6px"><span class="spinner"></span>AI is analyzing your stack...</span>
+          </button>
+        </div>
+
+        <!-- Skill readiness panel -->
+        <div class="card" style="position:sticky;top:20px">
+          <div class="card-header"><div class="card-title">Your Skill Readiness</div></div>
+          <div x-show="Object.keys(skillMatrix).length" style="display:flex;flex-direction:column;gap:8px">
+            <template x-for="(score, skill) in skillMatrix" :key="skill">
+              <div style="display:flex;align-items:center;gap:8px">
+                <div style="flex:1">
+                  <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+                    <span style="font-size:11px;font-weight:500" x-text="skill"></span>
+                    <span style="font-size:10px;font-weight:600;padding:1px 6px;border-radius:5px"
+                      :style="score>=.7?'background:rgba(16,185,129,.15);color:#10b981':score>=.4?'background:rgba(245,158,11,.15);color:#f59e0b':'background:rgba(239,68,68,.15);color:#ef4444'"
+                      x-text="score>=.7?'Ready':score>=.4?'Partial':'Gap'"></span>
+                  </div>
+                  <div style="height:3px;background:var(--bg4);border-radius:2px">
+                    <div :style="'width:'+Math.round(score*100)+'%;height:100%;border-radius:2px;background:'+(score>=.7?'#10b981':score>=.4?'#f59e0b':'#ef4444')"></div>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+          <div x-show="!Object.keys(skillMatrix).length" style="text-align:center;padding:20px 0;font-size:12px;color:#7b82a0">
+            Complete assessments to see your skill readiness
+          </div>
+        </div>
+      </div>
+
+      <!-- Analysis Results -->
+      <div x-show="validationResult" style="display:none">
+
+        <!-- Summary row -->
+        <div class="grid-4" style="margin-bottom:14px">
+          <div class="metric-card indigo">
+            <div class="metric-icon indigo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+            <div class="metric-value" x-text="techStack.length" style="font-size:24px"></div>
+            <div class="metric-label">Your Stack</div>
+          </div>
+          <div class="metric-card amber">
+            <div class="metric-icon amber"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+            <div class="metric-value" x-text="(validationResult?.missing_tech||[]).length" style="font-size:24px"></div>
+            <div class="metric-label">Missing Tech</div>
+          </div>
+          <div class="metric-card green">
+            <div class="metric-icon green"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="metric-value" style="font-size:24px" x-text="Object.values(skillMatrix).filter(s=>s>=0.7).length"></div>
+            <div class="metric-label">Skills Ready</div>
+          </div>
+          <div class="metric-card" style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px 18px">
+            <div class="metric-icon" style="background:rgba(6,182,212,.15);color:#06b6d4"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+            <div class="metric-value" style="font-size:18px"
+              x-text="(validationResult?.missing_tech||[]).length===0?'Solid':'Needs work'"></div>
+            <div class="metric-label">Stack Status</div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+
+          <!-- What you have vs what you need -->
+          <div class="card">
+            <div class="card-header"><div class="card-title">Stack Analysis</div></div>
+
+            <!-- What you have -->
+            <div style="margin-bottom:12px">
+              <div style="font-size:11px;font-weight:600;color:#10b981;margin-bottom:7px;display:flex;align-items:center;gap:5px">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                What you have
               </div>
               <div style="display:flex;flex-wrap:wrap;gap:5px">
                 <template x-for="t in techStack" :key="t">
-                  <span class="badge badge-accent" style="cursor:pointer" @click="removeTech(t)"><span x-text="t"></span><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span>
+                  <span style="font-size:11px;padding:3px 9px;background:rgba(16,185,129,.1);color:#10b981;border:1px solid rgba(16,185,129,.2);border-radius:6px" x-text="t"></span>
                 </template>
               </div>
             </div>
-            <button class="btn btn-primary" @click="doValidate()" :disabled="!projectIdea.trim()||projLoading">
-              <span x-show="!projLoading">Analyze stack</span>
-              <span x-show="projLoading" style="display:flex;align-items:center;gap:6px"><span class="spinner"></span>Analyzing…</span>
-            </button>
+
+            <!-- What you need -->
+            <div x-show="(validationResult?.missing_tech||[]).length">
+              <div style="font-size:11px;font-weight:600;color:#f59e0b;margin-bottom:7px;display:flex;align-items:center;gap:5px">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                What you need to add
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:5px">
+                <template x-for="t in (validationResult?.missing_tech||[])" :key="t">
+                  <span style="font-size:11px;padding:3px 9px;background:rgba(245,158,11,.1);color:#f59e0b;border:1px solid rgba(245,158,11,.2);border-radius:6px;cursor:pointer"
+                    @click="newTech=t; addTech()" x-text="t+' +'"></span>
+                </template>
+              </div>
+              <div style="font-size:10px;color:#7b82a0;margin-top:6px">Click any tech to add it to your stack</div>
+            </div>
+            <div x-show="!(validationResult?.missing_tech||[]).length" style="font-size:12px;color:#10b981;padding:8px 0">
+              Your stack covers all required technologies!
+            </div>
           </div>
 
-          <div class="card animate-up" x-show="validationResult" style="display:none">
-            <div class="card-header"><div class="card-title">Analysis results</div><span class="badge badge-green">Complete</span></div>
-            <div x-show="validationResult?.missing_tech?.length" style="margin-bottom:13px">
-              <div style="font-size:12px;font-weight:600;color:var(--amber);margin-bottom:8px">Missing technologies:</div>
-              <div style="display:flex;flex-wrap:wrap;gap:6px">
-                <template x-for="t in (validationResult?.missing_tech||[])"><span class="badge badge-amber"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span x-text="t"></span></span></template>
+          <!-- AI Explanation - plain language -->
+          <div class="card">
+            <div class="card-header"><div class="card-title">What This Means</div></div>
+            <!-- Plain language explanation -->
+            <div style="font-size:13px;color:var(--text);line-height:1.8;margin-bottom:12px" x-text="validationResult?.reasoning"></div>
+
+            <!-- Market relevance of missing tech -->
+            <div x-show="(validationResult?.missing_tech||[]).length" style="padding:10px 12px;background:rgba(99,102,241,.06);border:1px solid rgba(99,102,241,.12);border-radius:8px">
+              <div style="font-size:11px;font-weight:600;color:#a78bfa;margin-bottom:6px">Market relevance of missing tech</div>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <template x-for="t in (validationResult?.missing_tech||[])" :key="t">
+                  <div style="display:flex;align-items:center;justify-content:space-between">
+                    <span style="font-size:11px" x-text="t"></span>
+                    <span style="font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px"
+                      :style="getMarketTrend(t).color" x-text="getMarketTrend(t).label+' · '+getMarketTrend(t).jobs"></span>
+                  </div>
+                </template>
               </div>
             </div>
-            <div style="font-size:12px;color:var(--muted2);line-height:1.7;padding:11px;background:var(--bg3);border-radius:var(--r-sm)" x-text="validationResult?.reasoning"></div>
           </div>
         </div>
 
-        <div style="display:flex;flex-direction:column;gap:14px">
-          <div class="card animate-up" style="animation-delay:.08s">
-            <div class="card-header"><div class="card-title">AI Blueprint</div>
-              <button class="btn btn-ghost btn-sm" @click="doBlueprint()" :disabled="bpLoading">
-                <span x-show="!bpLoading">Generate</span><span x-show="bpLoading" class="spinner dark"></span>
-              </button>
-            </div>
-            <div x-show="!blueprint&&!bpLoading" style="text-align:center;padding:20px 0;font-size:12px;color:var(--muted)">Click Generate for a personalised project based on your skill matrix</div>
-            <div x-show="bpLoading" style="display:flex;flex-direction:column;gap:7px">
-              <div class="skeleton" style="height:12px;width:90%"></div>
-              <div class="skeleton" style="height:12px;width:70%"></div>
-              <div class="skeleton" style="height:12px;width:82%"></div>
-            </div>
-            <div x-show="blueprint">
-              <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:6px" x-text="blueprint?.title"></div>
-              <div style="font-size:12px;color:var(--muted2);line-height:1.65;margin-bottom:10px" x-text="blueprint?.description"></div>
-              <div style="font-size:11px;color:var(--muted);margin-bottom:5px">Tech stack:</div>
-              <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px">
-                <template x-for="t in (blueprint?.tech_stack||[])"><span class="badge badge-accent" x-text="t"></span></template>
+        <!-- Skill coverage bars -->
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-header">
+            <div class="card-title">Your Skill Coverage for This Project</div>
+            <span style="font-size:11px;color:#7b82a0">Based on your assessment scores</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">
+            <template x-for="(score, skill) in skillMatrix" :key="skill">
+              <div style="padding:10px 12px;background:var(--bg3);border-radius:8px">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+                  <span style="font-size:12px;font-weight:500" x-text="skill"></span>
+                  <span style="font-size:10px;font-weight:600"
+                    :style="score>=.7?'color:#10b981':score>=.4?'color:#f59e0b':'color:#ef4444'"
+                    x-text="Math.round(score*100)+'%'"></span>
+                </div>
+                <div style="height:4px;background:var(--bg4);border-radius:2px;overflow:hidden">
+                  <div :style="'width:'+Math.round(score*100)+'%;height:100%;border-radius:2px;background:'+(score>=.7?'#10b981':score>=.4?'#f59e0b':'#ef4444')"></div>
+                </div>
+                <div style="font-size:10px;margin-top:4px"
+                  :style="score>=.7?'color:#10b981':score>=.4?'color:#f59e0b':'color:#ef4444'"
+                  x-text="score>=.7?'Ready to use':score>=.4?'Needs practice':'Learn this first'"></div>
               </div>
-              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);padding-top:8px;border-top:1px solid var(--border)">
-                <span>~<span x-text="blueprint?.estimated_days"></span> days</span>
-                <span x-text="(blueprint?.skills_practiced||[]).length+' skills practiced'"></span>
-              </div>
-            </div>
+            </template>
+          </div>
+        </div>
+
+        <!-- AI Blueprint -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">AI Project Blueprint</div>
+            <button class="btn btn-primary btn-sm" @click="doBlueprint()" :disabled="bpLoading">
+              <span x-show="!bpLoading">Generate Blueprint</span>
+              <span x-show="bpLoading" style="display:flex;align-items:center;gap:5px"><span class="spinner"></span>Generating...</span>
+            </button>
           </div>
 
-          <div class="card animate-up" style="animation-delay:.14s">
-            <div class="card-header"><div class="card-title">Skill readiness</div></div>
-            <div style="display:flex;flex-direction:column;gap:7px">
-              <template x-for="(score, skill) in skillMatrix" :key="skill">
-                <div style="display:flex;align-items:center;justify-content:space-between;font-size:12px">
-                  <span x-text="skill"></span>
-                  <span class="badge" :class="score>=.7?'badge-green':score>=.4?'badge-amber':'badge-red'" x-text="score>=.7?'Ready':score>=.4?'Partial':'Gap'"></span>
-                </div>
-              </template>
-              <div class="empty-state" x-show="!Object.keys(skillMatrix).length" style="padding:16px 0">Complete assessments to see readiness</div>
+          <div x-show="!blueprint && !bpLoading" style="text-align:center;padding:30px;background:rgba(99,102,241,.04);border-radius:10px">
+            <div style="font-size:28px;margin-bottom:10px">🗺️</div>
+            <div style="font-size:13px;font-weight:600;margin-bottom:6px">Get your personalized project plan</div>
+            <div style="font-size:12px;color:#7b82a0;max-width:400px;margin:0 auto">AI will generate a step-by-step blueprint tailored to your skill level — what to build first, which skills to use, and estimated timeline</div>
+          </div>
+
+          <div x-show="bpLoading" style="display:flex;flex-direction:column;gap:8px;padding:10px 0">
+            <template x-for="i in 4" :key="i"><div class="skeleton" style="height:12px" :style="i===1?'width:80%':i===2?'width:60%':i===3?'width:90%':'width:70%'"></div></template>
+          </div>
+
+          <div x-show="blueprint">
+            <div style="display:grid;grid-template-columns:1fr auto;gap:12px;align-items:start;margin-bottom:14px">
+              <div>
+                <div style="font-family:Syne,sans-serif;font-size:17px;font-weight:700;letter-spacing:-.3px;margin-bottom:6px" x-text="blueprint?.title"></div>
+                <div style="font-size:13px;color:var(--text);line-height:1.7" x-text="blueprint?.description"></div>
+              </div>
+              <div style="text-align:right;flex-shrink:0">
+                <div style="font-size:22px;font-weight:700;color:#6366f1" x-text="'~'+(blueprint?.estimated_days||'?')+'d'"></div>
+                <div style="font-size:10px;color:#7b82a0">to build</div>
+              </div>
+            </div>
+
+            <!-- Tech stack used -->
+            <div style="margin-bottom:12px">
+              <div style="font-size:11px;font-weight:600;color:#7b82a0;margin-bottom:7px;text-transform:uppercase;letter-spacing:.5px">Recommended stack</div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px">
+                <template x-for="t in (blueprint?.tech_stack||[])" :key="t">
+                  <span style="font-size:11px;padding:4px 10px;background:rgba(99,102,241,.1);color:#a78bfa;border:1px solid rgba(99,102,241,.2);border-radius:7px" x-text="t"></span>
+                </template>
+              </div>
+            </div>
+
+            <!-- Skills practiced -->
+            <div style="padding:12px;background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.12);border-radius:8px">
+              <div style="font-size:11px;font-weight:600;color:#10b981;margin-bottom:6px">Skills this project will strengthen</div>
+              <div style="display:flex;flex-wrap:wrap;gap:5px">
+                <template x-for="s in (blueprint?.skills_practiced||[])" :key="s">
+                  <span style="font-size:11px;padding:2px 8px;background:rgba(16,185,129,.1);color:#10b981;border-radius:5px" x-text="s"></span>
+                </template>
+              </div>
             </div>
           </div>
         </div>
       </div>
+
+      <!-- Empty state before analysis -->
+      <div x-show="!validationResult && !projLoading" style="text-align:center;padding:60px 0">
+        <div style="font-size:48px;margin-bottom:16px">🔬</div>
+        <div style="font-size:16px;font-weight:600;margin-bottom:8px">Describe your project above</div>
+        <div style="font-size:13px;color:#7b82a0;max-width:400px;margin:0 auto">Add your project idea and current tech stack, then click Analyze. AI will tell you exactly what you are missing and how ready you are to build it.</div>
+      </div>
+
     </div>
 
     <!-- ── GITHUB ISSUES ── -->
@@ -2660,5 +2813,26 @@ function startDecayReview(skillName) {
 }
 </script>
 
+<div id="error-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#161b27;border:1px solid #ef4444;border-radius:14px;padding:24px;max-width:420px;text-align:center">
+    <div style="font-size:32px;margin-bottom:12px">⚠️</div>
+    <div style="font-size:15px;font-weight:600;color:#ef4444;margin-bottom:8px">Something went wrong</div>
+    <div id="error-message" style="font-size:12px;color:#7b82a0;margin-bottom:16px"></div>
+    <button onclick="location.reload()" style="background:#6366f1;color:white;border:none;padding:10px 24px;border-radius:8px;cursor:pointer;font-size:13px">Reload Page</button>
+  </div>
+</div>
+<script>
+// Global error boundary — catch unhandled errors gracefully
+window.addEventListener('error', function(e) {
+  // Only show overlay for non-Alpine errors (Alpine handles its own)
+  if (e.filename && e.filename.includes('cdn.min.js')) return;
+  console.error('Global error:', e.message);
+});
+
+// Unhandled promise rejections
+window.addEventListener('unhandledrejection', function(e) {
+  console.error('Unhandled promise rejection:', e.reason);
+});
+</script>
 </body>
 </html>
