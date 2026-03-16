@@ -116,7 +116,67 @@ async def get_spaced_queue(
     items = [SpacedRepetitionItem(**item) for item in queue]
     return SpacedRepetitionQueueOut(items=items, count=len(items))
 
+# ── Session history ───────────────────────────────────────────────────────────
 
+@router.get(
+
+    "/sessions",
+
+    summary="Get past assessment sessions for the current user",
+
+)
+
+async def get_sessions(
+
+    current_user: CurrentUser,
+
+    db: AsyncSession = Depends(get_db),
+
+    limit: int = 20,
+
+) -> dict:
+
+    result = await db.execute(
+
+        select(AssessmentSession)
+
+        .where(AssessmentSession.user_id == current_user.id)
+
+        .order_by(AssessmentSession.started_at.desc())
+
+        .limit(limit)
+
+    )
+
+    sessions = result.scalars().all()
+
+    return {
+
+        "sessions": [
+
+            {
+
+                "id": str(s.id),
+
+                "skill_name": s.skill_name,
+
+                "score": s.final_score,
+
+                "status": s.status.value if hasattr(s.status, 'value') else s.status,
+
+                "questions_answered": s.questions_asked,
+
+                "started_at": s.started_at.isoformat() if s.started_at else None,
+
+                "completed_at": s.completed_at.isoformat() if s.completed_at else None,
+
+            }
+
+            for s in sessions
+
+        ]
+
+    }
 # ── Session lifecycle ─────────────────────────────────────────────────────────
 
 @router.post(
