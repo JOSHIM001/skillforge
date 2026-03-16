@@ -2881,27 +2881,5 @@ function startDecayReview(skillName) {
   setTimeout(function() { app.startAssessment(skillName); }, 400);
 }
 </script>
-
-<div id="error-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px">
-  <div style="background:#161b27;border:1px solid #ef4444;border-radius:14px;padding:24px;max-width:420px;text-align:center">
-    <div style="font-size:32px;margin-bottom:12px">⚠️</div>
-    <div style="font-size:15px;font-weight:600;color:#ef4444;margin-bottom:8px">Something went wrong</div>
-    <div id="error-message" style="font-size:12px;color:#7b82a0;margin-bottom:16px"></div>
-    <button onclick="location.reload()" style="background:#6366f1;color:white;border:none;padding:10px 24px;border-radius:8px;cursor:pointer;font-size:13px">Reload Page</button>
-  </div>
-</div>
-<script>
-// Global error boundary — catch unhandled errors gracefully
-window.addEventListener('error', function(e) {
-  // Only show overlay for non-Alpine errors (Alpine handles its own)
-  if (e.filename && e.filename.includes('cdn.min.js')) return;
-  console.error('Global error:', e.message);
-});
-
-// Unhandled promise rejections
-window.addEventListener('unhandledrejection', function(e) {
-  console.error('Unhandled promise rejection:', e.reason);
-});
-</script>
 </body>
 </html>
