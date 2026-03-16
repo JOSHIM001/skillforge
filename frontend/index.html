@@ -762,6 +762,75 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
           </div>
         </div>
 
+        <!-- Market Relevance -->
+        <div class="card" style="margin-bottom:14px" x-show="validationResult?.market_relevance">
+          <div class="card-header">
+            <div class="card-title">Market Relevance</div>
+            <span style="font-size:12px;font-weight:700;padding:3px 10px;border-radius:8px"
+              :style="(validationResult?.market_relevance?.score||0)>=70?'background:rgba(16,185,129,.15);color:#10b981':(validationResult?.market_relevance?.score||0)>=40?'background:rgba(245,158,11,.15);color:#f59e0b':'background:rgba(239,68,68,.15);color:#ef4444'"
+              x-text="validationResult?.market_relevance?.label||'Analyzing...'"></span>
+          </div>
+
+          <div style="display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center;margin-bottom:16px">
+            <!-- Score circle -->
+            <div style="position:relative;width:80px;height:80px;flex-shrink:0">
+              <svg width="80" height="80" viewBox="0 0 80 80">
+                <circle cx="40" cy="40" r="34" fill="none" stroke="var(--bg3)" stroke-width="6"/>
+                <circle cx="40" cy="40" r="34" fill="none" stroke-width="6"
+                  stroke-linecap="round" transform="rotate(-90 40 40)"
+                  :stroke="(validationResult?.market_relevance?.score||0)>=70?'#10b981':(validationResult?.market_relevance?.score||0)>=40?'#f59e0b':'#ef4444'"
+                  :stroke-dasharray="213.6"
+                  :stroke-dashoffset="213.6 - (validationResult?.market_relevance?.score||0)/100*213.6"
+                  style="transition:stroke-dashoffset 1s ease"/>
+              </svg>
+              <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+                <span style="font-size:18px;font-weight:700;line-height:1" x-text="(validationResult?.market_relevance?.score||0)+'%'"></span>
+                <span style="font-size:9px;color:#7b82a0">demand</span>
+              </div>
+            </div>
+
+            <!-- Summary + verdict -->
+            <div>
+              <div style="font-size:13px;color:var(--text);line-height:1.7;margin-bottom:8px" x-text="validationResult?.market_relevance?.summary"></div>
+              <div style="padding:8px 12px;background:rgba(99,102,241,.08);border-left:3px solid #6366f1;border-radius:0 8px 8px 0;font-size:12px;color:#a78bfa;font-style:italic" x-text="validationResult?.market_relevance?.verdict"></div>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+            <!-- Top industries -->
+            <div style="padding:10px 12px;background:var(--bg3);border-radius:8px">
+              <div style="font-size:10px;font-weight:600;color:#7b82a0;text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px">Top Industries</div>
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <template x-for="ind in (validationResult?.market_relevance?.top_industries||[])" :key="ind">
+                  <div style="font-size:11px;display:flex;align-items:center;gap:5px">
+                    <span style="width:5px;height:5px;border-radius:50%;background:#6366f1;flex-shrink:0"></span>
+                    <span x-text="ind"></span>
+                  </div>
+                </template>
+              </div>
+            </div>
+
+            <!-- Similar products -->
+            <div style="padding:10px 12px;background:var(--bg3);border-radius:8px">
+              <div style="font-size:10px;font-weight:600;color:#7b82a0;text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px">Similar Products</div>
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <template x-for="prod in (validationResult?.market_relevance?.similar_products||[])" :key="prod">
+                  <div style="font-size:11px;display:flex;align-items:center;gap:5px">
+                    <span style="width:5px;height:5px;border-radius:50%;background:#10b981;flex-shrink:0"></span>
+                    <span x-text="prod"></span>
+                  </div>
+                </template>
+              </div>
+            </div>
+
+            <!-- Hiring demand -->
+            <div style="padding:10px 12px;background:var(--bg3);border-radius:8px">
+              <div style="font-size:10px;font-weight:600;color:#7b82a0;text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px">Hiring Demand</div>
+              <div style="font-size:12px;color:#f59e0b;font-weight:500;line-height:1.5" x-text="validationResult?.market_relevance?.hiring_demand"></div>
+            </div>
+          </div>
+        </div>
+
         <!-- Skill coverage bars -->
         <div class="card" style="margin-bottom:14px">
           <div class="card-header">
@@ -2813,5 +2882,26 @@ function startDecayReview(skillName) {
 }
 </script>
 
+<div id="error-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#161b27;border:1px solid #ef4444;border-radius:14px;padding:24px;max-width:420px;text-align:center">
+    <div style="font-size:32px;margin-bottom:12px">⚠️</div>
+    <div style="font-size:15px;font-weight:600;color:#ef4444;margin-bottom:8px">Something went wrong</div>
+    <div id="error-message" style="font-size:12px;color:#7b82a0;margin-bottom:16px"></div>
+    <button onclick="location.reload()" style="background:#6366f1;color:white;border:none;padding:10px 24px;border-radius:8px;cursor:pointer;font-size:13px">Reload Page</button>
+  </div>
+</div>
+<script>
+// Global error boundary — catch unhandled errors gracefully
+window.addEventListener('error', function(e) {
+  // Only show overlay for non-Alpine errors (Alpine handles its own)
+  if (e.filename && e.filename.includes('cdn.min.js')) return;
+  console.error('Global error:', e.message);
+});
+
+// Unhandled promise rejections
+window.addEventListener('unhandledrejection', function(e) {
+  console.error('Unhandled promise rejection:', e.reason);
+});
+</script>
 </body>
 </html>

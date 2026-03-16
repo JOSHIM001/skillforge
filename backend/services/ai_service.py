@@ -346,14 +346,25 @@ async def validate_project_stack(
         "Identify SPECIFIC missing technologies — name actual libraries and tools, not concepts. "
         "Be precise: say 'Celery' not 'task queue', 'JWT' not 'authentication'. "
         "Return ONLY valid JSON matching this schema: "
-        '{"missing_tech": ["string"], "reasoning": "string"}'
+        '{"missing_tech": ["string"], "reasoning": "string", '
+        '"market_relevance": {"score": 85, "label": "High Demand", "summary": "2 sentence plain English summary of market demand for this project type", '
+        '"top_industries": ["EdTech", "Enterprise"], "similar_products": ["Google Maps", "Wayfair"], '
+        '"hiring_demand": "High — 12,000+ job postings need these skills", '
+        '"verdict": "one sentence telling the developer if this is worth building for their career"}}'
     )
 
     prompt = (
         f"Project idea: {project_idea}\n"
         f"Current tech stack: {current_stack or ['none specified']}\n\n"
-        "List the specific technologies this project needs but doesn't have yet. "
-        "Focus on infrastructure gaps (caching, queues, auth, realtime, storage). "
+        "1. List the specific technologies this project needs but doesn't have yet.\n"
+        "2. Explain in plain English (not jargon) what is missing and why it matters.\n"
+        "3. Analyze the MARKET RELEVANCE of this project:\n"
+        "   - Score 0-100 based on current industry demand\n"
+        "   - Which industries need this type of project\n"
+        "   - Similar successful products that exist\n"
+        "   - How many jobs require building things like this\n"
+        "   - Is this worth building for career growth? (one clear verdict)\n"
+        "Focus on Indian tech market context (Bangalore, Hyderabad, Mumbai).\n"
         "Return ONLY valid JSON."
     )
 
@@ -362,6 +373,7 @@ async def validate_project_stack(
     return result or {
         "missing_tech": [],
         "reasoning": "Analysis unavailable. Please try again.",
+        "market_relevance": {"score": 0, "label": "Unknown", "summary": "Market analysis unavailable.", "top_industries": [], "similar_products": [], "hiring_demand": "Unknown", "verdict": "Unable to analyze market demand."},
     }
 
 
