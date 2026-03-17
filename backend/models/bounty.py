@@ -6,7 +6,8 @@ import uuid
 from datetime import datetime, timezone
 
 from sqlalchemy import Boolean, DateTime, Enum, Float, ForeignKey, String, Text, UniqueConstraint
-from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy import JSON
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database import Base
@@ -34,7 +35,7 @@ class Bounty(Base):
     is_ai_generated: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
     # [{"skill": "Python", "min_score": 0.75}, ...]
-    required_skills: Mapped[list] = mapped_column(JSONB, nullable=False, default=list)
+    required_skills: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
 
     reward_label: Mapped[str | None] = mapped_column(String(100), nullable=True)
     status: Mapped[BountyStatus] = mapped_column(
