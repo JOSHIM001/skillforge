@@ -347,6 +347,7 @@ async def validate_project_stack(
         "Be precise: say 'Celery' not 'task queue', 'JWT' not 'authentication'. "
         "Return ONLY valid JSON matching this schema: "
         '{"missing_tech": ["string"], "reasoning": "string", '
+        '"stack_improvements": [{"tech": "Redis", "adds": ["Caching reduces DB load by 80%", "Session storage for auth", "Real-time pub/sub for live features"], "impact": "High", "effort": "Low"}], '
         '"market_relevance": {"score": 85, "label": "High Demand", "summary": "2 sentence plain English summary of market demand for this project type", '
         '"top_industries": ["EdTech", "Enterprise"], "similar_products": ["Google Maps", "Wayfair"], '
         '"hiring_demand": "High — 12,000+ job postings need these skills", '
@@ -358,7 +359,10 @@ async def validate_project_stack(
         f"Current tech stack: {current_stack or ['none specified']}\n\n"
         "1. List the specific technologies this project needs but doesn't have yet.\n"
         "2. Explain in plain English (not jargon) what is missing and why it matters.\n"
-        "3. Analyze the MARKET RELEVANCE of this project:\n"
+        "3. For EACH missing technology, explain what adding it would enable — give 2-3 specific concrete benefits "
+        "   (e.g. 'Adding Redis enables: caching API responses for 10x faster load times, storing user sessions, "
+        "   pub/sub for real-time notifications'). Also rate impact (High/Medium/Low) and effort to add (Low/Medium/High).\n"
+        "4. Analyze the MARKET RELEVANCE of this project:\n"
         "   - Score 0-100 based on current industry demand\n"
         "   - Which industries need this type of project\n"
         "   - Similar successful products that exist\n"
@@ -373,6 +377,7 @@ async def validate_project_stack(
     return result or {
         "missing_tech": [],
         "reasoning": "Analysis unavailable. Please try again.",
+        "stack_improvements": [],
         "market_relevance": {"score": 0, "label": "Unknown", "summary": "Market analysis unavailable.", "top_industries": [], "similar_products": [], "hiring_demand": "Unknown", "verdict": "Unable to analyze market demand."},
     }
 

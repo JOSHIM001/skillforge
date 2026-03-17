@@ -809,6 +809,53 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
           </div>
         </div>
 
+        <!-- ── Stack Improvements ── -->
+        <div class="card" style="margin-bottom:14px" x-show="(validationResult?.stack_improvements||[]).length">
+          <div class="card-header">
+            <div class="card-title">What you'll gain by adding these</div>
+            <span class="badge badge-accent">AI Analysis</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <template x-for="imp in (validationResult?.stack_improvements||[])" :key="imp.tech">
+              <div style="padding:13px 15px;background:var(--bg3);border-radius:var(--r-md);border:1px solid var(--border);border-left:3px solid var(--accent)">
+
+                <!-- Header row -->
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px">
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent3)" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    <span style="font-size:13px;font-weight:600;color:var(--text)" x-text="'Add ' + imp.tech"></span>
+                  </div>
+                  <div style="display:flex;gap:5px;align-items:center">
+                    <span style="font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600"
+                      :style="imp.impact==='High'?'background:rgba(16,185,129,.15);color:#10b981':imp.impact==='Medium'?'background:rgba(245,158,11,.15);color:#f59e0b':'background:rgba(99,102,241,.15);color:#a78bfa'"
+                      x-text="imp.impact + ' impact'"></span>
+                    <span style="font-size:10px;padding:2px 8px;border-radius:10px;background:var(--bg4);color:var(--muted)"
+                      x-text="imp.effort + ' effort'"></span>
+                  </div>
+                </div>
+
+                <!-- Benefits list -->
+                <div style="display:flex;flex-direction:column;gap:5px">
+                  <template x-for="benefit in (imp.adds||[])" :key="benefit">
+                    <div style="display:flex;align-items:flex-start;gap:7px;font-size:11.5px;color:var(--muted2)">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" style="flex-shrink:0;margin-top:2px"><polyline points="20 6 9 17 4 12"/></svg>
+                      <span x-text="benefit"></span>
+                    </div>
+                  </template>
+                </div>
+
+                <!-- Click to add button -->
+                <button class="btn btn-ghost btn-sm" style="margin-top:10px;width:100%"
+                  @click="newTech=imp.tech; addTech(); toast('Added '+imp.tech+' to your stack', 'success')">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                  Add to my stack
+                </button>
+
+              </div>
+            </template>
+          </div>
+        </div>
+
         <!-- Market Relevance -->
         <div class="card" style="margin-bottom:14px" x-show="validationResult?.market_relevance">
           <div class="card-header">
