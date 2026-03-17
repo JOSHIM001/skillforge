@@ -1555,30 +1555,82 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
           </div>
         </div>
         <div x-show="gpsTab==='jobs'">
-          <div x-show="!gpsJobs" style="text-align:center;padding:40px"><div class="spinner" style="margin:0 auto 12px"></div><div style="font-size:12px;color:#7b82a0">Scanning job market...</div></div>
+          <!-- Header with refresh -->
+          <div x-show="gpsJobs" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <div style="font-size:12px;color:var(--muted)" x-text="(gpsJobs?.total||0) + ' roles found · sorted by match'"></div>
+            <button class="btn btn-ghost btn-sm" @click="gpsJobs=null; loadJobs()">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.51"/></svg>
+              Refresh
+            </button>
+          </div>
+
+          <div x-show="!gpsJobs" style="text-align:center;padding:40px">
+            <div class="spinner" style="margin:0 auto 12px"></div>
+            <div style="font-size:12px;color:#7b82a0">Scanning job market...</div>
+          </div>
+
           <div x-show="gpsJobs" style="display:flex;flex-direction:column;gap:10px">
             <template x-for="job in (gpsJobs?.jobs||[])" :key="job.title+job.company">
-              <div class="card" style="border-left:3px solid" :style="'border-left-color:'+(job.match_score>=80?'#10b981':job.match_score>=60?'#f59e0b':'#6366f1')">
+              <div class="card" :style="'border-left:3px solid '+(job.match_score>=80?'#10b981':job.match_score>=60?'#f59e0b':'#6366f1')">
                 <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
                   <div style="flex:1">
-                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap">
+
+                    <!-- Title + badges -->
+                    <div style="display:flex;align-items:center;gap:7px;margin-bottom:5px;flex-wrap:wrap">
                       <span style="font-size:13px;font-weight:600" x-text="job.title"></span>
-                      <span style="font-size:10px;padding:2px 7px;border-radius:8px;font-weight:600" :style="'background:'+(job.match_score>=80?'rgba(16,185,129,.15)':'rgba(245,158,11,.15)')+';color:'+(job.match_score>=80?'#10b981':'#f59e0b')" x-text="job.match_score+'% match'"></span>
-                      <span style="font-size:10px;background:var(--bg3);padding:2px 7px;border-radius:8px;color:#7b82a0" x-text="job.source"></span>
+                      <span style="font-size:10px;padding:2px 7px;border-radius:8px;font-weight:600"
+                        :style="'background:'+(job.match_score>=80?'rgba(16,185,129,.15)':'rgba(245,158,11,.15)')+';color:'+(job.match_score>=80?'#10b981':'#f59e0b')"
+                        x-text="job.match_score+'% match'"></span>
+                      <!-- Source badge — clickable -->
+                      <a :href="job.url" target="_blank" rel="noopener"
+                        style="font-size:10px;padding:2px 7px;border-radius:8px;color:#a78bfa;background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.2);text-decoration:none;cursor:pointer"
+                        x-text="job.source"></a>
                     </div>
-                    <div style="font-size:12px;color:#7b82a0;margin-bottom:6px"><span x-text="job.company"></span> · <span x-text="job.location"></span> · <span x-text="job.posted_days_ago+'d ago'"></span></div>
-                    <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:5px">
-                      <template x-for="skill in job.required_skills" :key="skill"><span style="font-size:10px;padding:2px 8px;background:var(--bg3);border-radius:6px" x-text="skill"></span></template>
+
+                    <!-- Company · location · posted -->
+                    <div style="font-size:12px;color:#7b82a0;margin-bottom:6px">
+                      <span style="font-weight:500;color:var(--text)" x-text="job.company"></span>
+                      <span> · </span><span x-text="job.location"></span>
+                      <span> · </span><span x-text="job.posted_days_ago+'d ago'"></span>
+                      <span x-show="job.applicants"> · </span>
+                      <span x-show="job.applicants" style="color:var(--amber)" x-text="job.applicants+' applicants'"></span>
                     </div>
-                    <div style="font-size:11px;color:#7b82a0;font-style:italic" x-text="'✓ ' + job.match_reason"></div>
+
+                    <!-- Required skills -->
+                    <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:7px">
+                      <template x-for="skill in job.required_skills" :key="skill">
+                        <span style="font-size:10px;padding:2px 8px;background:var(--bg3);border-radius:6px;color:var(--muted2)" x-text="skill"></span>
+                      </template>
+                    </div>
+
+                    <!-- Match reason -->
+                    <div style="font-size:11px;color:var(--muted);font-style:italic;margin-bottom:9px" x-text="'✓ ' + job.match_reason"></div>
+
+                    <!-- Apply button -->
+                    <a :href="job.url" target="_blank" rel="noopener"
+                      style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;background:var(--accent);color:#fff;border-radius:var(--r-sm);font-size:11.5px;font-weight:500;text-decoration:none;transition:background var(--t-base)"
+                      onmouseover="this.style.background='#4f52e0'" onmouseout="this.style.background='var(--accent)'">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                      Apply on <span x-text="job.source"></span>
+                    </a>
+
                   </div>
+
+                  <!-- Salary + company type -->
                   <div style="text-align:right;flex-shrink:0">
                     <div style="font-size:13px;font-weight:600;color:#10b981;margin-bottom:4px" x-text="job.salary_range"></div>
-                    <div style="font-size:10px;color:#7b82a0;text-transform:capitalize" x-text="job.company_type"></div>
+                    <div style="font-size:10px;color:#7b82a0;text-transform:capitalize;background:var(--bg3);padding:2px 8px;border-radius:6px" x-text="job.company_type"></div>
                   </div>
                 </div>
               </div>
             </template>
+
+            <!-- Empty state -->
+            <div x-show="!(gpsJobs?.jobs||[]).length" style="text-align:center;padding:40px 0">
+              <div style="font-size:32px;margin-bottom:10px">🔍</div>
+              <div style="font-size:13px;font-weight:600;margin-bottom:6px">No jobs found</div>
+              <div style="font-size:12px;color:var(--muted)">Try completing more assessments to build your skill matrix</div>
+            </div>
           </div>
         </div>
         <div x-show="gpsTab==='gaps'">

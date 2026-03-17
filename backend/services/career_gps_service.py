@@ -274,25 +274,63 @@ async def get_live_opportunities(skill_matrix: dict[str, float], location: str, 
     top_skills = sorted(skill_matrix.items(), key=lambda x: x[1], reverse=True)[:5]
     skill_names = [s[0] for s in top_skills]
 
-    # Use AI to generate realistic job listings based on user's skills
+    # Use AI to generate realistic, varied job listings based on user's skills
     system = (
-        "You are a job board aggregator. Generate realistic tech job listings. "
+        "You are a tech job board AI for Indian developers. "
+        "Generate realistic, SPECIFIC job listings with VARIED titles — never repeat 'Senior X Developer'. "
+        "Use real job title patterns: Backend Engineer, Full Stack Developer, Software Engineer II, "
+        "API Developer, Platform Engineer, ML Engineer, DevOps Engineer, Site Reliability Engineer, "
+        "Cloud Engineer, Data Engineer, Product Engineer, Solutions Architect, Tech Lead, etc. "
+        "Each listing must have a REAL searchable URL using this format: "
+        "LinkedIn: https://www.linkedin.com/jobs/search/?keywords=TITLE+SKILL&location=LOCATION "
+        "Naukri: https://www.naukri.com/SKILL-jobs-in-CITY "
+        "Indeed: https://in.indeed.com/jobs?q=TITLE+SKILL&l=CITY "
         "Return ONLY valid JSON: "
-        '{"jobs": [{"title": "string", "company": "string", "company_type": "startup|scaleup|enterprise|faang", '
+        '{"jobs": [{"title": "string", "company": "string", '
+        '"company_type": "startup|scaleup|enterprise|faang|service", '
         '"location": "string", "salary_range": "string", "required_skills": ["string"], '
-        '"match_score": 85, "match_reason": "string", "source": "LinkedIn|GitHub|Indeed", '
-        '"posted_days_ago": 2, "applicants": 45, "url": "#"}]}'
+        '"match_score": 85, "match_reason": "string", '
+        '"source": "LinkedIn|Naukri|Indeed", '
+        '"posted_days_ago": 2, "applicants": 45, "url": "string"}]}'
     )
 
-    loc_label = location if location.lower() != "remote" else "Remote / Worldwide"
+    # Determine India-specific context
+    india_cities = ["bangalore", "bengaluru", "hyderabad", "mumbai", "pune",
+                    "delhi", "noida", "gurugram", "chennai", "kochi"]
+    loc_lower = location.lower()
+    is_india = any(city in loc_lower for city in india_cities) or loc_lower in ("remote", "india")
+
+    salary_context = (
+        "Indian market salary in ₹ Lakhs per annum (e.g. ₹8L–₹18L for junior, ₹18L–₹35L for mid, ₹35L–₹60L for senior)"
+        if is_india else
+        "salary in USD per year appropriate for the location"
+    )
+
+    loc_label = location if location.lower() != "remote" else "Remote (India)"
+    naukri_city = loc_lower.replace(" ", "-") if is_india else "india"
+
     prompt = (
-        f"Developer skill matrix: {dict(top_skills)}\n"
-        f"Target location: {loc_label}\n\n"
-        f"Generate {min(limit, 10)} realistic job listings that match these skills. Mix of:\n"
-        "- 3 jobs they qualify for RIGHT NOW (match_score 80-95)\n"
-        "- 3 jobs that are a slight stretch (match_score 60-79)\n"
-        "- 2 aspirational jobs (match_score 40-59)\n"
-        "Include realistic company names, salary ranges for the location, and specific match reasons.\n"
+        f"Developer skill matrix (skill: proficiency 0-1): {dict(top_skills)}\n"
+        f"Target location: {loc_label}\n"
+        f"Salary format: {salary_context}\n\n"
+        f"Generate {min(limit, 10)} job listings. Rules:\n"
+        "1. VARY the job titles — use specific engineering titles based on the skills:\n"
+        "   - Python + FastAPI → 'Backend Engineer', 'API Developer', 'Python Engineer'\n"
+        "   - React + TypeScript → 'Frontend Engineer', 'React Developer', 'UI Engineer'\n"
+        "   - Docker + Kubernetes → 'DevOps Engineer', 'Platform Engineer', 'SRE'\n"
+        "   - PostgreSQL + Redis → 'Data Engineer', 'Backend Engineer'\n"
+        "   - Full stack skills → 'Full Stack Engineer', 'Product Engineer'\n"
+        "   NEVER use just 'Senior X Developer' as the only pattern.\n"
+        "2. Mix seniority: include Junior/Associate (1-3yr), Mid-level (3-5yr), Senior (5yr+) roles.\n"
+        "3. Mix of 3 they qualify for NOW (match_score 80-95), 3 stretch roles (60-79), 2 aspirational (40-59).\n"
+        "4. Use REAL Indian tech companies: Razorpay, Zepto, CRED, Swiggy, Zomato, Meesho, PhonePe, "
+        "   Byju's, Unacademy, Ola, Groww, Paytm, Flipkart, MakeMyTrip, Freshworks, Zoho, Infosys, TCS, Wipro, "
+        "   ThoughtWorks, Accenture, Capgemini, or well-known startups.\n"
+        f"5. For EACH job, build a real searchable URL:\n"
+        f"   - LinkedIn: https://www.linkedin.com/jobs/search/?keywords={{title+skill}}&location={loc_label.replace(' ', '%20')}\n"
+        f"   - Naukri: https://www.naukri.com/{{skill}}-jobs-in-{naukri_city}\n"
+        f"   - Indeed: https://in.indeed.com/jobs?q={{title}}+{{skill}}&l={loc_label.replace(' ', '+')}\n"
+        "   Alternate sources across listings.\n"
         "Return ONLY valid JSON."
     )
 
@@ -301,7 +339,15 @@ async def get_live_opportunities(skill_matrix: dict[str, float], location: str, 
 
     # Fallback jobs if AI fails
     if not jobs:
-        jobs = _fallback_jobs(skill_names, location)
+        jobs = _fallback_jobs(skill_names, location, is_india)
+
+    # Ensure all jobs have valid URLs (not just "#")
+    for job in jobs:
+        if not job.get("url") or job["url"] == "#":
+            skill_q = skill_names[0].replace(" ", "+") if skill_names else "developer"
+            title_q = job.get("title", "software+engineer").replace(" ", "+")
+            job["url"] = f"https://www.linkedin.com/jobs/search/?keywords={title_q}+{skill_q}&location={loc_label.replace(' ', '%20')}"
+            job["source"] = "LinkedIn"
 
     # Sort by match score
     jobs.sort(key=lambda x: x.get("match_score", 0), reverse=True)
@@ -311,23 +357,53 @@ async def get_live_opportunities(skill_matrix: dict[str, float], location: str, 
     return output
 
 
-def _fallback_jobs(skills: list[str], location: str) -> list[dict]:
+def _fallback_jobs(skills: list[str], location: str, is_india: bool = True) -> list[dict]:
+    """Fallback with varied titles and real searchable URLs."""
     primary = skills[0] if skills else "Python"
+    secondary = skills[1] if len(skills) > 1 else primary
+    skill_q = primary.lower().replace(" ", "+")
+    loc_q = location.replace(" ", "+")
+    loc_naukri = location.lower().replace(" ", "-")
+
+    title_map = {
+        "Python": "Backend Engineer", "JavaScript": "Frontend Engineer",
+        "TypeScript": "Full Stack Engineer", "React": "Frontend Developer",
+        "FastAPI": "Python Backend Engineer", "Node.js": "Node.js Engineer",
+        "Docker": "DevOps Engineer", "Kubernetes": "Platform Engineer",
+        "PostgreSQL": "Data Engineer", "AWS": "Cloud Engineer",
+        "Machine Learning": "ML Engineer", "Go": "Backend Engineer",
+    }
+    title = title_map.get(primary, f"{primary} Engineer")
+
     return [
         {
-            "title": f"Senior {primary} Developer",
-            "company": "TechCorp",
+            "title": title,
+            "company": "Razorpay",
             "company_type": "scaleup",
             "location": location,
-            "salary_range": "$110k–$150k",
+            "salary_range": "₹18L–₹32L" if is_india else "$110k–$150k",
             "required_skills": skills[:3],
             "match_score": 78,
-            "match_reason": f"Strong {primary} skills match",
+            "match_reason": f"Your {primary} and {secondary} skills directly match this role",
             "source": "LinkedIn",
-            "posted_days_ago": 3,
-            "applicants": 52,
-            "url": "#",
-        }
+            "posted_days_ago": 2,
+            "applicants": 43,
+            "url": f"https://www.linkedin.com/jobs/search/?keywords={title.replace(' ', '+')}+{skill_q}&location={loc_q}",
+        },
+        {
+            "title": f"Software Engineer II — {primary}",
+            "company": "Swiggy",
+            "company_type": "startup",
+            "location": location,
+            "salary_range": "₹14L–₹24L" if is_india else "$90k–$130k",
+            "required_skills": skills[:2],
+            "match_score": 65,
+            "match_reason": f"Good {primary} foundation, 1-2 skills to strengthen",
+            "source": "Naukri",
+            "posted_days_ago": 5,
+            "applicants": 87,
+            "url": f"https://www.naukri.com/{skill_q}-jobs-in-{loc_naukri}",
+        },
     ]
 
 
