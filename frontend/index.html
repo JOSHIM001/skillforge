@@ -291,7 +291,12 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
               Continue with GitHub
             </button>
             <p style="text-align:center;font-size:11.5px;color:var(--muted);margin-top:14px">No account? <span style="color:var(--accent);cursor:pointer" @click="authMode='register'">Create one free →</span></p>
-          </div>
+            <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);text-align:center">
+              <a href="/admin.html" style="display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px;transition:all .2s" onmouseover="this.style.borderColor='#ef4444';this.style.color='#ef4444'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                Login as Admin
+              </a>
+            </div>
 
           <!-- Register -->
           <div x-show="authMode === 'register'" style="display:none">
