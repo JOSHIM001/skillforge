@@ -34,31 +34,14 @@
   --t-spring:400ms cubic-bezier(0.34,1.56,0.64,1);
   --r-sm:8px; --r-md:12px; --r-lg:16px; --r-xl:24px;
 }
-/* ── Light mode overrides ── */
 body.light {
-  --bg:      #f4f6fb;
-  --bg2:     #ffffff;
-  --bg3:     #eef1f8;
-  --bg4:     #e4e8f2;
-  --border:  #d0d7e8;
-  --border2: #bcc5db;
-  --text:    #0f1623;
-  --muted:   #6b7a99;
-  --muted2:  #4a5568;
-  --accent:  #4f46e5;
-  --accent2: #7c3aed;
-  --accent3: #6d28d9;
-  --green:   #059669;
-  --amber:   #d97706;
-  --red:     #dc2626;
-  --teal:    #0891b2;
+  --bg:#f4f6fb;--bg2:#ffffff;--bg3:#eef1f8;--bg4:#e4e8f2;
+  --border:#d0d7e8;--border2:#bcc5db;
+  --text:#0f1623;--muted:#6b7a99;--muted2:#4a5568;
+  --accent:#4f46e5;--accent2:#7c3aed;--accent3:#6d28d9;
+  --green:#059669;--amber:#d97706;--red:#dc2626;--teal:#0891b2;
 }
-body.light::before {
-  background: radial-gradient(ellipse 80% 60% at 50% -10%,rgba(99,102,241,.05) 0%,transparent 70%),
-              url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M 60 0 L 0 0 0 60' fill='none' stroke='%23d0d7e8' stroke-width='0.5' opacity='0.4'/%3E%3C/svg%3E");
-}
-/* Smooth transition when toggling — only body background, nothing else */
-body { transition: background-color 250ms ease; }
+body.light::before{background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(99,102,241,.04) 0%,transparent 70%);}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{font-size:14px;-webkit-font-smoothing:antialiased}
 body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;line-height:1.6;min-height:100vh;overflow-x:hidden}
@@ -380,13 +363,13 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
         Dashboard
       </div>
-      <div class="nav-item" :class="{active:view==='assessment'}" @click="go('assessment')" x-show="features.assessment">
+      <div class="nav-item" :class="{active:view==='assessment'}" @click="go('assessment')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
         Assessment
         <span class="nav-badge" x-show="Object.keys(skillMatrix).length" x-text="Object.keys(skillMatrix).length"></span>
       </div>
       <div class="nav-section-label" style="margin-top:6px">Career</div>
-      <div class="nav-item" :class="{active:view==='projects'}" @click="go('projects')" x-show="features.project_analyzer">
+      <div class="nav-item" :class="{active:view==='projects'}" @click="go('projects')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
         Projects
       </div>
@@ -395,46 +378,42 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
         GitHub Issues
       </div>
       <div class="nav-section-label" style="margin-top:6px">Identity</div>
-      <div class="nav-item" :class="{active:view==='dna'}" @click="go('dna')" x-show="features.skill_dna">
+      <div class="nav-item" :class="{active:view==='dna'}" @click="go('dna')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2C6 2 2 7 2 12s4 10 10 10"/><path d="M12 22c6 0 10-5 10-10S18 2 12 2"/><path d="M2 12h4M18 12h4"/><circle cx="12" cy="12" r="3"/></svg>
         Skill DNA
         <span style="margin-left:auto;font-size:9px;font-weight:700;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;padding:2px 6px;border-radius:8px">NEW</span>
       </div>
-      <div class="nav-item" :class="{active:view==='decay'}" @click="go('decay')" x-show="features.skill_decay">
+      <div class="nav-item" :class="{active:view==='decay'}" @click="go('decay')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/><path d="M5 3v4M3 5h4M19 17v4M17 19h4"/></svg>
         Skill Decay
         <span style="margin-left:auto;font-size:9px;font-weight:700;background:linear-gradient(135deg,#ef4444,#f59e0b);color:#fff;padding:2px 6px;border-radius:8px">NEW</span>
       </div>
-      <div class="nav-item" :class="{active:view==='bounties'}" @click="go('bounties')" x-show="features.bounties">
+      <div class="nav-item" :class="{active:view==='bounties'}" @click="go('bounties')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
         Skill Bounties
         <span style="margin-left:auto;font-size:9px;font-weight:700;background:linear-gradient(135deg,#f59e0b,#10b981);color:#fff;padding:2px 6px;border-radius:8px">NEW</span>
       </div>
-      <div class="nav-item" :class="{active:view==='gps'}" @click="go('gps')" x-show="features.career_gps">
+      <div class="nav-item" :class="{active:view==='gps'}" @click="go('gps')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
         Career GPS
         <span style="margin-left:auto;font-size:9px;font-weight:700;background:linear-gradient(135deg,#06b6d4,#6366f1);color:#fff;padding:2px 6px;border-radius:8px">NEW</span>
       </div>
       <div class="nav-section-label" style="margin-top:6px">Team</div>
-      <div class="nav-item" :class="{active:view==='room'}" @click="go('room')" x-show="features.team_hub">
+      <div class="nav-item" :class="{active:view==='room'}" @click="go('room')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         Team Hub
         <span class="dot online" style="margin-left:auto" x-show="activeRoom"></span>
       </div>
     </nav>
     <div class="sidebar-footer">
-      <!-- Theme toggle -->
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 8px;margin-bottom:6px;border-radius:var(--r-md);cursor:pointer;transition:background var(--t-base)" @click="toggleTheme()" :title="darkMode ? 'Switch to light mode' : 'Switch to dark mode'" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">
+      <div @click="toggleTheme()" style="display:flex;align-items:center;justify-content:space-between;padding:6px 8px;margin-bottom:6px;border-radius:var(--r-md);cursor:pointer" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">
         <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted2)">
-          <!-- Sun icon (shown in dark mode) -->
           <svg x-show="darkMode" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-          <!-- Moon icon (shown in light mode) -->
           <svg x-show="!darkMode" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
           <span x-text="darkMode ? 'Light mode' : 'Dark mode'"></span>
         </div>
-        <!-- Toggle pill -->
-        <div style="width:32px;height:18px;border-radius:9px;border:1px solid var(--border2);background:var(--bg4);position:relative;transition:background .2s" :style="darkMode ? '' : 'background:var(--accent);border-color:var(--accent)'">
-          <div style="position:absolute;top:2px;width:12px;height:12px;border-radius:50%;background:var(--muted2);transition:all .2s" :style="darkMode ? 'left:2px' : 'left:16px;background:#fff'"></div>
+        <div style="width:32px;height:18px;border-radius:9px;border:1px solid var(--border2);background:var(--bg4);position:relative" :style="!darkMode ? 'background:var(--accent);border-color:var(--accent)' : ''">
+          <div style="position:absolute;top:2px;width:12px;height:12px;border-radius:50%;background:var(--muted);transition:left .2s" :style="!darkMode ? 'left:16px;background:#fff' : 'left:2px'"></div>
         </div>
       </div>
       <div class="user-chip" @click="doLogout()">
@@ -533,16 +512,6 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
     <!-- ── ASSESSMENT ── -->
     <div x-show="view==='assessment'" style="display:none">
-      <!-- Feature disabled overlay -->
-      <div x-show="!features.assessment" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:40px">
-        <div style="width:56px;height:56px;background:rgba(239,68,68,.1);border-radius:var(--r-lg);display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        </div>
-        <div style="font-size:18px;font-weight:700;margin-bottom:8px">Assessment is currently disabled</div>
-        <div style="font-size:13px;color:var(--muted);max-width:340px">This feature has been temporarily disabled by the administrator. Please check back later.</div>
-      </div>
-      <div x-show="features.assessment">
-
       <div class="page-header">
         <div><div class="page-title">Assessment</div><div class="page-subtitle">AI-powered adaptive technical interviews</div></div>
         <button class="btn btn-ghost btn-sm" x-show="activeSession" @click="endSession()">End session</button>
@@ -716,16 +685,6 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
     <!-- ── PROJECTS ── -->
     <div x-show="view==='projects'" style="display:none">
-      <!-- Feature disabled overlay -->
-      <div x-show="!features.project_analyzer" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:40px">
-        <div style="width:56px;height:56px;background:rgba(239,68,68,.1);border-radius:var(--r-lg);display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        </div>
-        <div style="font-size:18px;font-weight:700;margin-bottom:8px">Project Analyzer is currently disabled</div>
-        <div style="font-size:13px;color:var(--muted);max-width:340px">This feature has been temporarily disabled by the administrator. Please check back later.</div>
-      </div>
-      <div x-show="features.project_analyzer">
-
       <div class="page-header">
         <div>
           <div class="page-title">Project Analyzer</div>
@@ -1086,16 +1045,6 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
     <!-- ── TEAM HUB ── -->
     <div x-show="view==='room'" style="display:none">
-      <!-- Feature disabled overlay -->
-      <div x-show="!features.team_hub" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:40px">
-        <div style="width:56px;height:56px;background:rgba(239,68,68,.1);border-radius:var(--r-lg);display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        </div>
-        <div style="font-size:18px;font-weight:700;margin-bottom:8px">Team Hub is currently disabled</div>
-        <div style="font-size:13px;color:var(--muted);max-width:340px">This feature has been temporarily disabled by the administrator. Please check back later.</div>
-      </div>
-      <div x-show="features.team_hub">
-
       <div class="page-header">
         <div><div class="page-title">Team Hub</div><div class="page-subtitle">Live collaboration · Team skill matrix · Role gap analysis</div></div>
         <div style="display:flex;gap:7px">
@@ -1195,16 +1144,6 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
     <!-- DNA VIEW -->
     <div x-show="view==='dna'" style="display:none">
-      <!-- Feature disabled overlay -->
-      <div x-show="!features.skill_dna" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:40px">
-        <div style="width:56px;height:56px;background:rgba(239,68,68,.1);border-radius:var(--r-lg);display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        </div>
-        <div style="font-size:18px;font-weight:700;margin-bottom:8px">Skill DNA is currently disabled</div>
-        <div style="font-size:13px;color:var(--muted);max-width:340px">This feature has been temporarily disabled by the administrator. Please check back later.</div>
-      </div>
-      <div x-show="features.skill_dna">
-
       <div class="page-header">
         <div>
           <div class="page-title">Skill DNA</div>
@@ -1262,16 +1201,6 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
     <!-- SKILL DECAY VIEW -->
     <div x-show="view==='decay'" style="display:none">
-      <!-- Feature disabled overlay -->
-      <div x-show="!features.skill_decay" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:40px">
-        <div style="width:56px;height:56px;background:rgba(239,68,68,.1);border-radius:var(--r-lg);display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        </div>
-        <div style="font-size:18px;font-weight:700;margin-bottom:8px">Skill Decay is currently disabled</div>
-        <div style="font-size:13px;color:var(--muted);max-width:340px">This feature has been temporarily disabled by the administrator. Please check back later.</div>
-      </div>
-      <div x-show="features.skill_decay">
-
       <div class="page-header">
         <div>
           <div class="page-title">Skill Decay</div>
@@ -1369,16 +1298,6 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
     <!-- BOUNTIES VIEW -->
     <div x-show="view==='bounties'" style="display:none">
-      <!-- Feature disabled overlay -->
-      <div x-show="!features.bounties" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:40px">
-        <div style="width:56px;height:56px;background:rgba(239,68,68,.1);border-radius:var(--r-lg);display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        </div>
-        <div style="font-size:18px;font-weight:700;margin-bottom:8px">Skill Bounties is currently disabled</div>
-        <div style="font-size:13px;color:var(--muted);max-width:340px">This feature has been temporarily disabled by the administrator. Please check back later.</div>
-      </div>
-      <div x-show="features.bounties">
-
       <div class="page-header">
         <div>
           <div class="page-title">Skill Bounties</div>
@@ -1499,16 +1418,6 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
     <!-- CAREER GPS VIEW -->
     <div x-show="view==='gps'" style="display:none">
-      <!-- Feature disabled overlay -->
-      <div x-show="!features.career_gps" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:40px">
-        <div style="width:56px;height:56px;background:rgba(239,68,68,.1);border-radius:var(--r-lg);display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        </div>
-        <div style="font-size:18px;font-weight:700;margin-bottom:8px">Career GPS is currently disabled</div>
-        <div style="font-size:13px;color:var(--muted);max-width:340px">This feature has been temporarily disabled by the administrator. Please check back later.</div>
-      </div>
-      <div x-show="features.career_gps">
-
       <div class="page-header">
         <div>
           <div class="page-title">Career GPS</div>
@@ -1777,8 +1686,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
       </button>
       <button class="btn btn-ghost" @click="showJoinRoom=false">Cancel</button>
     </div>
-        </div>
-    </div>
+  </div>
 </div>
 
 <script>
@@ -1942,7 +1850,6 @@ document.addEventListener('alpine:init', () => {
     // ── nav ──
     view: 'landing',
     darkMode: true,
-    features: { assessment: true, career_gps: true, team_hub: true, project_analyzer: true, skill_decay: true, skill_dna: true, bounties: true },
 
     // ── data ──
     skillMatrix: {},
@@ -2016,15 +1923,10 @@ document.addEventListener('alpine:init', () => {
 
     // ── boot ──────────────────────────────────────────────────
     async boot() {
-      // Load saved theme preference
-      const savedTheme = localStorage.getItem('sf_theme');
-      this.darkMode = savedTheme ? savedTheme === 'dark' : true;
+      // Load saved theme
+      const saved = localStorage.getItem('sf_theme');
+      this.darkMode = saved ? saved === 'dark' : true;
       document.body.classList.toggle('light', !this.darkMode);
-      // Load feature flags immediately — before anything else renders
-      try {
-        const flags = await fetch('/api/admin/features').then(r => r.json());
-        if (flags?.features) this.features = { ...this.features, ...flags.features };
-      } catch {}
 
       const token = localStorage.getItem('sf_token');
       if (token) {
@@ -2040,6 +1942,12 @@ document.addEventListener('alpine:init', () => {
         countUp(document.getElementById('s-skills'), 48, 1400);
         countUp(document.getElementById('s-acc'), 94, 1600, '%');
       }, 500);
+    },
+
+    toggleTheme() {
+      this.darkMode = !this.darkMode;
+      document.body.classList.toggle('light', !this.darkMode);
+      localStorage.setItem('sf_theme', this.darkMode ? 'dark' : 'light');
     },
 
     // ── view switching ────────────────────────────────────────
@@ -2190,12 +2098,6 @@ document.addEventListener('alpine:init', () => {
     doGithubLogin() {
       toast('Redirecting to GitHub…', 'info');
       window.location.href = API + '/auth/github/login';
-    },
-
-    toggleTheme() {
-      this.darkMode = !this.darkMode;
-      document.body.classList.toggle('light', !this.darkMode);
-      localStorage.setItem('sf_theme', this.darkMode ? 'dark' : 'light');
     },
 
     async doLogout() {
