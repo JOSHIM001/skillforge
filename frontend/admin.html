@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SkillForge Admin</title>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#080b12;--bg2:#0e1120;--bg3:#141828;--bg4:#1a2035;
+  --border:#252d45;--border2:#2e3850;
+  --text:#e2e6f3;--muted:#6a738f;--muted2:#8891ab;
+  --accent:#6366f1;--accent2:#8b5cf6;--accent3:#a78bfa;
+  --green:#10b981;--amber:#f59e0b;--red:#ef4444;--teal:#06b6d4;
+  --r-sm:8px;--r-md:12px;--r-lg:16px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:14px;-webkit-font-smoothing:antialiased}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(99,102,241,.07) 0%,transparent 70%);pointer-events:none;z-index:0}
+
+/* ── Login screen ── */
+.login-wrap{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;min-height:100vh}
+.login-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-lg);padding:40px;width:100%;max-width:400px}
+.login-logo{display:flex;align-items:center;gap:10px;margin-bottom:28px}
+.logo-mark{width:32px;height:32px;background:linear-gradient(135deg,#ef4444,#dc2626);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:#fff}
+.login-title{font-size:20px;font-weight:700;letter-spacing:-.3px}
+.login-sub{font-size:12px;color:var(--muted);margin-bottom:24px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11px;font-weight:500;color:var(--muted2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
+.input{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:var(--r-sm);padding:9px 12px;font-size:13px;font-family:'Inter',sans-serif;outline:none;transition:border-color .2s}
+.input:focus{border-color:var(--accent)}
+.btn-admin{width:100%;padding:10px;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;border:none;border-radius:var(--r-sm);font-size:13px;font-weight:600;cursor:pointer;transition:opacity .2s}
+.btn-admin:hover{opacity:.9}
+.btn-admin:disabled{opacity:.5;cursor:not-allowed}
+.err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:var(--r-sm);padding:9px 12px;font-size:12px;color:#ef4444;margin-bottom:14px}
+
+/* ── Admin shell ── */
+.admin-shell{display:grid;grid-template-columns:220px 1fr;min-height:100vh;position:relative;z-index:1}
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+.sidebar-header{padding:20px 16px;border-bottom:1px solid var(--border)}
+.sidebar-logo{display:flex;align-items:center;gap:9px}
+.sidebar-title{font-size:15px;font-weight:700}
+.sidebar-badge{font-size:10px;background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.3);padding:2px 7px;border-radius:10px;margin-left:4px}
+.nav{padding:12px 8px;flex:1}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:var(--r-sm);cursor:pointer;font-size:13px;color:var(--muted2);transition:all .15s;margin-bottom:2px}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{background:rgba(99,102,241,.12);color:var(--accent3)}
+.nav-item svg{flex-shrink:0}
+.sidebar-footer{padding:12px 16px;border-top:1px solid var(--border)}
+.admin-user{font-size:12px;color:var(--muted);margin-bottom:8px}
+.btn-logout{width:100%;padding:7px;background:transparent;border:1px solid var(--border);border-radius:var(--r-sm);color:var(--muted2);font-size:12px;cursor:pointer;transition:all .2s}
+.btn-logout:hover{border-color:var(--red);color:var(--red)}
+
+.main{padding:28px 32px;overflow-y:auto}
+.page-title{font-size:22px;font-weight:700;letter-spacing:-.3px;margin-bottom:4px}
+.page-sub{font-size:13px;color:var(--muted);margin-bottom:24px}
+
+/* ── Stats grid ── */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-md);padding:16px 18px}
+.stat-val{font-size:26px;font-weight:700;font-family:'DM Mono',monospace;margin-bottom:3px}
+.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+
+/* ── Table ── */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-md);padding:18px}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.card-title{font-size:15px;font-weight:600}
+.search-input{background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:var(--r-sm);padding:7px 12px;font-size:12px;font-family:'Inter',sans-serif;outline:none;width:220px;transition:border-color .2s}
+.search-input:focus{border-color:var(--accent)}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:8px 10px;border-bottom:1px solid var(--border)}
+td{padding:10px 10px;font-size:12.5px;border-bottom:1px solid rgba(37,45,69,.5);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600}
+.badge-green{background:rgba(16,185,129,.12);color:#10b981;border:1px solid rgba(16,185,129,.2)}
+.badge-red{background:rgba(239,68,68,.12);color:#ef4444;border:1px solid rgba(239,68,68,.2)}
+.badge-amber{background:rgba(245,158,11,.12);color:#f59e0b;border:1px solid rgba(245,158,11,.2)}
+.badge-gray{background:rgba(106,115,143,.12);color:var(--muted);border:1px solid var(--border)}
+.score-bar{height:4px;background:var(--bg4);border-radius:2px;width:80px;overflow:hidden}
+.score-fill{height:100%;border-radius:2px;transition:width .6s ease}
+.btn-sm{padding:4px 10px;border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid;transition:all .15s;font-family:'Inter',sans-serif}
+.btn-block{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.3);color:#ef4444}
+.btn-block:hover{background:rgba(239,68,68,.18)}
+.btn-unblock{background:rgba(16,185,129,.08);border-color:rgba(16,185,129,.3);color:#10b981}
+.btn-unblock:hover{background:rgba(16,185,129,.18)}
+.btn-delete{background:transparent;border-color:var(--border);color:var(--muted)}
+.btn-delete:hover{border-color:var(--red);color:var(--red)}
+
+/* ── Feature flags ── */
+.features-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.feature-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-md);padding:16px;display:flex;align-items:center;justify-content:space-between;transition:border-color .2s}
+.feature-card:hover{border-color:var(--border2)}
+.feature-info{}
+.feature-name{font-size:13px;font-weight:600;margin-bottom:3px}
+.feature-desc{font-size:11px;color:var(--muted)}
+.toggle{position:relative;display:inline-block;width:38px;height:20px;cursor:pointer}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:var(--bg4);border-radius:10px;transition:.3s;border:1px solid var(--border)}
+.toggle-slider::before{content:'';position:absolute;width:14px;height:14px;left:2px;top:2px;background:var(--muted);border-radius:50%;transition:.3s}
+.toggle input:checked + .toggle-slider{background:rgba(99,102,241,.2);border-color:var(--accent)}
+.toggle input:checked + .toggle-slider::before{transform:translateX(18px);background:var(--accent)}
+
+.spinner{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:40px;color:var(--muted);font-size:13px}
+</style>
+</head>
+<body x-data="adminApp()" x-init="init()">
+
+  <!-- ── LOGIN SCREEN ── -->
+  <div class="login-wrap" x-show="!token" x-cloak>
+    <div class="login-card">
+      <div class="login-logo">
+        <div class="logo-mark">A</div>
+        <div>
+          <div class="login-title">SkillForge Admin</div>
+        </div>
+      </div>
+      <div class="login-sub">Restricted access — administrators only</div>
+
+      <div class="err" x-show="loginError" x-text="loginError"></div>
+
+      <div class="field">
+        <label>Email</label>
+        <input class="input" type="email" x-model="email" placeholder="admin@example.com" @keydown.enter="login()">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input class="input" type="password" x-model="password" placeholder="••••••••" @keydown.enter="login()">
+      </div>
+
+      <button class="btn-admin" @click="login()" :disabled="loading">
+        <span x-show="!loading">Login as Admin</span>
+        <span x-show="loading" style="display:flex;align-items:center;justify-content:center;gap:8px">
+          <span class="spinner" style="width:14px;height:14px;border-width:2px"></span>
+          Verifying...
+        </span>
+      </button>
+
+      <div style="margin-top:16px;text-align:center">
+        <a href="/" style="font-size:12px;color:var(--muted);text-decoration:none">← Back to SkillForge</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ADMIN SHELL ── -->
+  <div class="admin-shell" x-show="token" x-cloak>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <div class="logo-mark">A</div>
+          <div>
+            <span class="sidebar-title">Admin</span>
+            <span class="sidebar-badge">Restricted</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <div class="nav-item" :class="{active:view==='dashboard'}" @click="view='dashboard'">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </div>
+        <div class="nav-item" :class="{active:view==='users'}" @click="view='users'; loadUsers()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Users
+        </div>
+        <div class="nav-item" :class="{active:view==='features'}" @click="view='features'; loadFeatures()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          Feature Flags
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="admin-user" x-text="'Logged in as: ' + adminUser"></div>
+        <button class="btn-logout" @click="logout()">Logout</button>
+      </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="main">
+
+      <!-- DASHBOARD VIEW -->
+      <div x-show="view==='dashboard'">
+        <div class="page-title">Dashboard</div>
+        <div class="page-sub">SkillForge platform overview</div>
+
+        <div class="stats-grid" x-show="stats">
+          <div class="stat-card">
+            <div class="stat-val" style="color:var(--accent)" x-text="stats?.total_users ?? '—'"></div>
+            <div class="stat-label">Total Users</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val" style="color:var(--green)" x-text="stats?.active_users ?? '—'"></div>
+            <div class="stat-label">Active Users</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val" style="color:var(--red)" x-text="stats?.blocked_users ?? '—'"></div>
+            <div class="stat-label">Blocked Users</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val" style="color:var(--teal)" x-text="stats?.total_skill_profiles ?? '—'"></div>
+            <div class="stat-label">Skill Profiles</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="card-title">Quick actions</div></div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn-sm btn-unblock" @click="view='users'; loadUsers()">View all users →</button>
+            <button class="btn-sm btn-unblock" @click="view='features'; loadFeatures()">Manage feature flags →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- USERS VIEW -->
+      <div x-show="view==='users'">
+        <div class="page-title">Users</div>
+        <div class="page-sub">Manage registered users, block access, or delete accounts</div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title" x-text="'All users (' + users.length + ')'"></div>
+            <input class="search-input" placeholder="Search by username or email…" x-model="search">
+          </div>
+
+          <div x-show="usersLoading" class="empty"><span class="spinner"></span></div>
+          <div x-show="!usersLoading && !users.length" class="empty">No users found</div>
+
+          <div x-show="!usersLoading && users.length" style="overflow-x:auto">
+            <table>
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Email</th>
+                  <th>Skills</th>
+                  <th>Score</th>
+                  <th>Status</th>
+                  <th>Joined</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <template x-for="u in filteredUsers" :key="u.id">
+                  <tr>
+                    <td>
+                      <div style="display:flex;align-items:center;gap:8px">
+                        <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff;flex-shrink:0" x-text="u.username[0].toUpperCase()"></div>
+                        <div>
+                          <div style="font-weight:500" x-text="u.username"></div>
+                          <div style="font-size:10px;color:var(--muted)" x-text="u.is_admin ? '⭐ Admin' : ''"></div>
+                        </div>
+                      </div>
+                    </td>
+                    <td style="color:var(--muted2);font-family:'DM Mono',monospace;font-size:11px" x-text="u.email"></td>
+                    <td>
+                      <div style="font-size:12px" x-text="u.skills_count + ' skills'"></div>
+                      <div style="font-size:10px;color:var(--muted)" x-text="u.top_skill ? 'Top: ' + u.top_skill : 'No assessments'"></div>
+                    </td>
+                    <td>
+                      <div style="display:flex;align-items:center;gap:6px">
+                        <div class="score-bar">
+                          <div class="score-fill" :style="'width:'+Math.round(u.overall_score*100)+'%;background:'+(u.overall_score>=.7?'var(--green)':u.overall_score>=.4?'var(--amber)':'var(--red)')"></div>
+                        </div>
+                        <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2)" x-text="Math.round(u.overall_score*100)+'%'"></span>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="badge" :class="u.is_blocked ? 'badge-red' : 'badge-green'" x-text="u.is_blocked ? 'Blocked' : 'Active'"></span>
+                    </td>
+                    <td style="color:var(--muted);font-size:11px" x-text="new Date(u.created_at).toLocaleDateString('en-IN')"></td>
+                    <td>
+                      <div style="display:flex;gap:5px" x-show="!u.is_admin">
+                        <button class="btn-sm" :class="u.is_blocked ? 'btn-unblock' : 'btn-block'"
+                          x-text="u.is_blocked ? 'Unblock' : 'Block'"
+                          @click="toggleBlock(u)"></button>
+                        <button class="btn-sm btn-delete" @click="confirmDelete(u)">Delete</button>
+                      </div>
+                      <span x-show="u.is_admin" style="font-size:10px;color:var(--muted)">Admin</span>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- FEATURES VIEW -->
+      <div x-show="view==='features'">
+        <div class="page-title">Feature Flags</div>
+        <div class="page-sub">Toggle platform features on or off for all users instantly</div>
+
+        <div x-show="featuresLoading" class="empty"><span class="spinner"></span></div>
+
+        <div class="features-grid" x-show="!featuresLoading">
+          <template x-for="[name, enabled] in Object.entries(features)" :key="name">
+            <div class="feature-card">
+              <div class="feature-info">
+                <div class="feature-name" x-text="featureLabel(name)"></div>
+                <div class="feature-desc" x-text="enabled ? 'Currently enabled for all users' : 'Disabled — users see a locked state'"></div>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" :checked="enabled" @change="toggleFeature(name, $event.target.checked)">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </template>
+        </div>
+
+        <div style="margin-top:16px;padding:12px 16px;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);border-radius:var(--r-md)">
+          <div style="font-size:12px;color:var(--amber)">⚠ Feature flags apply instantly to all active users. Changes persist until toggled again.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Delete confirm modal -->
+  <div x-show="deleteTarget" style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;display:flex;align-items:center;justify-content:center">
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-lg);padding:28px;max-width:380px;width:90%">
+      <div style="font-size:16px;font-weight:600;margin-bottom:8px">Delete user?</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:20px">
+        This will permanently delete <strong x-text="deleteTarget?.username"></strong> and all their skill data, assessments, and history. This cannot be undone.
+      </div>
+      <div style="display:flex;gap:9px;justify-content:flex-end">
+        <button class="btn-sm btn-delete" style="border-color:var(--border)" @click="deleteTarget=null">Cancel</button>
+        <button class="btn-sm btn-block" @click="deleteUser()">Delete permanently</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+function adminApp() {
+  return {
+    // Auth state
+    token: localStorage.getItem('admin_token') || '',
+    email: '',
+    password: '',
+    loading: false,
+    loginError: '',
+    adminUser: '',
+
+    // View
+    view: 'dashboard',
+
+    // Data
+    stats: null,
+    users: [],
+    usersLoading: false,
+    search: '',
+    features: {},
+    featuresLoading: false,
+    deleteTarget: null,
+
+    async init() {
+      if (this.token) {
+        await this.verifyAdmin();
+      }
+    },
+
+    async api(path, opts = {}) {
+      const res = await fetch('/api' + path, {
+        ...opts,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.token}`,
+          ...(opts.headers || {}),
+        },
+      });
+      if (res.status === 401 || res.status === 403) {
+        this.logout();
+        throw new Error('Unauthorized');
+      }
+      return res.json();
+    },
+
+    async verifyAdmin() {
+      try {
+        const data = await this.api('/admin/check');
+        if (data.is_admin) {
+          this.adminUser = data.username;
+          await this.loadStats();
+        } else {
+          this.logout();
+        }
+      } catch {
+        this.logout();
+      }
+    },
+
+    async login() {
+      this.loginError = '';
+      this.loading = true;
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: this.email, password: this.password }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          this.loginError = data.detail || 'Login failed';
+          return;
+        }
+        this.token = data.access_token;
+        localStorage.setItem('admin_token', this.token);
+        // Verify admin role
+        const check = await this.api('/admin/check');
+        if (!check.is_admin) {
+          this.loginError = 'This account does not have admin privileges';
+          this.logout();
+          return;
+        }
+        this.adminUser = check.username;
+        await this.loadStats();
+      } catch (e) {
+        this.loginError = 'Connection error — is the server running?';
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    logout() {
+      this.token = '';
+      localStorage.removeItem('admin_token');
+      this.adminUser = '';
+      this.stats = null;
+      this.users = [];
+      this.features = {};
+    },
+
+    async loadStats() {
+      try {
+        this.stats = await this.api('/admin/stats');
+      } catch {}
+    },
+
+    async loadUsers() {
+      this.usersLoading = true;
+      try {
+        const data = await this.api('/admin/users');
+        this.users = data.users || [];
+      } catch {
+        this.users = [];
+      } finally {
+        this.usersLoading = false;
+      }
+    },
+
+    get filteredUsers() {
+      const q = this.search.toLowerCase();
+      if (!q) return this.users;
+      return this.users.filter(u =>
+        u.username.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
+      );
+    },
+
+    async toggleBlock(user) {
+      const path = user.is_blocked ? `/admin/users/${user.id}/unblock` : `/admin/users/${user.id}/block`;
+      try {
+        const data = await this.api(path, { method: 'PATCH' });
+        user.is_blocked = data.is_blocked;
+        await this.loadStats();
+      } catch {}
+    },
+
+    confirmDelete(user) {
+      this.deleteTarget = user;
+    },
+
+    async deleteUser() {
+      if (!this.deleteTarget) return;
+      try {
+        await this.api(`/admin/users/${this.deleteTarget.id}`, { method: 'DELETE' });
+        this.users = this.users.filter(u => u.id !== this.deleteTarget.id);
+        this.deleteTarget = null;
+        await this.loadStats();
+      } catch {}
+    },
+
+    async loadFeatures() {
+      this.featuresLoading = true;
+      try {
+        const data = await this.api('/admin/features');
+        this.features = data.features || {};
+      } catch {
+        this.features = {};
+      } finally {
+        this.featuresLoading = false;
+      }
+    },
+
+    async toggleFeature(name, enabled) {
+      try {
+        await this.api(`/admin/features/${name}`, {
+          method: 'PATCH',
+          body: JSON.stringify({ enabled }),
+        });
+        this.features[name] = enabled;
+      } catch {}
+    },
+
+    featureLabel(name) {
+      const labels = {
+        assessment:       'Skill Assessment',
+        career_gps:       'Career GPS',
+        team_hub:         'Team Hub',
+        project_analyzer: 'Project Analyzer',
+        skill_decay:      'Skill Decay',
+        skill_dna:        'Skill DNA',
+        bounties:         'Bounties',
+      };
+      return labels[name] || name;
+    },
+  };
+}
+</script>
+</body>
+</html>

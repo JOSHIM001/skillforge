@@ -73,6 +73,7 @@ def create_app() -> FastAPI:
     from routers.rooms       import router as rooms_router
     from routers.bounties    import router as bounties_router
     from routers.career_gps  import router as gps_router
+    from routers.admin       import router as admin_router
     from websocket.ws_router import router as ws_router
 
     app.include_router(auth_router,     prefix="/api/auth",       tags=["Auth"])
@@ -82,6 +83,7 @@ def create_app() -> FastAPI:
     app.include_router(rooms_router,    prefix="/api/rooms",      tags=["Rooms"])
     app.include_router(bounties_router, prefix="/api/bounties",   tags=["Bounties"])
     app.include_router(gps_router,      prefix="/api/career-gps", tags=["Career GPS"])
+    app.include_router(admin_router,    prefix="/api/admin",      tags=["Admin"])
     app.include_router(ws_router,                                  tags=["WebSocket"])
 
     # Serve frontend
@@ -92,6 +94,10 @@ def create_app() -> FastAPI:
         @app.get("/", include_in_schema=False)
         async def serve_frontend():
             return FileResponse(f"{frontend_path}/index.html")
+
+        @app.get("/admin.html", include_in_schema=False)
+        async def serve_admin():
+            return FileResponse(f"{frontend_path}/admin.html")
 
     # Health check — now includes AI key status
     @app.get("/health", tags=["Infra"])
