@@ -22,8 +22,6 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     avatar_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     hashed_password: Mapped[str | None] = mapped_column(Text, nullable=True)
-    is_admin: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    is_blocked: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow, nullable=False)
 

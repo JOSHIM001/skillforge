@@ -29,6 +29,9 @@ class Settings(BaseSettings):
     frontend_url: str = "http://localhost:8000"
     environment: str = "development"  # development | production
 
+    # ── Admin ─────────────────────────────────────────────────
+    admin_email: str = ""  # Set in Render env vars — this email gets admin access
+
     # ── Observability ─────────────────────────────────────────
     sentry_dsn: str = ""
 
