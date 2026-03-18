@@ -1976,6 +1976,12 @@ document.addEventListener('alpine:init', () => {
 
     // ── boot ──────────────────────────────────────────────────
     async boot() {
+      // Load feature flags immediately — before anything else renders
+      try {
+        const flags = await fetch('/api/admin/features').then(r => r.json());
+        if (flags?.features) this.features = { ...this.features, ...flags.features };
+      } catch {}
+
       const token = localStorage.getItem('sf_token');
       if (token) {
         try {
@@ -2051,12 +2057,6 @@ document.addEventListener('alpine:init', () => {
     },
 
     async loadDashboard() {
-      // Load feature flags first so nav items show/hide correctly
-      try {
-        const flags = await api('/admin/features');
-        if (flags?.features) this.features = { ...this.features, ...flags.features };
-      } catch { /* feature flags optional — defaults to all enabled */ }
-
       try {
         const [matrixData, queueData] = await Promise.all([
           api('/skills/matrix'),

@@ -178,7 +178,8 @@ async def delete_user(
 
 # ── Feature flags (Redis) ─────────────────────────────────────────────────────
 @router.get("/features")
-async def get_features(admin: User = Depends(require_admin)) -> dict[str, Any]:
+async def get_features() -> dict[str, Any]:
+    """Public endpoint — any user can read flags to show/hide features."""
     flags = {}
     for name, key in FEATURE_KEYS.items():
         cached = await cache_get(key)
