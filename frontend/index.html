@@ -34,6 +34,31 @@
   --t-spring:400ms cubic-bezier(0.34,1.56,0.64,1);
   --r-sm:8px; --r-md:12px; --r-lg:16px; --r-xl:24px;
 }
+/* ── Light mode overrides ── */
+body.light {
+  --bg:      #f4f6fb;
+  --bg2:     #ffffff;
+  --bg3:     #eef1f8;
+  --bg4:     #e4e8f2;
+  --border:  #d0d7e8;
+  --border2: #bcc5db;
+  --text:    #0f1623;
+  --muted:   #6b7a99;
+  --muted2:  #4a5568;
+  --accent:  #4f46e5;
+  --accent2: #7c3aed;
+  --accent3: #6d28d9;
+  --green:   #059669;
+  --amber:   #d97706;
+  --red:     #dc2626;
+  --teal:    #0891b2;
+}
+body.light::before {
+  background: radial-gradient(ellipse 80% 60% at 50% -10%,rgba(99,102,241,.05) 0%,transparent 70%),
+              url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M 60 0 L 0 0 0 60' fill='none' stroke='%23d0d7e8' stroke-width='0.5' opacity='0.4'/%3E%3C/svg%3E");
+}
+/* Smooth transition when toggling */
+body, body * { transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease; }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{font-size:14px;-webkit-font-smoothing:antialiased}
 body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;line-height:1.6;min-height:100vh;overflow-x:hidden}
@@ -392,6 +417,20 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
       </div>
     </nav>
     <div class="sidebar-footer">
+      <!-- Theme toggle -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 8px;margin-bottom:6px;border-radius:var(--r-md);cursor:pointer;transition:background var(--t-base)" @click="toggleTheme()" :title="darkMode ? 'Switch to light mode' : 'Switch to dark mode'" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted2)">
+          <!-- Sun icon (shown in dark mode) -->
+          <svg x-show="darkMode" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <!-- Moon icon (shown in light mode) -->
+          <svg x-show="!darkMode" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <span x-text="darkMode ? 'Light mode' : 'Dark mode'"></span>
+        </div>
+        <!-- Toggle pill -->
+        <div style="width:32px;height:18px;border-radius:9px;border:1px solid var(--border2);background:var(--bg4);position:relative;transition:background .2s" :style="darkMode ? '' : 'background:var(--accent);border-color:var(--accent)'">
+          <div style="position:absolute;top:2px;width:12px;height:12px;border-radius:50%;background:var(--muted2);transition:all .2s" :style="darkMode ? 'left:2px' : 'left:16px;background:#fff'"></div>
+        </div>
+      </div>
       <div class="user-chip" @click="doLogout()">
         <div class="avatar" x-text="(user?.username?.[0]||'U').toUpperCase()"></div>
         <div>
@@ -1902,6 +1941,7 @@ document.addEventListener('alpine:init', () => {
 
     // ── nav ──
     view: 'landing',
+    darkMode: true,
     features: { assessment: true, career_gps: true, team_hub: true, project_analyzer: true, skill_decay: true, skill_dna: true, bounties: true },
 
     // ── data ──
@@ -1976,6 +2016,10 @@ document.addEventListener('alpine:init', () => {
 
     // ── boot ──────────────────────────────────────────────────
     async boot() {
+      // Load saved theme preference
+      const savedTheme = localStorage.getItem('sf_theme');
+      this.darkMode = savedTheme ? savedTheme === 'dark' : true;
+      document.body.classList.toggle('light', !this.darkMode);
       // Load feature flags immediately — before anything else renders
       try {
         const flags = await fetch('/api/admin/features').then(r => r.json());
@@ -2146,6 +2190,12 @@ document.addEventListener('alpine:init', () => {
     doGithubLogin() {
       toast('Redirecting to GitHub…', 'info');
       window.location.href = API + '/auth/github/login';
+    },
+
+    toggleTheme() {
+      this.darkMode = !this.darkMode;
+      document.body.classList.toggle('light', !this.darkMode);
+      localStorage.setItem('sf_theme', this.darkMode ? 'dark' : 'light');
     },
 
     async doLogout() {
