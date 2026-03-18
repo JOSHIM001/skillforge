@@ -57,11 +57,8 @@ body.light::before {
   background: radial-gradient(ellipse 80% 60% at 50% -10%,rgba(99,102,241,.05) 0%,transparent 70%),
               url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M 60 0 L 0 0 0 60' fill='none' stroke='%23d0d7e8' stroke-width='0.5' opacity='0.4'/%3E%3C/svg%3E");
 }
-/* Smooth transition when toggling — only on specific properties, not display */
-body { transition: background-color 200ms ease; }
-.sidebar, .main-content, .card, .nav-item, .metric-card, .btn, input, textarea, select {
-  transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease !important;
-}
+/* Smooth transition when toggling — only body background, nothing else */
+body { transition: background-color 250ms ease; }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{font-size:14px;-webkit-font-smoothing:antialiased}
 body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;line-height:1.6;min-height:100vh;overflow-x:hidden}
@@ -715,7 +712,6 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
           </template>
         </div>
       </div>
-          </div>
     </div>
 
     <!-- ── PROJECTS ── -->
@@ -1086,7 +1082,6 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
           No matching issues found. Complete more assessments to improve matching.
         </div>
       </div>
-          </div>
     </div>
 
     <!-- ── TEAM HUB ── -->
@@ -1196,7 +1191,6 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
           </div>
         </div>
       </div>
-          </div>
     </div>
 
     <!-- DNA VIEW -->
@@ -1264,7 +1258,6 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
           </div>
         </div>
       </div>
-          </div>
     </div>
 
     <!-- SKILL DECAY VIEW -->
@@ -1372,7 +1365,6 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
         </div>
       </div>
-          </div>
     </div>
 
     <!-- BOUNTIES VIEW -->
@@ -1503,7 +1495,6 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
           <button x-show="bountyTab!=='claimed'" @click="generateAIBounties()" class="btn btn-primary">🤖 Generate My Bounties</button>
         </div>
       </div>
-          </div>
     </div>
 
     <!-- CAREER GPS VIEW -->
