@@ -49,6 +49,8 @@ class RoomStateOut(BaseModel):
     team_matrix: dict[str, float]
     # AI-generated role gap analysis
     role_gaps: list["RoleGapOut"]
+    # AI-suggested projects based on the team's combined skills
+    suggested_projects: list["SuggestedProjectOut"] = []
     online_count: int
 
 
@@ -59,6 +61,14 @@ class RoleGapOut(BaseModel):
     # Which member covers this role (None if gap)
     covered_by: str | None = None
     coverage_score: float  # 0.0 → 1.0
+
+
+class SuggestedProjectOut(BaseModel):
+    title: str
+    description: str
+    difficulty: str   # Beginner | Intermediate | Advanced
+    skills_used: list[str]
+    why_good_fit: str
 
 
 # ── WebSocket message envelopes ───────────────────────────────────────────────

@@ -18,8 +18,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from models.room import CollabRoom, RoomMember
 from models.skill import SkillProfile
 from models.user import User
-from schemas.room import RoleGapOut, RoomMemberOut, RoomStateOut
-from services.ai_service import analyze_team_gaps
+from schemas.room import RoleGapOut, RoomMemberOut, RoomStateOut, SuggestedProjectOut
+from services.ai_service import analyze_team_gaps, suggest_team_projects
 
 
 # ── Room code generation ──────────────────────────────────────────────────────
@@ -283,6 +283,78 @@ async def _ai_gap_analysis(
     return sorted(gaps, key=lambda g: (g.covered, g.coverage_score))
 
 
+# ── Suggested project fallback ────────────────────────────────────────────────
+
+# Curated projects keyed by required skills. Scored by how many team skills match.
+_PROJECT_TEMPLATES = [
+    {
+        "title": "REST API with Auth & Rate Limiting",
+        "description": "Build a production-grade REST API with JWT authentication, Redis-based rate limiting, and PostgreSQL persistence.",
+        "difficulty": "Intermediate",
+        "skills": {"Python", "FastAPI", "PostgreSQL", "Redis"},
+        "why_good_fit": "Directly maps to your team's backend stack.",
+    },
+    {
+        "title": "Real-time Dashboard",
+        "description": "Build a live analytics dashboard using WebSockets for real-time updates and Chart.js for visualizations.",
+        "difficulty": "Intermediate",
+        "skills": {"Python", "JavaScript", "Redis", "FastAPI"},
+        "why_good_fit": "Leverages your team's Python and JS skills together.",
+    },
+    {
+        "title": "Containerized Microservice",
+        "description": "Package a Python service into Docker, deploy with Docker Compose, and expose via a typed REST interface.",
+        "difficulty": "Intermediate",
+        "skills": {"Docker", "Python", "FastAPI"},
+        "why_good_fit": "Great fit for teams with DevOps and backend skills.",
+    },
+    {
+        "title": "ML Model API",
+        "description": "Train a simple ML model and serve it as a REST endpoint with FastAPI, including preprocessing and result caching.",
+        "difficulty": "Advanced",
+        "skills": {"Python", "ML", "FastAPI", "Redis"},
+        "why_good_fit": "Perfect for teams that span ML and backend engineering.",
+    },
+    {
+        "title": "CI/CD Pipeline",
+        "description": "Set up an automated test, build, and deploy pipeline using Docker and AWS, triggered on git push.",
+        "difficulty": "Advanced",
+        "skills": {"Docker", "AWS", "Kubernetes"},
+        "why_good_fit": "Puts your DevOps skills to practical use end-to-end.",
+    },
+    {
+        "title": "Full-Stack Todo App",
+        "description": "A full-stack application with a React frontend and FastAPI backend, featuring real-time sync and PostgreSQL persistence.",
+        "difficulty": "Beginner",
+        "skills": {"React", "JavaScript", "Python", "PostgreSQL"},
+        "why_good_fit": "A great starter project to practice the full stack together.",
+    },
+]
+
+
+def _local_project_suggestions(team_matrix: dict[str, float]) -> list[SuggestedProjectOut]:
+    """Rank project templates by skill overlap with the team matrix."""
+    team_skills = {k for k, v in team_matrix.items() if v >= 0.3}
+    scored = []
+    for tmpl in _PROJECT_TEMPLATES:
+        overlap = tmpl["skills"] & team_skills
+        if overlap:
+            scored.append((len(overlap), tmpl))
+
+    scored.sort(key=lambda x: x[0], reverse=True)
+    results = []
+    for _, tmpl in scored[:4]:
+        overlap = list(tmpl["skills"] & team_skills)
+        results.append(SuggestedProjectOut(
+            title=tmpl["title"],
+            description=tmpl["description"],
+            difficulty=tmpl["difficulty"],
+            skills_used=overlap,
+            why_good_fit=tmpl["why_good_fit"],
+        ))
+    return results
+
+
 # ── Full room state ───────────────────────────────────────────────────────────
 
 async def build_room_state(
@@ -306,11 +378,36 @@ async def build_room_state(
     else:
         role_gaps = _local_gap_analysis(team_matrix)
 
+    # Suggested projects — AI first, local fallback
+    if use_ai_analysis and team_matrix:
+        ai_projects = await suggest_team_projects(
+            team_matrix,
+            [g.model_dump() for g in role_gaps],
+        )
+        suggested_projects_raw = ai_projects or []
+        if suggested_projects_raw:
+            suggested_projects = [
+                SuggestedProjectOut(
+                    title=p.get("title", ""),
+                    description=p.get("description", ""),
+                    difficulty=p.get("difficulty", "Intermediate"),
+                    skills_used=p.get("skills_used", []),
+                    why_good_fit=p.get("why_good_fit", ""),
+                )
+                for p in suggested_projects_raw
+                if p.get("title")
+            ]
+        else:
+            suggested_projects = _local_project_suggestions(team_matrix)
+    else:
+        suggested_projects = _local_project_suggestions(team_matrix)
+
     return RoomStateOut(
         room_id=room.id,
         name=room.name,
         members=members,
         team_matrix=team_matrix,
         role_gaps=role_gaps,
+        suggested_projects=suggested_projects,
         online_count=len(online_user_ids),
     )

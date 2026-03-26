@@ -466,3 +466,59 @@ async def analyze_team_gaps(
         "gaps": [],
         "recommendation": "Team analysis unavailable. Please try again.",
     }
+
+
+async def suggest_team_projects(
+    team_matrix: dict[str, float],
+    role_gaps: list[dict],
+) -> list[dict]:
+    """
+    Suggest real-world projects the team can build together based on their
+    combined skill matrix and which roles are covered.
+
+    Args:
+        team_matrix: {skill_name: max_score_across_team}
+        role_gaps:   list of {role, covered, coverage_score}
+
+    Returns:
+        [
+          {
+            "title": "string",
+            "description": "string",
+            "difficulty": "Beginner|Intermediate|Advanced",
+            "skills_used": ["string"],
+            "why_good_fit": "string"
+          },
+          ...  (3-4 projects)
+        ]
+    """
+    if not team_matrix:
+        return []
+
+    covered_roles = [g["role"] for g in role_gaps if g.get("covered")]
+    top_skills = sorted(team_matrix.items(), key=lambda x: x[1], reverse=True)[:8]
+    top_skill_names = [s[0] for s in top_skills]
+
+    system = (
+        "You are a senior engineering mentor recommending team projects. "
+        "Suggest practical, buildable projects that match the team's actual skills. "
+        "Return ONLY valid JSON — no markdown, no explanation, no preamble. "
+        'Schema: {"projects": [{"title": "string", "description": "string (1-2 sentences)", '
+        '"difficulty": "Beginner|Intermediate|Advanced", "skills_used": ["string"], '
+        '"why_good_fit": "string (1 sentence)"}]}'
+    )
+
+    prompt = (
+        f"Team's top skills (skill: score 0-1): {dict(top_skills)}\n"
+        f"Covered engineering roles: {covered_roles or ['None yet']}\n\n"
+        "Suggest 3-4 real-world projects this team can realistically build together. "
+        "Match difficulty to skill scores (scores < 0.5 = Beginner, 0.5-0.75 = Intermediate, >0.75 = Advanced). "
+        "Only use skills the team actually has. "
+        "Return ONLY valid JSON."
+    )
+
+    result = await call_ai(prompt, system, cache_ttl=1800)  # 30 min cache
+
+    if result and "projects" in result:
+        return result["projects"][:4]
+    return []

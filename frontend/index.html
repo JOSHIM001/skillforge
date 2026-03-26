@@ -1099,6 +1099,30 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
                 </template>
               </div>
             </div>
+            <div class="card animate-up" style="animation-delay:.16s">
+              <div class="card-header">
+                <div class="card-title">Suggested projects</div>
+                <span class="badge" style="background:rgba(99,102,241,.15);color:var(--accent3)">AI</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <template x-for="proj in (activeRoom?.suggested_projects||[])" :key="proj.title">
+                  <div style="padding:11px 12px;background:var(--bg3);border-radius:var(--r-sm);border:1px solid var(--border)">
+                    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:5px">
+                      <div style="font-size:12px;font-weight:600;line-height:1.4" x-text="proj.title"></div>
+                      <span class="badge" style="flex-shrink:0" :class="proj.difficulty==='Advanced'?'badge-red':proj.difficulty==='Intermediate'?'':' '" :style="proj.difficulty==='Intermediate'?'background:rgba(245,158,11,.15);color:var(--amber)':proj.difficulty==='Beginner'?'background:rgba(16,185,129,.15);color:var(--green)':''" x-text="proj.difficulty"></span>
+                    </div>
+                    <div style="font-size:11px;color:var(--muted2);margin-bottom:5px;line-height:1.5" x-text="proj.description"></div>
+                    <div style="font-size:10.5px;color:var(--accent3);font-style:italic;margin-bottom:7px" x-text="proj.why_good_fit"></div>
+                    <div style="display:flex;flex-wrap:wrap;gap:4px">
+                      <template x-for="skill in (proj.skills_used||[])" :key="skill">
+                        <span style="font-size:10px;padding:2px 7px;background:rgba(99,102,241,.12);color:var(--accent3);border-radius:4px;border:1px solid rgba(99,102,241,.2)" x-text="skill"></span>
+                      </template>
+                    </div>
+                  </div>
+                </template>
+                <div x-show="!(activeRoom?.suggested_projects||[]).length" style="font-size:11px;color:var(--muted);text-align:center;padding:18px 0">Complete an assessment to get AI project suggestions</div>
+              </div>
+            </div>
           </div>
 
           <div style="display:flex;flex-direction:column;gap:12px">
@@ -2242,7 +2266,7 @@ document.addEventListener('alpine:init', () => {
       try {
         const room = await api('/rooms', { method:'POST', body: JSON.stringify({ name: this.newRoomName }) });
         this.showCreateRoom = false; this.newRoomName = '';
-        this.activeRoom = { ...room, online_count: 1, role_gaps: [], team_matrix: {} };
+        this.activeRoom = { ...room, online_count: 1, role_gaps: [], team_matrix: {}, suggested_projects: [] };
         this.connectWs(room.room_id);
         toast(`Room ${room.room_id} created! Share this code with your team.`, 'success');
       } catch (err) { toast('Could not create room: ' + (err.detail||err.message), 'error'); }
