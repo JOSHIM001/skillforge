@@ -13,7 +13,8 @@
 [![Celery](https://img.shields.io/badge/Celery-5.3-37814A?style=for-the-badge&logo=celery&logoColor=white)](https://docs.celeryq.dev)
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://docker.com)
 
-[![CI](https://github.com/YOUR_USERNAME/skillforge/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_USERNAME/skillforge/actions)
+[![CI](https://github.com/YOUR_USERNAME/skillforge/actions/workflows/ci.yml/badge.svg)](https://github.com/JOSHIM001/skillforge/actions)
+[![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen?style=for-the-badge)](https://skillforge-yoza.onrender.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
 </div>
